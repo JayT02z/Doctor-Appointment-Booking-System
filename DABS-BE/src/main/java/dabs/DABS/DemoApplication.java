@@ -1,4 +1,4 @@
-package dabs.demo;
+package dabs.DABS;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
