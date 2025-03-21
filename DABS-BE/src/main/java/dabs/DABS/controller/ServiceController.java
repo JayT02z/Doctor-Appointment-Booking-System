@@ -34,8 +34,7 @@ public class ServiceController {
     @PutMapping("/{id}")
     public ResponseEntity<ServiceResponse> updateService(
             @PathVariable Long id,
-            @RequestBody ServiceRequest serviceRequest
-    ) {
+            @RequestBody ServiceRequest serviceRequest) {
         return ResponseEntity.ok(serviceService.updateService(id, serviceRequest));
     }
 

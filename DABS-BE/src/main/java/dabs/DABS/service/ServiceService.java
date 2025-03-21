@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ServiceService implements IServiceService {
+
     private final ServiceRepository serviceRepository;
 
     @Override
