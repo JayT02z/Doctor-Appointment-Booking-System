@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.userdetails.User;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
