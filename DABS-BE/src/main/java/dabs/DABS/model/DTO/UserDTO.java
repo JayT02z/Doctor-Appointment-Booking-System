@@ -1,7 +1,10 @@
 package dabs.DABS.model.DTO;
 
-import dabs.DABS.model.Entity.Users;
+import dabs.DABS.Enum.Status;
 import lombok.*;
+import dabs.DABS.Enum.Role;
+import dabs.DABS.model.Entity.Users;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -12,9 +15,9 @@ public class UserDTO {
     private String name;
     private String email;
     private String phone;
-    private String address;
-    private Status status;
     private Role role;
+    private LocalDateTime createdAt;
+    private Status status;
 
     // Static method for mapping from entity to DTO
     public static UserDTO fromEntity(Users user) {
@@ -22,12 +25,12 @@ public class UserDTO {
             return null;
         }
         return UserDTO.builder()
-                .name(user.getUserName())
+                .name(user.getName())
                 .email(user.getEmail())
-                .phone(user.getPhoneNumber())
-                .address(user.getAddress())
-                .status(user.getUserStatus())
+                .phone(user.getPhone())
                 .role(user.getRole())
+                .createdAt(user.getCreatedAt())
+                .status(user.getStatus())
                 .build();
     }
 
@@ -37,12 +40,12 @@ public class UserDTO {
             return null;
         }
         Users user = new Users();
-        user.setUserName(userDTO.getName());
+        user.setName(userDTO.getName());
         user.setEmail(userDTO.getEmail());
-        user.setPhoneNumber(userDTO.getPhone());
-        user.setAddress(userDTO.getAddress());
-        user.setUserStatus(userDTO.getStatus());
+        user.setPhone(userDTO.getPhone());
         user.setRole(userDTO.getRole());
+        user.setCreatedAt(userDTO.getCreatedAt());
+        user.setStatus(userDTO.getStatus());
         return user;
     }
 }

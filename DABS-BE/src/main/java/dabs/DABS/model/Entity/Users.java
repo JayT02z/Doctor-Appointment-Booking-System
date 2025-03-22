@@ -1,6 +1,7 @@
 package dabs.DABS.model.Entity;
 
 import dabs.DABS.Enum.Role;
+import dabs.DABS.Enum.Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -35,4 +36,6 @@ public class Users {
     private Role role;
 
     private LocalDateTime createdAt;
+
+    private Status status;
 }
