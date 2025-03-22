@@ -1,7 +1,10 @@
 package dabs.DABS.model.DTO;
 
+import ch.qos.logback.core.status.Status;
 import dabs.DABS.model.Entity.Users;
 import lombok.*;
+
+import javax.management.relation.Role;
 
 @Getter
 @Setter

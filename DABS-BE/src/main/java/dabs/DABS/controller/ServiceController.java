@@ -1,7 +1,7 @@
 package dabs.DABS.controller;
 
-import dabs.DABS.dto.ServiceRequest;
-import dabs.DABS.dto.ServiceResponse;
+import dabs.DABS.model.request.ServiceRequest;
+import dabs.DABS.model.Response.ServiceResponse;
 import dabs.DABS.service.IServiceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +34,8 @@ public class ServiceController {
     @PutMapping("/{id}")
     public ResponseEntity<ServiceResponse> updateService(
             @PathVariable Long id,
-            @RequestBody ServiceRequest serviceRequest) {
+            @RequestBody ServiceRequest serviceRequest
+    ) {
         return ResponseEntity.ok(serviceService.updateService(id, serviceRequest));
     }
 
