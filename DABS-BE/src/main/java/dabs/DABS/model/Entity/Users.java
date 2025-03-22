@@ -35,4 +35,7 @@ public class Users {
     private Role role;
 
     private LocalDateTime createdAt;
+
+    public void setUserName(String name) {
+    }
 }
