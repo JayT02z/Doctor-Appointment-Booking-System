@@ -37,5 +37,10 @@ public class Users {
 
     private LocalDateTime createdAt;
 
+<<<<<<< HEAD
     private Status status;
+=======
+    public void setUserName(String name) {
+    }
+>>>>>>> 99bcdaaa2054b4d20455878c13ec62e1d1ddb0b0
 }

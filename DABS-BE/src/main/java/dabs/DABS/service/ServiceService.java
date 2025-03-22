@@ -1,7 +1,7 @@
 package dabs.DABS.service;
 
-import dabs.DABS.dto.ServiceRequest;
-import dabs.DABS.dto.ServiceResponse;
+import dabs.DABS.model.request.ServiceRequest;
+import dabs.DABS.model.Response.ServiceResponse;
 import dabs.DABS.exception.ResourceNotFoundException;
 import dabs.DABS.model.Entity.ServiceEntity;
 import dabs.DABS.repository.ServiceRepository;

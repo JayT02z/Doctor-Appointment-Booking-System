@@ -1,4 +1,4 @@
-package dabs.DABS.dto;
+package dabs.DABS.model.request;
 
 import lombok.Getter;
 import lombok.Setter;

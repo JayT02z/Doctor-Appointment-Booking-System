@@ -1,10 +1,17 @@
 package dabs.DABS.model.DTO;
 
+<<<<<<< HEAD
 import dabs.DABS.Enum.Status;
+=======
+import ch.qos.logback.core.status.Status;
+import dabs.DABS.model.Entity.Users;
+>>>>>>> 99bcdaaa2054b4d20455878c13ec62e1d1ddb0b0
 import lombok.*;
 import dabs.DABS.Enum.Role;
 import dabs.DABS.model.Entity.Users;
 import java.time.LocalDateTime;
+
+import javax.management.relation.Role;
 
 @Getter
 @Setter

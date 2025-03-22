@@ -1,4 +1,4 @@
-package dabs.DABS.config;
+package dabs.DABS.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
