@@ -41,5 +41,4 @@ public class UsersController {
         return usersService.updateUser(id);
     }
 
-
 }
