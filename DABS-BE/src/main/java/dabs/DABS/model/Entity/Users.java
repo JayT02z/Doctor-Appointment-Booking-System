@@ -1,12 +1,9 @@
 package dabs.DABS.model.Entity;
 
-import dabs.DABS.Enum.Status;
 import dabs.DABS.Enum.Role;
+import dabs.DABS.Enum.Status;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -26,6 +23,7 @@ public class Users {
 
     @Column(unique = true, nullable = false)
     private String email;
+
     @Column(nullable = false)
     private String password;
 
@@ -38,6 +36,7 @@ public class Users {
     private Set<Role> roles;
 
     private LocalDateTime createdAt;
+    private LocalDateTime lastLoginAt;
 
     @Enumerated(EnumType.STRING)
     private Status status;

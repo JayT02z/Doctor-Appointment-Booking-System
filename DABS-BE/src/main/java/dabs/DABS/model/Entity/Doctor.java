@@ -1,11 +1,7 @@
 package dabs.DABS.model.Entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.springframework.security.core.userdetails.User;
+import lombok.*;
 
 import java.util.List;
 
@@ -19,7 +15,7 @@ public class Doctor {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name ="full_name",nullable = false)
+    @Column(name ="full_name", nullable = false)
     private String fullName;
 
     @OneToOne(fetch = FetchType.EAGER)
@@ -31,7 +27,7 @@ public class Doctor {
     private String qualification;
     private String hospital;
 
-    @OneToMany(mappedBy = "doctor",cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Schedule> availability;
 
     private Double rating;

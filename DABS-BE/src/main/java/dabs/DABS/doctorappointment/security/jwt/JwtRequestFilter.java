@@ -1,16 +1,15 @@
 package dabs.DABS.doctorappointment.security.jwt;
 
-import dabs.DABS.doctorappointment.security.jwt.JwtUtil;
 import dabs.DABS.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -38,7 +37,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 username = jwtUtil.extractUsername(jwt);
             } catch (Exception e) {
                 // Log lỗi nhưng không ngăn chặn request
-                System.err.println("Lỗi khi trích xuất username: " + e.getMessage());
+                System.err.println("Errors username: " + e.getMessage());
             }
         }
 
@@ -52,7 +51,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
             } catch (Exception e) {
-                System.err.println("Lỗi trong xác thực: " + e.getMessage());
+                System.err.println("Error authen: " + e.getMessage());
             }
         }
         filterChain.doFilter(request, response);

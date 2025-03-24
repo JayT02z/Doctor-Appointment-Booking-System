@@ -3,18 +3,27 @@ package dabs.DABS.service;
 import dabs.DABS.Enum.Role;
 import dabs.DABS.Enum.Status;
 import dabs.DABS.Enum.StatusApplication;
+import dabs.DABS.doctorappointment.security.jwt.JwtUtil;
 import dabs.DABS.exception.ErrorCode;
-import dabs.DABS.model.request.LoginRequest;
 import dabs.DABS.model.DTO.UserDTO;
 import dabs.DABS.model.Entity.Users;
+import dabs.DABS.model.Response.AuthResponse;
 import dabs.DABS.model.Response.ResponseData;
+import dabs.DABS.model.request.LoginRequest;
 import dabs.DABS.model.request.RegistrationRequest;
 import dabs.DABS.repository.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -23,181 +32,172 @@ import java.util.Optional;
 @Service
 public class UsersService {
 
-    @Autowired
-    private UsersRepository usersRepository;
+    private static final Logger log = LoggerFactory.getLogger(UsersService.class);
 
-    // Code form application.properties
+    private final UsersRepository usersRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    @Autowired
+    public UsersService(UsersRepository usersRepository, PasswordEncoder passwordEncoder) {
+        this.usersRepository = usersRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Autowired
+    private JwtUtil jwtUtil;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private UserDetailsService userDetailsService;
+
     @Value("${doctor.invitation.code}")
     private String validInvitationCode;
 
+    /**
+     * Xử lý đăng nhập user
+     */
+    public ResponseEntity<ResponseData<AuthResponse>> loginUser(LoginRequest loginRequest) {
+        Optional<Users> optionalUser = usersRepository.findByUsername(loginRequest.getUsername());
+        if (!optionalUser.isPresent()) {
+            return ResponseEntity.status(404).body(new ResponseData<>(
+                    ErrorCode.USER_NOT_FOUND.getCode(),
+                    ErrorCode.USER_NOT_FOUND.getMessage(),
+                    null
+            ));
+        }
+
+        Users foundUser = optionalUser.get();
+        if (!passwordEncoder.matches(loginRequest.getPassword(), foundUser.getPassword())) {
+            return ResponseEntity.status(401).body(new ResponseData<>(
+                    ErrorCode.INVALID_CREDENTIAL.getCode(),
+                    ErrorCode.INVALID_CREDENTIAL.getMessage(),
+                    null
+            ));
+        }
+
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
+        );
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
+        String token = jwtUtil.generateToken(userDetails);
+
+        foundUser.setLastLoginAt(LocalDateTime.now());
+        usersRepository.save(foundUser);
+
+        AuthResponse authResponse = new AuthResponse(token);
+        return ResponseEntity.ok(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                authResponse
+        ));
+    }
+
+//register user
+    //check dup mail
     public ResponseEntity<ResponseData<UserDTO>> saveUser(RegistrationRequest regRequest) {
-        // Checking duplicate email
-        Optional<Users> existingByEmail = usersRepository.findByEmail(regRequest.getEmail());
-        if (existingByEmail.isPresent()) {
-            ResponseData<UserDTO> response = ResponseData.<UserDTO>builder()
-                    .StatusCode(ErrorCode.EMAIL_EXISTS.getCode())
-                    .Message(ErrorCode.EMAIL_EXISTS.getMessage())
-                    .data(null)
-                    .build();
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        if (usersRepository.findByEmail(regRequest.getEmail()).isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseData<>(
+                    ErrorCode.EMAIL_EXISTS.getCode(),
+                    ErrorCode.EMAIL_EXISTS.getMessage(),
+                    null
+            ));
         }
-
-        // Checking Phone number
-        Optional<Users> existingByPhone = usersRepository.findByPhone(regRequest.getPhone());
-        if (existingByPhone.isPresent()) {
-            ResponseData<UserDTO> response = ResponseData.<UserDTO>builder()
-                    .StatusCode(ErrorCode.PHONE_EXISTS.getCode())
-                    .Message(ErrorCode.PHONE_EXISTS.getMessage())
-                    .data(null)
-                    .build();
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        //check dup phone
+        if (usersRepository.findByPhone(regRequest.getPhone()).isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseData<>(
+                    ErrorCode.PHONE_EXISTS.getCode(),
+                    ErrorCode.PHONE_EXISTS.getMessage(),
+                    null
+            ));
         }
-
-        // If role is DOCTOR, Checking CODE
-        if ("DOCTOR".equalsIgnoreCase(regRequest.getRole())) {
-            if (regRequest.getInvitationCode() == null ||
-                    !validInvitationCode.equals(regRequest.getInvitationCode())) {
-                System.out.println("Mã mời nhận được: " + regRequest.getInvitationCode() + ", Code done: " + validInvitationCode);
-                ResponseData<UserDTO> response = ResponseData.<UserDTO>builder()
-                        .StatusCode(403)
-                        .Message("Code incorrect")
-                        .data(null)
-                        .build();
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
-            }
+        //check code if correct -> user is doctor
+        if ("DOCTOR".equalsIgnoreCase(regRequest.getRole()) &&
+                (regRequest.getInvitationCode() == null || !validInvitationCode.equals(regRequest.getInvitationCode()))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ResponseData<>(
+                    403, "Code incorrect", null
+            ));
         }
-
-        // Creating newusers from RegistrationRequest
+//tao user moi
         Users newUser = new Users();
         newUser.setUsername(regRequest.getUsername());
         newUser.setEmail(regRequest.getEmail());
-        newUser.setPassword(regRequest.getPassword());
+        newUser.setPassword(passwordEncoder.encode(regRequest.getPassword()));
         newUser.setPhone(regRequest.getPhone());
         newUser.setCreatedAt(LocalDateTime.now());
         newUser.setStatus(Status.ACTIVE);
 
-        // Role default PATIENT
-        String roleStr = regRequest.getRole();
-        Role role;
-        try {
-            role = (roleStr != null && !roleStr.isEmpty()) ? Role.valueOf(roleStr.toUpperCase()) : Role.PATIENT;
-        } catch (Exception e) {
-            role = Role.PATIENT;
-        }
+        Role role = Optional.ofNullable(regRequest.getRole())
+                .map(r -> Role.valueOf(r.toUpperCase()))
+                .orElse(Role.PATIENT);
         newUser.setRoles(Collections.singleton(role));
 
-        // Save new user
         Users savedUser = usersRepository.save(newUser);
-        UserDTO userDTO = UserDTO.fromEntity(savedUser);
-
-        ResponseData<UserDTO> response = ResponseData.<UserDTO>builder()
-                .StatusCode(StatusApplication.SUCCESS.getCode())
-                .Message(StatusApplication.SUCCESS.getMessage())
-                .data(userDTO)
-                .build();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                UserDTO.fromEntity(savedUser)
+        ));
     }
 
-    //Login data accept from model DTO, request
-    public ResponseEntity<ResponseData<UserDTO>> loginUser(LoginRequest loginRequest) {
-        Optional<Users> optionalUser = usersRepository.findByUsername(loginRequest.getUsername());
-        if (!optionalUser.isPresent()) {
-            ResponseData<UserDTO> response = ResponseData.<UserDTO>builder()
-                    .StatusCode(ErrorCode.USER_NOT_FOUND.getCode())
-                    .Message(ErrorCode.USER_NOT_FOUND.getMessage())
-                    .data(null)
-                    .build();
-            return ResponseEntity.status(404).body(response);
-        }
-        Users foundUser = optionalUser.get();
-        if (!foundUser.getPassword().equals(loginRequest.getPassword())) {
-            ResponseData<UserDTO> response = ResponseData.<UserDTO>builder()
-                    .StatusCode(ErrorCode.INVALID_CREDENTIAL.getCode())
-                    .Message(ErrorCode.INVALID_CREDENTIAL.getMessage())
-                    .data(null)
-                    .build();
-            return ResponseEntity.status(401).body(response);
-        }
-        UserDTO userDTO = UserDTO.fromEntity(foundUser);
-        ResponseData<UserDTO> response = ResponseData.<UserDTO>builder()
-                .StatusCode(StatusApplication.SUCCESS.getCode())
-                .Message(StatusApplication.SUCCESS.getMessage())
-                .data(userDTO)
-                .build();
-        return ResponseEntity.ok(response);
-    }
-
+    // get info fowllow id
     public ResponseEntity<ResponseData<UserDTO>> getUserById(int id) {
         Optional<Users> optionalUser = usersRepository.findById(id);
         if (!optionalUser.isPresent()) {
-            ResponseData<UserDTO> response = ResponseData.<UserDTO>builder()
-                    .StatusCode(ErrorCode.USER_NOT_FOUND.getCode())
-                    .Message(ErrorCode.USER_NOT_FOUND.getMessage())
-                    .data(null)
-                    .build();
-            return ResponseEntity.status(404).body(response);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseData<>(
+                    ErrorCode.USER_NOT_FOUND.getCode(),
+                    ErrorCode.USER_NOT_FOUND.getMessage(),
+                    null
+            ));
         }
-        Users user = optionalUser.get();
-        UserDTO userDTO = UserDTO.fromEntity(user);
-        ResponseData<UserDTO> response = ResponseData.<UserDTO>builder()
-                .StatusCode(StatusApplication.SUCCESS.getCode())
-                .Message(StatusApplication.SUCCESS.getMessage())
-                .data(userDTO)
-                .build();
-        return ResponseEntity.ok(response);
+
+        UserDTO userDTO = UserDTO.fromEntity(optionalUser.get());
+        return ResponseEntity.ok(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                userDTO
+        ));
     }
 
-    // update info
-    public ResponseEntity<ResponseData<UserDTO>> updateUserInfo(int id, Users updatedUser) {
-        Optional<Users> optionalUser = usersRepository.findById(id);
-        if (!optionalUser.isPresent()) {
-            ResponseData<UserDTO> response = ResponseData.<UserDTO>builder()
-                    .StatusCode(ErrorCode.USER_NOT_FOUND.getCode())
-                    .Message(ErrorCode.USER_NOT_FOUND.getMessage())
-                    .data(null)
-                    .build();
-            return ResponseEntity.status(404).body(response);
-        }
-        Users existingUser = optionalUser.get();
-        // Update
-        existingUser.setEmail(updatedUser.getEmail());
-        existingUser.setPhone(updatedUser.getPhone());
-        if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
-            existingUser.setPassword(updatedUser.getPassword());
-        }
-        if (updatedUser.getRoles() != null && !updatedUser.getRoles().isEmpty()) {
-            existingUser.setRoles(updatedUser.getRoles());
-        }
-        Users savedUser = usersRepository.save(existingUser);
-        UserDTO userDTO = UserDTO.fromEntity(savedUser);
-        ResponseData<UserDTO> response = ResponseData.<UserDTO>builder()
-                .StatusCode(StatusApplication.SUCCESS.getCode())
-                .Message(StatusApplication.SUCCESS.getMessage())
-                .data(userDTO)
-                .build();
-        return ResponseEntity.ok(response);
-    }
-
-    // Update done
+    //update status acc
     public ResponseEntity<ResponseData<UserDTO>> updateUser(int id) {
         Optional<Users> optionalUser = usersRepository.findById(id);
         if (!optionalUser.isPresent()) {
-            ResponseData<UserDTO> response = ResponseData.<UserDTO>builder()
-                    .StatusCode(ErrorCode.USER_NOT_FOUND.getCode())
-                    .Message(ErrorCode.USER_NOT_FOUND.getMessage())
-                    .data(null)
-                    .build();
-            return ResponseEntity.status(404).body(response);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseData<>(
+                    ErrorCode.USER_NOT_FOUND.getCode(),
+                    ErrorCode.USER_NOT_FOUND.getMessage(),
+                    null
+            ));
         }
-        Users findUser = optionalUser.get();
-        findUser.setStatus(Status.INACTIVE);
-        Users savedUser = usersRepository.save(findUser);
-        UserDTO userDTO = UserDTO.fromEntity(savedUser);
-        ResponseData<UserDTO> response = ResponseData.<UserDTO>builder()
-                .StatusCode(StatusApplication.SUCCESS.getCode())
-                .Message(StatusApplication.SUCCESS.getMessage())
-                .data(userDTO)
-                .build();
-        return ResponseEntity.ok(response);
+
+        Users user = optionalUser.get();
+        user.setStatus(Status.INACTIVE);
+        Users savedUser = usersRepository.save(user);
+
+        return ResponseEntity.ok(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                UserDTO.fromEntity(savedUser)
+        ));
+    }
+
+    //update info user
+    public ResponseEntity<ResponseData<UserDTO>> updateUserInfo(int id, Users updatedUser) {
+        Users existingUser = usersRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        existingUser.setEmail(updatedUser.getEmail());
+        existingUser.setPhone(updatedUser.getPhone());
+
+        if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
+            existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+        }
+
+        Users savedUser = usersRepository.save(existingUser);
+        return ResponseEntity.ok(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                UserDTO.fromEntity(savedUser)
+        ));
     }
 }
