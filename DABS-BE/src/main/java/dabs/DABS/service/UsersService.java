@@ -2,7 +2,8 @@ package dabs.DABS.service;
 
 import dabs.DABS.Enum.Status;
 import dabs.DABS.Enum.StatusApplication;
-import dabs.DABS.model.request.LoginRequest;
+import dabs.DABS.exception.ErrorCode;
+import dabs.DABS.model.Request.LoginRequest;
 import dabs.DABS.model.DTO.UserDTO;
 import dabs.DABS.model.Entity.Users;
 import dabs.DABS.model.Response.ResponseData;
@@ -26,8 +27,8 @@ public class UsersService {
         Optional<Users> existingUser = usersRepository.findByEmail(user.getEmail());
         if (existingUser.isPresent()) {
             ResponseData<UserDTO> response = ResponseData.<UserDTO>builder()
-                    .StatusCode(409)
-                    .Message("Email đã tồn tại!")
+                    .StatusCode(ErrorCode.EMAIL_EXISTS.getCode())
+                    .Message(ErrorCode.EMAIL_EXISTS.getMessage())
                     .data(null)
                     .build();
             return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
@@ -58,8 +59,8 @@ public class UsersService {
         Optional<Users> optionalUser = usersRepository.findByUsername(loginRequest.getUsername());
         if (!optionalUser.isPresent()) {
             ResponseData<UserDTO> response = ResponseData.<UserDTO>builder()
-                    .StatusCode(404)
-                    .Message("User not found")
+                    .StatusCode(ErrorCode.USER_NOT_FOUND.getCode())
+                    .Message(ErrorCode.USER_NOT_FOUND.getMessage())
                     .data(null)
                     .build();
             return ResponseEntity.status(404).body(response);
@@ -67,8 +68,8 @@ public class UsersService {
         Users foundUser = optionalUser.get();
         if (!foundUser.getPassword().equals(loginRequest.getPassword())) {
             ResponseData<UserDTO> response = ResponseData.<UserDTO>builder()
-                    .StatusCode(401)
-                    .Message("Invalid credentials")
+                    .StatusCode(ErrorCode.INVALID_CREDENTIAL.getCode())
+                    .Message(ErrorCode.INVALID_CREDENTIAL.getMessage())
                     .data(null)
                     .build();
             return ResponseEntity.status(401).body(response);
@@ -86,8 +87,8 @@ public class UsersService {
         Optional<Users> optionalUser = usersRepository.findById(id);
         if (!optionalUser.isPresent()) {
             ResponseData<UserDTO> response = ResponseData.<UserDTO>builder()
-                    .StatusCode(404)
-                    .Message("User not found")
+                    .StatusCode(ErrorCode.USER_NOT_FOUND.getCode())
+                    .Message(ErrorCode.USER_NOT_FOUND.getMessage())
                     .data(null)
                     .build();
             return ResponseEntity.status(404).body(response);
@@ -107,8 +108,8 @@ public class UsersService {
         Optional<Users> optionalUser = usersRepository.findById(id);
         if (!optionalUser.isPresent()) {
             ResponseData<UserDTO> response = ResponseData.<UserDTO>builder()
-                    .StatusCode(404)
-                    .Message("User not found")
+                    .StatusCode(ErrorCode.USER_NOT_FOUND.getCode())
+                    .Message(ErrorCode.USER_NOT_FOUND.getMessage())
                     .data(null)
                     .build();
             return ResponseEntity.status(404).body(response);
@@ -138,8 +139,8 @@ public class UsersService {
         Optional<Users> optionalUser = usersRepository.findById(id);
         if (!optionalUser.isPresent()) {
             ResponseData<UserDTO> response = ResponseData.<UserDTO>builder()
-                    .StatusCode(404)
-                    .Message("User not found")
+                    .StatusCode(ErrorCode.USER_NOT_FOUND.getCode())
+                    .Message(ErrorCode.USER_NOT_FOUND.getMessage())
                     .data(null)
                     .build();
             return ResponseEntity.status(404).body(response);

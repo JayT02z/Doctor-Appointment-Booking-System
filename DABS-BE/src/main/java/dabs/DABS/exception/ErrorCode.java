@@ -1,7 +1,9 @@
 package dabs.DABS.exception;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+@Getter
 public enum ErrorCode {
     BAD_REQUEST(400, "Invalid request",HttpStatus.BAD_REQUEST),
     EMAIL_EXISTS(409, "Email already exists", HttpStatus.CONFLICT),
@@ -9,6 +11,8 @@ public enum ErrorCode {
     UNAUTHENTICATED(401, "Wrong password or email", HttpStatus.UNAUTHORIZED),
     INVALID_TOKEN(401, "Invalid token", HttpStatus.UNAUTHORIZED),
     NOT_FOUND(404, "Resource not found", HttpStatus.NOT_FOUND),
+    USER_NOT_FOUND(404, "User not found", HttpStatus.NOT_FOUND),
+    INVALID_CREDENTIAL(401, "Invalid credentials", HttpStatus.NOT_FOUND),
 
     // Server error messages
     SERVER_ERROR(500, "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR),

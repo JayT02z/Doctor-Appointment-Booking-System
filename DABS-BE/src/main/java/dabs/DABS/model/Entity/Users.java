@@ -26,7 +26,6 @@ public class Users {
 
     @Column(unique = true, nullable = false)
     private String email;
-
     @Column(nullable = false)
     private String password;
 
@@ -42,5 +41,4 @@ public class Users {
 
     @Enumerated(EnumType.STRING)
     private Status status;
-
 }

@@ -3,7 +3,7 @@ package dabs.DABS.controller;
 import dabs.DABS.model.DTO.UserDTO;
 import dabs.DABS.model.Entity.Users;
 import dabs.DABS.model.Response.ResponseData;
-import dabs.DABS.model.request.LoginRequest;
+import dabs.DABS.model.Request.LoginRequest;
 import dabs.DABS.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
