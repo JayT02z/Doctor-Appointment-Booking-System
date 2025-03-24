@@ -1,4 +1,4 @@
-package dabs.DABS.model.Request;
+package dabs.DABS.model.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

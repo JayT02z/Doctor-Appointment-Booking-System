@@ -1,6 +1,6 @@
 package dabs.DABS.controller;
 
-import dabs.DABS.model.Request.ServiceRequest;
+import dabs.DABS.model.request.ServiceRequest;
 import dabs.DABS.model.Response.ServiceResponse;
 import dabs.DABS.service.IServiceService;
 import lombok.RequiredArgsConstructor;

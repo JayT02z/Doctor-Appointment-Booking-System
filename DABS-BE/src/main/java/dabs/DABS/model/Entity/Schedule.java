@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -21,13 +22,21 @@ public class Schedule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
 
-    @Enumerated(EnumType.STRING)
-    private DayOfWeek dayOfWeek; // ENUM: MONDAY - SUNDAY
+//    @Enumerated(EnumType.STRING)
+//    private DayOfWeek dayOfWeek; // ENUM: MONDAY - SUNDAY
 
-    @ElementCollection
-    private List<TimeSlot> timeSlots; // Danh sách khung giờ làm việc
+    //Ngày làm việc
+    @Column(nullable = false)
+    private LocalDate date;
+
+    //Giờ làm việc
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TimeSlot timeSlot;
+    @Column(nullable = false)
+    private boolean available;
 }

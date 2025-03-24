@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
     BAD_REQUEST(400, "Invalid request",HttpStatus.BAD_REQUEST),
     EMAIL_EXISTS(409, "Email already exists", HttpStatus.CONFLICT),
+    PHONE_EXISTS(409, "Phone already exists", HttpStatus.CONFLICT),
     UNAUTHORIZED(401, "Unauthorized access", HttpStatus.UNAUTHORIZED),
     UNAUTHENTICATED(401, "Wrong password or email", HttpStatus.UNAUTHORIZED),
     INVALID_TOKEN(401, "Invalid token", HttpStatus.UNAUTHORIZED),
@@ -25,7 +26,9 @@ public enum ErrorCode {
     PASSWORD_TOO_WEAK(400, "Password is too weak", HttpStatus.BAD_REQUEST),
     INVALID_DATE_FORMAT(400, "Invalid date format", HttpStatus.BAD_REQUEST),
     FIELD_LENGTH_EXCEEDED(400, "Field length exceeded the allowed limit", HttpStatus.BAD_REQUEST),
-    VALUE_OUT_OF_RANGE(400, "Value is out of the acceptable range", HttpStatus.BAD_REQUEST);
+    VALUE_OUT_OF_RANGE(400, "Value is out of the acceptable range", HttpStatus.BAD_REQUEST),
+
+    UPDATE_ERROR(200, "Update fail", HttpStatus.BAD_REQUEST);
 
     private final int code;
     private final String message;
