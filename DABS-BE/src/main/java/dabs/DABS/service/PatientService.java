@@ -1,5 +1,6 @@
 package dabs.DABS.service;
 
+import dabs.DABS.Enum.Status;
 import dabs.DABS.Enum.StatusApplication;
 import dabs.DABS.exception.ErrorCode;
 import dabs.DABS.model.Entity.Patient;
@@ -87,5 +88,20 @@ public class PatientService {
 
         ResponseData<Patient> responseData = new ResponseData<>(StatusApplication.SUCCESS.getCode(),StatusApplication.SUCCESS.getMessage(), patients);
         return ResponseEntity.ok(responseData);
+    }
+
+    public ResponseEntity<ResponseData<Patient>> deletePatient(Long id) {
+        Patient patients = patientRepository.findById(id).orElseThrow();
+        Users users = usersRepository.findById(patients.getUser().getId()).orElseThrow();
+        users.setStatus(Status.INACTIVE);
+
+        usersRepository.save(users);
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                null
+        ));
+
     }
 }

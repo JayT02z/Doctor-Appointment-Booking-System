@@ -25,17 +25,17 @@ public class UsersController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ResponseData<UserDTO>> getUserById(@PathVariable int id) {
+    public ResponseEntity<ResponseData<UserDTO>> getUserById(@PathVariable Long id) {
         return usersService.getUserById(id);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ResponseData<UserDTO>> updateUser(@PathVariable int id, @RequestBody Users updatedUser) {
+    public ResponseEntity<ResponseData<UserDTO>> updateUser(@PathVariable Long id, @RequestBody Users updatedUser) {
         return usersService.updateUserInfo(id, updatedUser);
     }
 
     @PatchMapping("/deactivate/{id}")
-    public ResponseEntity<ResponseData<UserDTO>> updateStatus(@PathVariable int id) {
+    public ResponseEntity<ResponseData<UserDTO>> updateStatus(@PathVariable Long id) {
         return usersService.updateUser(id);
     }
 }

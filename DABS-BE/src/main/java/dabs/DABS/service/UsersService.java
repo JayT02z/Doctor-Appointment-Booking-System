@@ -141,7 +141,7 @@ public class UsersService {
     }
 
     // get info fowllow id
-    public ResponseEntity<ResponseData<UserDTO>> getUserById(int id) {
+    public ResponseEntity<ResponseData<UserDTO>> getUserById(Long id) {
         Optional<Users> optionalUser = usersRepository.findById(id);
         if (!optionalUser.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseData<>(
@@ -160,7 +160,7 @@ public class UsersService {
     }
 
     //update status acc
-    public ResponseEntity<ResponseData<UserDTO>> updateUser(int id) {
+    public ResponseEntity<ResponseData<UserDTO>> updateUser(Long id) {
         Optional<Users> optionalUser = usersRepository.findById(id);
         if (!optionalUser.isPresent()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseData<>(
@@ -182,7 +182,7 @@ public class UsersService {
     }
 
     //update info user
-    public ResponseEntity<ResponseData<UserDTO>> updateUserInfo(int id, Users updatedUser) {
+    public ResponseEntity<ResponseData<UserDTO>> updateUserInfo(Long id, Users updatedUser) {
         Users existingUser = usersRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
