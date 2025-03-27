@@ -6,6 +6,7 @@ import dabs.DABS.model.Entity.Patient;
 import dabs.DABS.model.Entity.Users;
 import dabs.DABS.model.Response.ResponseData;
 import dabs.DABS.model.request.RegisterPatientForm;
+import dabs.DABS.model.request.UpdatePatientrForm;
 import dabs.DABS.repository.PatientRepository;
 import dabs.DABS.repository.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,30 +68,24 @@ public class PatientService {
         ));
     }
 
-//    public ResponseEntity<ResponseData<Patient>> updatePatient(Long id, RegisterPatientForm patient) {
-//        // Tìm bệnh nhân theo ID
-//        Patient patient = patientRepository.findById(id)
-//                .orElseThrow(() -> new RuntimeException("Patient not found with id: " + id));
-//
-//        // Cập nhật thông tin từ DTO
-//        if (patientForm.getDob() != null) patient.setDob(patientForm.getDob());
-//        if (patientForm.getGender() != null) patient.setGender(patientForm.getGender());
-//        if (patientForm.getAddress() != null) patient.setAddress(patientForm.getAddress());
-//        if (patientForm.getMedicalHistory() != null) patient.setMedicalHistory(patientForm.getMedicalHistory());
-//
-//        // Cập nhật thông tin User nếu cần
-//        Users user = patient.getUser();
-//        if (patientForm.getName() != null) user.setName(patientForm.getName());
-//        if (patientForm.getEmail() != null) user.setEmail(patientForm.getEmail());
-//        if (patientForm.getPhone() != null) user.setPhone(patientForm.getPhone());
-//
-//        // Lưu thay đổi vào database
-//        userRepository.save(user);
-//        Patient updatedPatient = patientRepository.save(patient);
-//
-//        // Trả về dữ liệu thành công
-//        ResponseData<Patient> responseData = new ResponseData<>(true, "Patient updated successfully", updatedPatient);
-//        return ResponseEntity.ok(responseData);
-//
-//    }
+    public ResponseEntity<ResponseData<Patient>> updatePatient(Long id, UpdatePatientrForm patientForm) {
+
+        Patient patients = patientRepository.findById(id).orElseThrow();
+        Users users = usersRepository.findById(patientForm.getUserId()).orElseThrow();
+
+        patients.setDob(patientForm.getDob());
+        patients.setGender(patientForm.getGender());
+        patients.setAddress(patientForm.getAddress());
+        patients.setMedicalHistory(patientForm.getMedicalHistory());
+
+        users.setEmail(patientForm.getEmail());
+        users.setPhone(patientForm.getPhone());
+        users.setUsername(patientForm.getName());
+
+        usersRepository.save(users);
+        patientRepository.save(patients);
+
+        ResponseData<Patient> responseData = new ResponseData<>(StatusApplication.SUCCESS.getCode(),StatusApplication.SUCCESS.getMessage(), patients);
+        return ResponseEntity.ok(responseData);
+    }
 }
