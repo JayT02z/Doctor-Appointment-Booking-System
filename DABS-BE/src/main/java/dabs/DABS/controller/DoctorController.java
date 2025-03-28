@@ -3,10 +3,14 @@ package dabs.DABS.controller;
 
 import dabs.DABS.model.Entity.Doctor;
 import dabs.DABS.model.Response.ResponseData;
+import dabs.DABS.model.request.RegisterDoctorForm;
+import dabs.DABS.model.request.UpdateDoctorForm;
 import dabs.DABS.service.DoctorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -16,27 +20,24 @@ public class DoctorController {
     @Autowired
     private DoctorService doctorService;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ResponseData<Doctor>> getDoctorById(@PathVariable Long id) {
-        Doctor doctor = doctorService.getDoctorById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy bác sĩ với id: " + id));
-        ResponseData<Doctor> response = ResponseData.<Doctor>builder()
-                .StatusCode(200)
-                .Message("Lấy thông tin bác sĩ thành công")
-                .data(doctor)
-                .build();
-        return ResponseEntity.ok(response);
+    @GetMapping("")
+    public ResponseEntity<ResponseData<List<Doctor>>> getAllDoctors() {
+        return doctorService.getAllDoctors();
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ResponseData<Doctor>> updateDoctor(@PathVariable Long id, @RequestBody Doctor updatedDoctor) {
-        Doctor doctor = doctorService.updateDoctor(id, updatedDoctor);
-        ResponseData<Doctor> response = ResponseData.<Doctor>builder()
-                .StatusCode(200)
-                .Message("Update fail")
-                .data(doctor)
-                .build();
-        return ResponseEntity.ok(response);
+    @GetMapping("/{id}")
+    public ResponseEntity<ResponseData<Doctor>> getDoctorById(@PathVariable Long id) {
+        return doctorService.getDoctorById(id);
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<ResponseData<Doctor>> updateDoctor(@PathVariable Long id, @RequestBody UpdateDoctorForm updatedDoctor) {
+        return doctorService.updateDoctor(id,updatedDoctor);
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<ResponseData<Doctor>> createDoctor(@RequestBody RegisterDoctorForm doctor) {
+        return doctorService.addDoctor(doctor);
     }
 
 

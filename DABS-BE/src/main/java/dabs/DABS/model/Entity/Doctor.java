@@ -27,6 +27,9 @@ public class Doctor {
     private String qualification;
     private String hospital;
 
+//    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<ServiceEntity> services;
+
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Schedule> availability;
 

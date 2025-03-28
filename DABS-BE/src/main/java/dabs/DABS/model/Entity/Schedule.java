@@ -26,8 +26,8 @@ public class Schedule {
     @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
 
-//    @Enumerated(EnumType.STRING)
-//    private DayOfWeek dayOfWeek; // ENUM: MONDAY - SUNDAY
+    @Enumerated(EnumType.STRING)
+    private DayOfWeek dayOfWeek; // ENUM: MONDAY - SUNDAY
 
     //Ngày làm việc
     @Column(nullable = false)
