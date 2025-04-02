@@ -35,7 +35,10 @@ public class Users {
     @Enumerated(EnumType.STRING)
     private Set<Role> roles;
 
+    @Column(unique = false, nullable = true)
     private LocalDateTime createdAt;
+
+    @Column(unique = false, nullable = true)
     private LocalDateTime lastLoginAt;
 
     @Enumerated(EnumType.STRING)

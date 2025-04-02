@@ -1,5 +1,6 @@
 package dabs.DABS.model.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import dabs.DABS.Enum.DayOfWeek;
 import dabs.DABS.Enum.TimeSlot;
 import jakarta.persistence.*;
@@ -10,6 +11,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 
 @Entity
@@ -22,8 +24,9 @@ public class Schedule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "doctor_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "doctor_id") // Liên kết với Doctor
+    @JsonIgnore
     private Doctor doctor;
 
     @Enumerated(EnumType.STRING)
@@ -34,9 +37,12 @@ public class Schedule {
     private LocalDate date;
 
     //Giờ làm việc
+    @ElementCollection(targetClass = TimeSlot.class)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TimeSlot timeSlot;
+    @JsonIgnore
+    private Set<TimeSlot> timeSlot;
+
     @Column(nullable = false)
     private boolean available;
 }

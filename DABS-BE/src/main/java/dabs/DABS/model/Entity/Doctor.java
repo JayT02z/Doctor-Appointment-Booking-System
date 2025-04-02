@@ -28,10 +28,11 @@ public class Doctor {
     private String hospital;
 
 //    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<ServiceEntity> services;
+//    private List<Long> serviceId;
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Schedule> availability;
+
 
     private Double rating;
 }
