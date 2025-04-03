@@ -40,7 +40,6 @@ public class Schedule {
     @ElementCollection(targetClass = TimeSlot.class)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @JsonIgnore
     private Set<TimeSlot> timeSlot;
 
     @Column(nullable = false)

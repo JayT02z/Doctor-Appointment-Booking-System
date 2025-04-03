@@ -8,4 +8,9 @@ public enum DayOfWeek {
     FRIDAY,    // Thứ Sáu
     SATURDAY,  // Thứ Bảy
     SUNDAY     // Chủ Nhật
+    ;
+
+    public String toUpperCase() {
+        return name().toUpperCase();
+    }
 }
