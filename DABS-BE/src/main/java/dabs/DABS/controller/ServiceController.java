@@ -26,7 +26,7 @@ public class ServiceController {
         return ResponseEntity.ok(serviceService.getServiceById(id));
     }
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<ServiceResponse> createService(@RequestBody ServiceRequest serviceRequest) {
         return ResponseEntity.ok(serviceService.createService(serviceRequest));
     }
