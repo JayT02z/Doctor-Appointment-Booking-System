@@ -2,6 +2,7 @@ package dabs.DABS.service;
 
 import dabs.DABS.Enum.AppointmentStatus;
 import dabs.DABS.Enum.StatusApplication;
+import dabs.DABS.model.DTO.AppointmentDTO;
 import dabs.DABS.model.DTO.UserDTO;
 import dabs.DABS.model.Entity.Appointment;
 import dabs.DABS.model.Entity.Doctor;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AppointmentService {
@@ -26,21 +28,26 @@ public class AppointmentService {
     @Autowired
     private PatientRepository patientRepository;
 
-    public ResponseEntity<ResponseData<List<Appointment>>> getAllAppointments() {
+    public ResponseEntity<ResponseData<List<AppointmentDTO>>> getAllAppointments() {
         List<Appointment> appointments = appointmentRepository.findAll();
+        List<AppointmentDTO> appointmentDTOs = appointments.stream()
+                .map(AppointmentDTO::new)
+                .collect(Collectors.toList());
         return ResponseEntity.ok(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
                 StatusApplication.SUCCESS.getMessage(),
-                appointments
+                appointmentDTOs
         ));
     }
 
-    public ResponseEntity<ResponseData<Appointment>> getAppointmentById(Long id) {
+    public ResponseEntity<ResponseData<AppointmentDTO>> getAppointmentById(Long id) {
         Appointment appointment = appointmentRepository.findById(id).orElse(null);
+        AppointmentDTO appointmentDTO = new AppointmentDTO(appointment);
+
         return ResponseEntity.ok(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
                 StatusApplication.SUCCESS.getMessage(),
-                appointment
+                appointmentDTO
         ));
     }
 
