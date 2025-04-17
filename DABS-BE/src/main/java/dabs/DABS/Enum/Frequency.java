@@ -1,8 +1,8 @@
 package dabs.DABS.Enum;
 
 public enum Frequency {
-    ONCE,
-    TWICE,
-    THREE_TIMES,
-    FOUR_TIME
+    ONCE, // Một lần
+    TWICE, // Hai Lần
+    THREE_TIMES, // Ba Lần
+    FOUR_TIME // Bốn Lần
 }

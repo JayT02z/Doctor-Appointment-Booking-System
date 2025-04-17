@@ -2,7 +2,7 @@ package dabs.DABS.controller;
 
 import dabs.DABS.model.Entity.Medicine;
 import dabs.DABS.model.Response.ResponseData;
-import dabs.DABS.model.request.MedicineRequest;
+import dabs.DABS.model.Request.MedicineRequest;
 import dabs.DABS.service.MedicineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

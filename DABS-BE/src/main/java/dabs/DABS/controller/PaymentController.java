@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @Controller
-@RequestMapping("/api/patient")
+@RequestMapping("/api/payment")
 public class PaymentController {
     @Autowired
     private PaymentService paymentService;

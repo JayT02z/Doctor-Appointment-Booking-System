@@ -1,5 +1,6 @@
 package dabs.DABS.model.Entity;
 
+import dabs.DABS.Enum.Frequency;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,7 +22,7 @@ public class Prescription {
     private int duration;
 
     @Enumerated(EnumType.STRING)
-    private String frequency;
+    private Frequency frequency;
 
     private String description;
 

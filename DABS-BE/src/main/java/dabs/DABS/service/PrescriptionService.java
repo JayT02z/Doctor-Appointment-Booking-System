@@ -8,6 +8,7 @@ import dabs.DABS.repository.DoctorRepository;
 import dabs.DABS.repository.PatientRepository;
 import dabs.DABS.repository.MedicineRepository;
 import dabs.DABS.Enum.StatusApplication;
+import dabs.DABS.Enum.Frequency;
 import dabs.DABS.model.request.PrescriptionRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +39,7 @@ public class PrescriptionService {
 
         prescription.setDosage(request.getDosage());
         prescription.setDuration(request.getDuration());
-        prescription.setFrequency(request.getFrequency());
+        prescription.setFrequency(Frequency.valueOf(request.getFrequency()));
         prescription.setDescription(request.getDescription());
 
         Appointment appointment = appointmentRepository.findById(request.getAppointmentId())
@@ -69,7 +70,7 @@ public class PrescriptionService {
 
         prescription.setDosage(request.getDosage());
         prescription.setDuration(request.getDuration());
-        prescription.setFrequency(request.getFrequency());
+        prescription.setFrequency(Frequency.valueOf(request.getFrequency()));
         prescription.setDescription(request.getDescription());
 
         Appointment appointment = appointmentRepository.findById(request.getAppointmentId())
