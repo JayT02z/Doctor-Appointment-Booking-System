@@ -1,7 +1,7 @@
 package dabs.DABS.service;
 
 import dabs.DABS.model.Entity.Medicine;
-import dabs.DABS.model.Request.MedicineRequest;
+import dabs.DABS.model.request.MedicineRequest;
 import dabs.DABS.repository.MedicineRepository;
 import dabs.DABS.Enum.StatusApplication;
 import dabs.DABS.model.Response.ResponseData;

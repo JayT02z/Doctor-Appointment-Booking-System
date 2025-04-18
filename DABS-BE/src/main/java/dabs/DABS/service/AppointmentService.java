@@ -3,7 +3,6 @@ package dabs.DABS.service;
 import dabs.DABS.Enum.AppointmentStatus;
 import dabs.DABS.Enum.StatusApplication;
 import dabs.DABS.model.DTO.AppointmentDTO;
-import dabs.DABS.model.DTO.UserDTO;
 import dabs.DABS.model.Entity.Appointment;
 import dabs.DABS.model.Entity.Doctor;
 import dabs.DABS.model.Entity.Patient;
