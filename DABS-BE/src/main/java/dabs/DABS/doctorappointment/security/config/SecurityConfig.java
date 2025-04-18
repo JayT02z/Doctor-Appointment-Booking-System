@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/appointment/**").permitAll()
                         .requestMatchers("/api/medicine/**").permitAll()
                         .requestMatchers("/api/prescription/**").permitAll()
+                        .requestMatchers("/api/feedback/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -25,7 +25,7 @@ public class AppointmentController {
         return appointmentService.addAppointment(appointment);
     }
 
-    @GetMapping()
+    @GetMapping("")
     public ResponseEntity<ResponseData<List<AppointmentDTO>>> getAllAppointments() {
         return appointmentService.getAllAppointments();
     }
@@ -33,5 +33,12 @@ public class AppointmentController {
     @GetMapping("/{id}")
     public ResponseEntity<ResponseData<AppointmentDTO>> getAppointmentById(@PathVariable Long id) {
         return appointmentService.getAppointmentById(id);
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<ResponseData<AppointmentDTO>> updateAppointmentStatus(
+            @PathVariable("id") Long appointmentId,
+            @RequestBody AppointmentForm appointmentForm) {
+        return appointmentService.updateAppointmentStatus(appointmentId, appointmentForm.getStatus());
     }
 }

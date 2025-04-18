@@ -31,4 +31,14 @@ public class PrescriptionController {
     public ResponseEntity<ResponseData<List<Prescription>>> listAllPrescription() {
     return prescriptionService.getAllPrescriptions();
     }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<ResponseData<Prescription>> updatePrescription(@PathVariable String id, @RequestBody PrescriptionRequest request) {
+        return prescriptionService.updatePrescription(id, request);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<ResponseData<Void>> deletePrescription(@PathVariable String id) {
+        return prescriptionService.deletePrescription(id);
+    }
 }

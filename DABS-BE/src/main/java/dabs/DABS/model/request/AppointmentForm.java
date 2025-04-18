@@ -19,5 +19,6 @@ public class AppointmentForm {
     private LocalDate date;
     private TimeSlot timeSlot;
     private String notes;
+    private AppointmentStatus status;
 
 }

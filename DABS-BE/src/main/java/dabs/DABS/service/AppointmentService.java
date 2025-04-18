@@ -68,4 +68,20 @@ public class AppointmentService {
                 appointments
         ));
     }
+//phương thức nào được thiết kế để cập nhật trạng thái của một Appointment đã tồn tại.
+    public ResponseEntity<ResponseData<AppointmentDTO>> updateAppointmentStatus(Long appointmentId, AppointmentStatus newStatus) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Appointment not found with id: " + appointmentId));
+
+        appointment.setStatus(newStatus);
+        appointmentRepository.save(appointment);
+
+        AppointmentDTO updatedAppointmentDTO = new AppointmentDTO(appointment);
+
+        return ResponseEntity.ok(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                updatedAppointmentDTO
+        ));
+    }
 }
