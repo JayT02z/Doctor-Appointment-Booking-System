@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @Controller
-@RequestMapping("/api/patient")
+@RequestMapping("/api/payment")
 public class PaymentController {
     @Autowired
     private PaymentService paymentService;
@@ -24,8 +24,8 @@ public class PaymentController {
         return paymentService.getallPayment();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ResponseData<Payment>> getPatientById(@PathVariable("id") Long id) {
-        return paymentService.findByAppointment(id);
-    }
+//    @GetMapping("/{id}")
+//    public ResponseEntity<ResponseData<Payment>> getPatientById(@PathVariable("id") Long id) {
+//        return paymentService.findByAppointment(id);
+//    }
 }

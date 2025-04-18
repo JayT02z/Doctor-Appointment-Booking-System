@@ -30,15 +30,15 @@ public class PaymentService {
         ));
     }
 
-    public ResponseEntity<ResponseData<Payment>> findByAppointment(Long appointmentId) {
-        Appointment appointment = appointmentRepository.findById(appointmentId).orElse(null);
-        Payment payment = appointment.getPayment();
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
-                StatusApplication.SUCCESS.getCode(),
-                StatusApplication.SUCCESS.getMessage(),
-                payment
-        ));
-    }
+//    public ResponseEntity<ResponseData<Payment>> findByAppointment(Long appointmentId) {
+//        Appointment appointment = appointmentRepository.findById(appointmentId).orElse(null);
+//        Payment payment = appointment.getPayment();
+//        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
+//                StatusApplication.SUCCESS.getCode(),
+//                StatusApplication.SUCCESS.getMessage(),
+//                payment
+//        ));
+//    }
 
     public ResponseEntity<ResponseData<List<Payment>>> getallPayment() {
         List<Payment> payments = paymentRepository.findAll();
