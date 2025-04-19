@@ -20,7 +20,7 @@ public class Patient {
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
-    private Users user;
+    private Users user; // Ensure correct relationship with Users entity
 
     private LocalDate dob;
     private String gender;

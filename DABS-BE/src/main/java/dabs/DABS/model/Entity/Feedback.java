@@ -29,6 +29,10 @@ public class Feedback {
     @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
 
+    @ManyToOne
+    @JoinColumn(name = "appointment_id", nullable = false) // Add this field to reference Appointment
+    private Appointment appointment;
+
     @Column(nullable = true, length = 2000)
     private String comment;
 }

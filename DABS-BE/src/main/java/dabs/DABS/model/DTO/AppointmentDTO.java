@@ -25,14 +25,13 @@ public class AppointmentDTO {
 
     public AppointmentDTO(Appointment appointment) {
         this.id = appointment.getId();
-        this.patientName = appointment.getPatient().getUser().getUsername();
-        this.doctorName = appointment.getDoctor().getUser().getUsername();
-        this.specialization = appointment.getDoctor().getSpecialization();
+        this.patientName = appointment.getPatient() != null && appointment.getPatient().getUser() != null ? appointment.getPatient().getUser().getUsername() : "N/A";
+        this.doctorName = appointment.getDoctor() != null && appointment.getDoctor().getUser() != null ? appointment.getDoctor().getUser().getUsername() : "N/A";
+        this.specialization = appointment.getDoctor() != null ? appointment.getDoctor().getSpecialization() : "N/A";
         this.date = appointment.getDate();
-        this.timeSlot = appointment.getTimeSlot().toString();
-        this.status = appointment.getStatus().toString();
-        this.notes = appointment.getNotes().toString();
+        this.timeSlot = appointment.getTimeSlot() != null ? appointment.getTimeSlot().toString() : "N/A";
+        this.status = appointment.getStatus() != null ? appointment.getStatus().toString() : "N/A";
+        this.notes = appointment.getNotes() != null ? appointment.getNotes() : "N/A";
     }
 
 }
-

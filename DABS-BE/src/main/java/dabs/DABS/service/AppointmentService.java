@@ -50,9 +50,13 @@ public class AppointmentService {
         ));
     }
 
-    public ResponseEntity<ResponseData<Appointment>> addAppointment(AppointmentForm appointment) {
-        Doctor doctor = doctorRepository.findById(appointment.getDoctorId()).orElse(null);
-        Patient patient = patientRepository.findById(appointment.getPatientId()).orElse(null);
+    public ResponseEntity<ResponseData<AppointmentDTO>> addAppointment(AppointmentForm appointment) {
+        Doctor doctor = doctorRepository.findByUserId(appointment.getDoctorId())
+                .orElseThrow(() -> new RuntimeException("Doctor not found with userId: " + appointment.getDoctorId()));
+
+        Patient patient = patientRepository.findById(appointment.getPatientId())
+                .orElseThrow(() -> new RuntimeException("Patient not found with userId: " + appointment.getPatientId()));
+
         Appointment appointments = new Appointment();
         appointments.setDoctor(doctor);
         appointments.setPatient(patient);
@@ -62,13 +66,15 @@ public class AppointmentService {
         appointments.setDate(appointment.getDate());
         appointmentRepository.save(appointments);
 
+        AppointmentDTO appointmentDTO = new AppointmentDTO(appointments);
+
         return ResponseEntity.ok(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
                 StatusApplication.SUCCESS.getMessage(),
-                appointments
+                appointmentDTO
         ));
     }
-//phương thức nào được thiết kế để cập nhật trạng thái của một Appointment đã tồn tại.
+
     public ResponseEntity<ResponseData<AppointmentDTO>> updateAppointmentStatus(Long appointmentId, AppointmentStatus newStatus) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found with id: " + appointmentId));

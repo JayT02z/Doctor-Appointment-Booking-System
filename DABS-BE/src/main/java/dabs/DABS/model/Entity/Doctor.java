@@ -18,7 +18,7 @@ public class Doctor {
     @Column(name ="full_name", nullable = false)
     private String fullName;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 

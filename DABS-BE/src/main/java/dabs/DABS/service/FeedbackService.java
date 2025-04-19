@@ -1,5 +1,6 @@
 package dabs.DABS.service;
 
+import dabs.DABS.model.DTO.FeedbackDTO;
 import dabs.DABS.model.Entity.Appointment;
 import dabs.DABS.repository.AppointmentRepository;
 import dabs.DABS.repository.FeedbackRepository;
@@ -17,6 +18,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import dabs.DABS.Enum.AppointmentStatus;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class FeedbackService {
     @Autowired
@@ -31,8 +35,15 @@ public class FeedbackService {
     @Autowired
     private AppointmentRepository appointmentRepository;
 
-    public ResponseEntity<ResponseData<Feedback>> createFeedback(FeedbackRequest request) {
-        Feedback feedback = new Feedback();
+    public ResponseEntity<ResponseData<FeedbackDTO>> createFeedback(FeedbackRequest request) {
+        if (request.getRating() == null) {
+            throw new RuntimeException("Rating cannot be null");
+        }
+
+        // Kiểm tra xem feedback đã tồn tại cho appointmentId này chưa
+        if (feedbackRepository.existsByAppointmentId(request.getAppointmentId())) {
+            throw new RuntimeException("Feedback has already been created for this appointment");
+        }
 
         Patient patient = patientRepository.findById(request.getPatientId())
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
@@ -46,21 +57,28 @@ public class FeedbackService {
             throw new RuntimeException("Feedback can only be created after the appointment is completed");
         }
 
+        Feedback feedback = new Feedback();
         feedback.setPatient(patient);
         feedback.setDoctor(doctor);
         feedback.setRating(request.getRating());
         feedback.setComment(request.getComment());
+        feedback.setAppointment(appointment);
 
         Feedback savedFeedback = feedbackRepository.save(feedback);
+        FeedbackDTO feedbackDTO = new FeedbackDTO(savedFeedback);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
                 StatusApplication.SUCCESS.getMessage(),
-                savedFeedback
+                feedbackDTO
         ));
     }
 
-    public ResponseEntity<ResponseData<Feedback>> updateFeedback(String id, FeedbackRequest request) {
+    public ResponseEntity<ResponseData<FeedbackDTO>> updateFeedback(String id, FeedbackRequest request) {
+        if (request.getRating() == null) {
+            throw new RuntimeException("Rating cannot be null");
+        }
+
         Feedback feedback = feedbackRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Feedback not found"));
 
@@ -75,30 +93,35 @@ public class FeedbackService {
         feedback.setComment(request.getComment());
 
         Feedback updatedFeedback = feedbackRepository.save(feedback);
+        FeedbackDTO feedbackDTO = new FeedbackDTO(updatedFeedback);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
                 StatusApplication.SUCCESS.getMessage(),
-                updatedFeedback
+                feedbackDTO
         ));
     }
 
-    public ResponseEntity<ResponseData<java.util.List<Feedback>>> getAllFeedbacks() {
-        java.util.List<Feedback> feedbacks = feedbackRepository.findAll();
+    public ResponseEntity<ResponseData<List<FeedbackDTO>>> getAllFeedbacks() {
+        List<Feedback> feedbacks = feedbackRepository.findAll();
+        List<FeedbackDTO> feedbackDTOs = feedbacks.stream()
+                .map(FeedbackDTO::new)
+                .collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
                 StatusApplication.SUCCESS.getMessage(),
-                feedbacks
+                feedbackDTOs
         ));
     }
 
-    public ResponseEntity<ResponseData<Feedback>> getFeedbackById(String id) {
+    public ResponseEntity<ResponseData<FeedbackDTO>> getFeedbackById(String id) {
         Feedback feedback = feedbackRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Feedback not found"));
+        FeedbackDTO feedbackDTO = new FeedbackDTO(feedback);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
                 StatusApplication.SUCCESS.getMessage(),
-                feedback
+                feedbackDTO
         ));
     }
 }

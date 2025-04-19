@@ -39,17 +39,31 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
+                        // --- Public Endpoints ---
                         .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login").permitAll()
-                        .requestMatchers("/**").hasRole("ADMIN")
-                        .requestMatchers("/api/doctor/**").permitAll()
-                        .requestMatchers("/api/patient/**").permitAll()
-                        .requestMatchers("/api/schedules/**").permitAll()
-                        .requestMatchers("/api/services/**").permitAll()
-                        .requestMatchers("/api/appointment/**").permitAll()
-                        .requestMatchers("/api/medicine/**").permitAll()
-                        .requestMatchers("/api/prescription/**").permitAll()
-                        .requestMatchers("/api/feedback/**").permitAll()
-                        .requestMatchers("/api/payment/**").permitAll()
+                        .requestMatchers("/api/schedules/**",
+                                         "/api/services/**",
+                                         "/api/appointment/**",
+                                         "/api/medicine/**",
+                                         "/api/prescription/**",
+                                         "/api/feedback/**",
+                                         "/api/payment/**").permitAll()
+
+                        // --- Private Endpoints: ADMIN only ---
+                        .requestMatchers("/api/doctor/create").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        // --- Private Endpoints: PATIENT only ---
+                        .requestMatchers("/api/feedback/create").hasRole("PATIENT")
+                        .requestMatchers("/api/patient/create").hasRole("PATIENT")
+
+                        // --- Private Endpoints: PATIENT or ADMIN ---
+                        .requestMatchers("/api/patient/**").hasAnyRole("PATIENT", "ADMIN")
+
+                        // --- Private Endpoints: DOCTOR or ADMIN ---
+                        .requestMatchers("/api/doctor/**").hasAnyRole("DOCTOR", "ADMIN")
+
+                        // --- Any other requests ---
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

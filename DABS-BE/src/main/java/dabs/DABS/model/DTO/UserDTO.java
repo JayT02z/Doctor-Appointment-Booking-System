@@ -13,6 +13,7 @@ import java.util.Collections;
 @AllArgsConstructor
 @Builder
 public class UserDTO {
+    private Long id;
     private String username;
     private String email;
     private String phone;
@@ -29,6 +30,7 @@ public class UserDTO {
             role = user.getRoles().iterator().next();
         }
         return UserDTO.builder()
+                .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .phone(user.getPhone())
