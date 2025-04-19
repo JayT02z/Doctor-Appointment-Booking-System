@@ -31,7 +31,7 @@ public class FeedbackController {
     public ResponseEntity<ResponseData<Feedback>> getFeedback(@PathVariable String id) {
         return feedbackService.getFeedbackById(id);
     }
-    @GetMapping("")
+    @GetMapping("/all")
     public ResponseEntity<ResponseData<java.util.List<Feedback>>> listAllFeedback() {
         return feedbackService.getAllFeedbacks();
     }

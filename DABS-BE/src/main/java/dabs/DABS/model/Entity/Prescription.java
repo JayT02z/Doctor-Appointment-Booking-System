@@ -18,12 +18,17 @@ public class Prescription {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
+
+    @Column(nullable = false)
     private int dosage;
+
+    @Column(nullable = false)
     private int duration;
 
     @Enumerated(EnumType.STRING)
     private Frequency frequency;
 
+    @Column(length = 2000)
     private String description;
 
     @OneToOne

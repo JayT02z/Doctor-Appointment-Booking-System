@@ -22,9 +22,16 @@ public class Doctor {
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
+    @Column(nullable = false)
     private String specialization;
+
+    @Column(nullable = false)
     private int experience;
+
+    @Column(nullable = false)
     private String qualification;
+
+    @Column(nullable = false)
     private String hospital;
 
 //    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -34,5 +41,5 @@ public class Doctor {
     private List<Schedule> availability;
 
 
-    private Double rating;
+//    private Double rating;
 }

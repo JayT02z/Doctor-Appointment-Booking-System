@@ -19,8 +19,13 @@ public class Medicine {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    @Column(nullable = false, unique = true)
     private String name;
+
+    @Column(length = 2000)
     private String description;
+
+    @Column(nullable = false)
     private String dosage;
 
     @ManyToMany(mappedBy = "medicines")

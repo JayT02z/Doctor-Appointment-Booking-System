@@ -16,7 +16,7 @@ import java.util.List;
 public class ServiceController {
     private final IServiceService serviceService;
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<ServiceResponse>> getAllServices() {
         return ResponseEntity.ok(serviceService.getAllServices());
     }

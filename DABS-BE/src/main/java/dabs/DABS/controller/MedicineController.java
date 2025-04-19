@@ -27,7 +27,7 @@ public class MedicineController {
         return medicineService.getMedicineById(id);
     }
 
-    @GetMapping("")
+    @GetMapping("/all")
     public ResponseEntity<ResponseData<List<Medicine>>> listAllMedicines() {
         return medicineService.getAllMedicines();
     }

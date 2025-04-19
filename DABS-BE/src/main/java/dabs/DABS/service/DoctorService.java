@@ -52,7 +52,7 @@ public class DoctorService {
         doctor.setSpecialization(updateDoctorForm.getSpecialization());
         doctor.setQualification(updateDoctorForm.getQualification());
         doctor.setExperience(updateDoctorForm.getExperience());
-        doctor.setRating(updateDoctorForm.getRating());
+//        doctor.setRating(updateDoctorForm.getRating());
         doctor.setHospital(updateDoctorForm.getHospital());
 
         Doctor updatedDoctor = doctorRepository.save(doctor);

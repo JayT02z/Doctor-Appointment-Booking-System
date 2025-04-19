@@ -25,7 +25,7 @@ public class AppointmentController {
         return appointmentService.addAppointment(appointment);
     }
 
-    @GetMapping("")
+    @GetMapping("/all")
     public ResponseEntity<ResponseData<List<AppointmentDTO>>> getAllAppointments() {
         return appointmentService.getAllAppointments();
     }
