@@ -49,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/medicine/**").permitAll()
                         .requestMatchers("/api/prescription/**").permitAll()
                         .requestMatchers("/api/feedback/**").permitAll()
+                        .requestMatchers("/api/payment/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
