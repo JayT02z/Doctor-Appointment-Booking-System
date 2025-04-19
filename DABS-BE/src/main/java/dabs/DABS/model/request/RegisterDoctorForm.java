@@ -16,5 +16,5 @@ public class RegisterDoctorForm {
     private int experience;
     private String qualification;
     private String hospital;
-    private Double rating;
+//    private Double rating;
 }

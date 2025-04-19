@@ -73,7 +73,7 @@ public class DoctorService {
         doctors.setExperience(doctor.getExperience());
         doctors.setQualification(doctor.getQualification());
         doctors.setHospital(doctor.getHospital());
-        doctors.setRating(doctor.getRating());
+//        doctors.setRating(doctor.getRating());
 
         Doctor responseData = doctorRepository.save(doctors);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
