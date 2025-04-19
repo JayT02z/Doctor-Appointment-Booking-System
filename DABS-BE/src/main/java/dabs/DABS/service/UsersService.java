@@ -84,8 +84,8 @@ public class UsersService {
 
         foundUser.setLastLoginAt(LocalDateTime.now());
         usersRepository.save(foundUser);
-
-        AuthResponse authResponse = new AuthResponse(token);
+        Long userId = foundUser.getId();
+        AuthResponse authResponse = new AuthResponse(token, userId);
         return ResponseEntity.ok(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
                 StatusApplication.SUCCESS.getMessage(),
