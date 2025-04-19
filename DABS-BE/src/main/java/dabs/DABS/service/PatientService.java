@@ -3,6 +3,8 @@ package dabs.DABS.service;
 import dabs.DABS.Enum.Status;
 import dabs.DABS.Enum.StatusApplication;
 import dabs.DABS.exception.ErrorCode;
+import dabs.DABS.model.DTO.PatientDTO;
+import dabs.DABS.model.DTO.UserDTO;
 import dabs.DABS.model.Entity.Patient;
 import dabs.DABS.model.Entity.Users;
 import dabs.DABS.model.Response.ResponseData;
@@ -29,25 +31,29 @@ public class PatientService {
     @Autowired
     private UsersService usersService;
 
-    public ResponseEntity<ResponseData<List<Patient>>> getAllPatients() {
+    public ResponseEntity<ResponseData<List<PatientDTO>>> getAllPatients() {
         List<Patient> patients = patientRepository.findAll();
+        List<PatientDTO> patientDTOs = patients.stream()
+                .map(PatientDTO::new)
+                .toList();
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
                 StatusApplication.SUCCESS.getMessage(),
-                patients
+                patientDTOs
         ));
     }
 
-    public ResponseEntity<ResponseData<Optional<Patient>>> getPatientById(Long id) {
-        Optional<Patient> patient = patientRepository.findById(id);
+    public ResponseEntity<ResponseData<PatientDTO>> getPatientById(Long id) {
+        Patient patient = patientRepository.findById(id).orElse(null);
+        PatientDTO patientDTO = new PatientDTO(patient);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
                 StatusApplication.SUCCESS.getMessage(),
-                patient
+                patientDTO
         ));
     }
 
-    public ResponseEntity<ResponseData<Patient>> addPatient(RegisterPatientForm patient) {
+    public ResponseEntity<ResponseData<PatientDTO>> addPatient(RegisterPatientForm patient) {
         Patient patients = new Patient();
 
 
@@ -62,10 +68,12 @@ public class PatientService {
 
         patientRepository.save(patients);
 
+        PatientDTO patientDTO = new PatientDTO(patients);
+
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
                 StatusApplication.SUCCESS.getMessage(),
-                patients
+                patientDTO
         ));
     }
 
@@ -86,17 +94,18 @@ public class PatientService {
         usersRepository.save(users);
         patientRepository.save(patients);
 
-        ResponseData<Patient> responseData = new ResponseData<>(StatusApplication.SUCCESS.getCode(),StatusApplication.SUCCESS.getMessage(), patients);
-        return ResponseEntity.ok(responseData);
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                patients));
     }
 
     public ResponseEntity<ResponseData<Patient>> deletePatient(Long id) {
         Patient patients = patientRepository.findById(id).orElseThrow();
         Users users = usersRepository.findById(patients.getUser().getId()).orElseThrow();
         users.setStatus(Status.INACTIVE);
-
         usersRepository.save(users);
-
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
                 StatusApplication.SUCCESS.getMessage(),

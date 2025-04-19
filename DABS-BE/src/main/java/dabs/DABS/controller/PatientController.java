@@ -1,5 +1,6 @@
 package dabs.DABS.controller;
 
+import dabs.DABS.model.DTO.PatientDTO;
 import dabs.DABS.model.Entity.Patient;
 import dabs.DABS.model.Response.ResponseData;
 import dabs.DABS.model.request.RegisterPatientForm;
@@ -23,22 +24,22 @@ public class PatientController {
     private PatientService patientService;
 
     @GetMapping("")
-    public ResponseEntity<ResponseData<List<Patient>>> listAllpatients() {
+    public ResponseEntity<ResponseData<List<PatientDTO>>> listAllpatients() {
         return patientService.getAllPatients();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ResponseData<Optional<Patient>>> getPatientById(@PathVariable Long id) {
+    public ResponseEntity<ResponseData<PatientDTO>> getPatientById(@PathVariable Long id) {
         return patientService.getPatientById(id);
     }
 
     @PostMapping("/create")
-    public ResponseEntity<ResponseData<Patient>> createPatient(@RequestBody RegisterPatientForm patient) {
+    public ResponseEntity<ResponseData<PatientDTO>> createPatient(@RequestBody RegisterPatientForm patient) {
         return patientService.addPatient(patient);
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<ResponseData<Patient>> updatePatient(@PathVariable Long id, @RequestBody UpdatePatientrForm patient) {
+    public ResponseEntity<ResponseData<PatientDTO>> updatePatient(@PathVariable Long id, @RequestBody UpdatePatientrForm patient) {
         return patientService.updatePatient(id,patient);
     }
 
