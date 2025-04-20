@@ -1,6 +1,7 @@
 package dabs.DABS.controller;
 
 
+import dabs.DABS.model.DTO.DoctorDTO;
 import dabs.DABS.model.Entity.Doctor;
 import dabs.DABS.model.Response.ResponseData;
 import dabs.DABS.model.request.RegisterDoctorForm;
@@ -20,13 +21,13 @@ public class DoctorController {
     @Autowired
     private DoctorService doctorService;
 
-    @GetMapping("")
-    public ResponseEntity<ResponseData<List<Doctor>>> getAllDoctors() {
+    @GetMapping("/all")
+    public ResponseEntity<ResponseData<List<DoctorDTO>>> getAllDoctors() {
         return doctorService.getAllDoctors();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ResponseData<Doctor>> getDoctorById(@PathVariable Long id) {
+    public ResponseEntity<ResponseData<DoctorDTO>> getDoctorById(@PathVariable Long id) {
         return doctorService.getDoctorById(id);
     }
 

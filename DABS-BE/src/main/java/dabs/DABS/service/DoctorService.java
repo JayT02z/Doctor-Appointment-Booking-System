@@ -3,6 +3,7 @@ package dabs.DABS.service;
 import dabs.DABS.Enum.Role;
 import dabs.DABS.Enum.StatusApplication;
 import dabs.DABS.exception.ErrorCode;
+import dabs.DABS.model.DTO.DoctorDTO;
 import dabs.DABS.model.Entity.Doctor;
 import dabs.DABS.model.Entity.Users;
 import dabs.DABS.model.Response.ResponseData;
@@ -29,21 +30,34 @@ public class DoctorService {
     @Autowired
     private UsersRepository usersRepository;
 
-    public ResponseEntity<ResponseData<List<Doctor>>> getAllDoctors() {
-       List<Doctor> listAlldoctor = doctorRepository.findAll();
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
-                StatusApplication.SUCCESS.getCode(),
-                StatusApplication.SUCCESS.getMessage(),
-                listAlldoctor
-        ));
+    public ResponseEntity<ResponseData<List<DoctorDTO>>> getAllDoctors() {
+   List<Doctor> listAllDoctor = doctorRepository.findAll();
+    List<DoctorDTO> dtoList = listAllDoctor.stream()
+            .map(DoctorDTO::fromEntity)
+            .toList();
+    return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
+            StatusApplication.SUCCESS.getCode(),
+            StatusApplication.SUCCESS.getMessage(),
+            dtoList
+    ));
     }
 
-    public ResponseEntity<ResponseData<Doctor>> getDoctorById(long id) {
+    public ResponseEntity<ResponseData<DoctorDTO>> getDoctorById(long id) {
         Doctor doctor = doctorRepository.findById(id).orElse(null);
+
+        if (doctor == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseData<>(
+                    ErrorCode.USER_NOT_FOUND.getCode(),
+                    "Doctor not found",
+                    null
+            ));
+        }
+
+        DoctorDTO doctorDTO = DoctorDTO.fromEntity(doctor);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
                 StatusApplication.SUCCESS.getMessage(),
-                doctor
+                doctorDTO
         ));
     }
 
