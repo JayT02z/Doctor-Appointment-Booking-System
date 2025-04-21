@@ -6,11 +6,13 @@ import dabs.DABS.model.DTO.AppointmentDTO;
 import dabs.DABS.model.Entity.Appointment;
 import dabs.DABS.model.Entity.Doctor;
 import dabs.DABS.model.Entity.Patient;
+import dabs.DABS.model.Entity.ServiceEntity;
 import dabs.DABS.model.Response.ResponseData;
 import dabs.DABS.model.request.AppointmentForm;
 import dabs.DABS.repository.AppointmentRepository;
 import dabs.DABS.repository.DoctorRepository;
 import dabs.DABS.repository.PatientRepository;
+import dabs.DABS.repository.ServiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,8 @@ public class AppointmentService {
     private DoctorRepository doctorRepository;
     @Autowired
     private PatientRepository patientRepository;
+    @Autowired
+    private ServiceRepository serviceRepository;
 
     public ResponseEntity<ResponseData<List<AppointmentDTO>>> getAllAppointments() {
         List<Appointment> appointments = appointmentRepository.findAll();
@@ -57,9 +61,13 @@ public class AppointmentService {
         Patient patient = patientRepository.findById(appointment.getPatientId())
                 .orElseThrow(() -> new RuntimeException("Patient not found with userId: " + appointment.getPatientId()));
 
+        ServiceEntity service = serviceRepository.findById(appointment.getServiceId())
+                .orElseThrow(() -> new RuntimeException("Service not found with id: " + appointment.getServiceId()));
+
         Appointment appointments = new Appointment();
         appointments.setDoctor(doctor);
         appointments.setPatient(patient);
+        appointments.setService(service);
         appointments.setTimeSlot(appointment.getTimeSlot());
         appointments.setStatus(AppointmentStatus.PENDING);
         appointments.setNotes(appointment.getNotes());

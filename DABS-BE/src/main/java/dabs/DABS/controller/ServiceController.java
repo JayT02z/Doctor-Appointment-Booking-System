@@ -22,7 +22,7 @@ public class ServiceController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<ResponseData<ServiceEntity>> updateService(@PathVariable String id, @RequestBody ServiceRequest request) {
+    public ResponseEntity<ResponseData<ServiceEntity>> updateService(@PathVariable Long id, @RequestBody ServiceRequest request) {
         return serviceService.updateService(id, request);
     }
 
@@ -31,7 +31,7 @@ public class ServiceController {
         return serviceService.getAllServices();
     }
     @GetMapping("/{id}")
-    public ResponseEntity<ResponseData<ServiceEntity>> getServiceById(@PathVariable String id) {
+    public ResponseEntity<ResponseData<ServiceEntity>> getServiceById(@PathVariable Long id) {
         return serviceService.getServiceById(id);
     }
 }

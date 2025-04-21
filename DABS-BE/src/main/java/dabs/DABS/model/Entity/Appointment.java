@@ -28,6 +28,10 @@ public class Appointment {
     @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
 
+    @ManyToOne
+    @JoinColumn(name = "service_id", nullable = false)
+    private ServiceEntity service;
+
     private LocalDate date;
 
     @Enumerated(EnumType.STRING)

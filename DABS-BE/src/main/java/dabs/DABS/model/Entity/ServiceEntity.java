@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Getter
@@ -17,8 +15,8 @@ import java.util.Set;
 @Table(name = "services")
 public class ServiceEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false, unique = true)
     private String name;
@@ -32,11 +30,4 @@ public class ServiceEntity {
     @Column(nullable = false)
     private Boolean isActive = true;
 
-    @ManyToMany
-    @JoinTable(
-            name = "service_slug",
-            joinColumns = @JoinColumn(name = "service_id"),
-            inverseJoinColumns = @JoinColumn(name = "slug_id")
-    )
-    private Set<Slug> slugs = new HashSet<>();
 }

@@ -18,6 +18,7 @@ public class AppointmentDTO {
     private String patientName;
     private String doctorName;
     private String specialization;
+    private String serviceName;
     private LocalDate date;
     private String timeSlot;
     private String status;
@@ -28,6 +29,7 @@ public class AppointmentDTO {
         this.patientName = appointment.getPatient() != null && appointment.getPatient().getUser() != null ? appointment.getPatient().getUser().getUsername() : "N/A";
         this.doctorName = appointment.getDoctor() != null && appointment.getDoctor().getUser() != null ? appointment.getDoctor().getUser().getUsername() : "N/A";
         this.specialization = appointment.getDoctor() != null ? appointment.getDoctor().getSpecialization() : "N/A";
+        this.serviceName = appointment.getService() != null ? appointment.getService().getName() : "N/A";
         this.date = appointment.getDate();
         this.timeSlot = appointment.getTimeSlot() != null ? appointment.getTimeSlot().toString() : "N/A";
         this.status = appointment.getStatus() != null ? appointment.getStatus().toString() : "N/A";

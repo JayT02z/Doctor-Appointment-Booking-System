@@ -1,5 +1,6 @@
 package dabs.DABS.controller;
 
+import dabs.DABS.model.DTO.PrescriptionDTO;
 import dabs.DABS.model.Entity.Prescription;
 import dabs.DABS.model.Response.ResponseData;
 import dabs.DABS.model.request.PrescriptionRequest;
@@ -19,21 +20,21 @@ public class PrescriptionController {
     private PrescriptionService prescriptionService;
 
     @PostMapping("/create")
-    public ResponseEntity<ResponseData<Prescription>> createPrescription(@RequestBody PrescriptionRequest request) {
+    public ResponseEntity<ResponseData<PrescriptionDTO>> createPrescription(@RequestBody PrescriptionRequest request) {
         return prescriptionService.createRequest(request);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ResponseData<Prescription>> getPrescription(@PathVariable String id) {
+    public ResponseEntity<ResponseData<PrescriptionDTO>> getPrescription(@PathVariable String id) {
         return prescriptionService.getPrescriptionById(id);
     }
     @GetMapping("")
-    public ResponseEntity<ResponseData<List<Prescription>>> listAllPrescription() {
+    public ResponseEntity<ResponseData<List<PrescriptionDTO>>> listAllPrescription() {
     return prescriptionService.getAllPrescriptions();
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<ResponseData<Prescription>> updatePrescription(@PathVariable String id, @RequestBody PrescriptionRequest request) {
+    public ResponseEntity<ResponseData<PrescriptionDTO>> updatePrescription(@PathVariable String id, @RequestBody PrescriptionRequest request) {
         return prescriptionService.updatePrescription(id, request);
     }
 

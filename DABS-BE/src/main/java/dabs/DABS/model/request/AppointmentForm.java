@@ -16,6 +16,7 @@ import java.time.LocalDate;
 public class AppointmentForm {
     private Long patientId;
     private Long doctorId;
+    private Long serviceId;
     private LocalDate date;
     private TimeSlot timeSlot;
     private String notes;

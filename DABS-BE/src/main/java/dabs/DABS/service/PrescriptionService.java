@@ -1,5 +1,6 @@
 package dabs.DABS.service;
 
+import dabs.DABS.model.DTO.PrescriptionDTO;
 import dabs.DABS.model.Entity.*;
 import dabs.DABS.model.Response.ResponseData;
 import dabs.DABS.repository.PrescriptionRepository;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PrescriptionService {
@@ -34,7 +36,11 @@ public class PrescriptionService {
     @Autowired
     private MedicineRepository medicineRepository;
 
-    public ResponseEntity<ResponseData<Prescription>> createRequest(PrescriptionRequest request){
+
+    public ResponseEntity<ResponseData<PrescriptionDTO>> createRequest(PrescriptionRequest request){
+        if (prescriptionRepository.existsByAppointment_Id(request.getAppointmentId())) {
+            throw new RuntimeException("Appointment already has a prescription");
+        }
         Prescription prescription = new Prescription();
 
         prescription.setDosage(request.getDosage());
@@ -60,11 +66,11 @@ public class PrescriptionService {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
             StatusApplication.SUCCESS.getCode(),
             StatusApplication.SUCCESS.getMessage(),
-            savedPrescription
+            PrescriptionDTO.mapToDTO(savedPrescription)
         ));
     }
 
-    public ResponseEntity<ResponseData<Prescription>> updatePrescription(String id, PrescriptionRequest request) {
+    public ResponseEntity<ResponseData<PrescriptionDTO>> updatePrescription(String id, PrescriptionRequest request) {
         Prescription prescription = prescriptionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Prescription not found"));
 
@@ -91,26 +97,29 @@ public class PrescriptionService {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
             StatusApplication.SUCCESS.getCode(),
             StatusApplication.SUCCESS.getMessage(),
-            updatedPrescription
+            PrescriptionDTO.mapToDTO(updatedPrescription)
         ));
     }
 
-    public ResponseEntity<ResponseData<List<Prescription>>> getAllPrescriptions() {
+    public ResponseEntity<ResponseData<List<PrescriptionDTO>>> getAllPrescriptions() {
         List<Prescription> prescriptions = prescriptionRepository.findAll();
+        List<PrescriptionDTO> dtos = prescriptions.stream()
+            .map(PrescriptionDTO::mapToDTO)
+            .collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
             StatusApplication.SUCCESS.getCode(),
             StatusApplication.SUCCESS.getMessage(),
-            prescriptions
+            dtos
         ));
     }
 
-    public ResponseEntity<ResponseData<Prescription>> getPrescriptionById(String id) {
+    public ResponseEntity<ResponseData<PrescriptionDTO>> getPrescriptionById(String id) {
         Prescription prescription = prescriptionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Prescription not found"));
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
                 StatusApplication.SUCCESS.getMessage(),
-                prescription
+                PrescriptionDTO.mapToDTO(prescription)
         ));
     }
 
