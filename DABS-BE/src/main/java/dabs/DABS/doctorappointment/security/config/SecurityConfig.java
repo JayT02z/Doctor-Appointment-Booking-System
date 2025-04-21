@@ -40,9 +40,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         // --- Public Endpoints ---
-                        .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login").permitAll()
+                        .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/logout").permitAll()
                         .requestMatchers("/api/schedules/**",
-                                         "/api/services/**",
                                          "/api/appointment/**",
                                          "/api/medicine/**",
                                          "/api/prescription/**",
@@ -51,9 +50,8 @@ public class SecurityConfig {
 
                         // --- Private Endpoints: ADMIN only ---
                         .requestMatchers("/api/doctor/create").hasRole("ADMIN")
-                        .requestMatchers("/api/slug/create").hasRole("ADMIN")
                         .requestMatchers("/api/patient/create").hasRole("ADMIN")
-                        .requestMatchers("/api/slug/all").hasRole("ADMIN")
+                        .requestMatchers("/api/services/all").hasRole("ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                         // --- Private Endpoints: PATIENT only ---
