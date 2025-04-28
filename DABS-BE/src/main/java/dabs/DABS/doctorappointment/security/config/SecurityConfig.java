@@ -40,7 +40,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         // --- Public Endpoints ---
-                        .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/logout").permitAll()
+                        .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/logout","/api/v1/auth/send-otp").permitAll()
                         .requestMatchers("/api/schedules/**",
                                          "/api/appointment/**",
                                          "/api/medicine/**",

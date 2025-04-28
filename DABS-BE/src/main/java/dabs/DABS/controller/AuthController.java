@@ -3,7 +3,11 @@ package dabs.DABS.controller;
 import dabs.DABS.doctorappointment.security.jwt.JwtUtil;
 import dabs.DABS.doctorappointment.security.jwt.TokenBlacklistService;
 import dabs.DABS.model.request.LoginRequest;
+import dabs.DABS.model.request.OTP;
+import dabs.DABS.service.MailSenderService;
 import dabs.DABS.service.UsersService;
+import jakarta.mail.MessagingException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -27,6 +31,8 @@ public class AuthController {
         this.tokenBlackListService = tokenBlacklistService;
     }
 
+    @Autowired
+    private MailSenderService mailSenderService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
@@ -41,5 +47,16 @@ public class AuthController {
             return ResponseEntity.ok("Logout successful");
         }
         return ResponseEntity.badRequest().body("Invalid Authorization header");
+    }
+
+    @PostMapping("/send-otp")
+    public ResponseEntity<?> sendOtp(@RequestBody OTP email) {
+        try {
+            String otp = mailSenderService.sendOtpAndReturn(email);
+            return ResponseEntity.ok("Đã gửi OTP thành công. Mã OTP: " + otp);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Gửi OTP thất bại: " + e.getMessage());
+        }
     }
 }

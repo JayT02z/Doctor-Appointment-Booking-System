@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Entity
 @Getter
 @Setter
@@ -29,4 +31,6 @@ public class Payment {
 
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
+
+    private LocalDate paymentDate;
 }

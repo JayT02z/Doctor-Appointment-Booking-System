@@ -35,7 +35,7 @@ public class Doctor {
     private String hospital;
 
 //    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<Long> serviceId;
+//    private List<ServiceEntity> serviceId;
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Schedule> availability;
