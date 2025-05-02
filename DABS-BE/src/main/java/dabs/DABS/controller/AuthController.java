@@ -4,6 +4,7 @@ import dabs.DABS.doctorappointment.security.jwt.JwtUtil;
 import dabs.DABS.doctorappointment.security.jwt.TokenBlacklistService;
 import dabs.DABS.model.request.LoginRequest;
 import dabs.DABS.model.request.OTP;
+import dabs.DABS.model.request.OTPVerificationRequest;
 import dabs.DABS.service.MailSenderService;
 import dabs.DABS.service.UsersService;
 import jakarta.mail.MessagingException;
@@ -49,14 +50,18 @@ public class AuthController {
         return ResponseEntity.badRequest().body("Invalid Authorization header");
     }
 
-    @PostMapping("/send-otp")
-    public ResponseEntity<?> sendOtp(@RequestBody OTP email) {
-        try {
-            String otp = mailSenderService.sendOtpAndReturn(email);
-            return ResponseEntity.ok("Đã gửi OTP thành công. Mã OTP: " + otp);
-        } catch (MessagingException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body("Gửi OTP thất bại: " + e.getMessage());
-        }
+    @PostMapping("/sendOTP")
+    public ResponseEntity<?> sendOtp(@RequestBody OTP request) throws MessagingException {
+        return mailSenderService.sendOtp(request.getEmail());
+    }
+
+    @PostMapping("/verifyOTP")
+    public ResponseEntity<?> verifyOtp(@RequestBody OTPVerificationRequest request) {
+        return mailSenderService.verifyOtp(request.getEmail(), request.getOtp());
+    }
+
+    @PostMapping("/resendOTP")
+    public ResponseEntity<?> resendOtp(@RequestBody OTP request) throws MessagingException {
+        return mailSenderService.resendOtp(request.getEmail());
     }
 }

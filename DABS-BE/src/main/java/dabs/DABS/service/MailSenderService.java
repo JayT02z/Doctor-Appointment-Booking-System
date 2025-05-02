@@ -1,6 +1,14 @@
 package dabs.DABS.service;
 
+import dabs.DABS.Enum.Message;
+import dabs.DABS.Enum.StatusApplication;
+import dabs.DABS.model.DTO.PrescriptionDTO;
+import dabs.DABS.model.Response.ResponseData;
 import dabs.DABS.model.request.OTP;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -10,53 +18,69 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
 import java.security.SecureRandom;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class MailSenderService {
 
-    private static final String OTP_EMAIL_SUBJECT = "Mã OTP của bạn";
+    @Autowired
+    private JavaMailSender emailSender;
+    @Autowired
+    private TemplateEngine templateEngine;
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
 
-    private final JavaMailSender emailSender;
-    private final TemplateEngine templateEngine;
-
-    public MailSenderService(JavaMailSender emailSender, TemplateEngine templateEngine) {
-        this.emailSender = emailSender;
-        this.templateEngine = templateEngine;
-    }
-
-    // Tạo mã OTP ngẫu nhiên gồm 6 chữ số
     private String generateOtp() {
         SecureRandom random = new SecureRandom();
-        int otp = 100000 + random.nextInt(900000);
-        return String.valueOf(otp);
+        return String.valueOf(100000 + random.nextInt(900000));
     }
 
-    // Gửi OTP qua email và trả về mã OTP
-    public String sendOtpAndReturn(OTP recipientEmail) throws MessagingException {
-        // Tạo mã OTP
+    public ResponseEntity<ResponseData<String>> sendOtp(String email) throws MessagingException {
         String otp = generateOtp();
 
-        // Tạo context cho Thymeleaf
-        Context context = new Context();
-        context.setVariable("otp", otp);  // Thêm giá trị OTP vào context
+        // Lưu OTP vào Redis với thời gian sống 5 phút
+        redisTemplate.opsForValue().set("otp:" + email, otp, 5, TimeUnit.MINUTES);
 
-        // Tạo nội dung email từ template
+        // Gửi email OTP
+        Context context = new Context();
+        context.setVariable("otp", otp);
         String emailContent = templateEngine.process("OTPtemplate", context);
 
-        // Cấu hình email
-        MimeMessage mimeMessage = emailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
-        helper.setFrom("anhoa1794@gmail.com");
-        helper.setTo(recipientEmail.getEmail());
-        helper.setSubject(OTP_EMAIL_SUBJECT);
-        helper.setText(emailContent, true);  // true = HTML content
+        MimeMessage message = emailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        helper.setTo(email);
+        helper.setSubject("Mã OTP của bạn");
+        helper.setText(emailContent, true);
+        emailSender.send(message);
 
-        // Gửi email
-        emailSender.send(mimeMessage);
-        System.out.println("Đã gửi OTP: " + otp + " đến email: " + recipientEmail.getEmail());
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                Message.OTP_REQUIRED.getMessage()
+        ));
+    }
 
-        // Trả về mã OTP để dùng tiếp (ví dụ lưu vào database hoặc gửi về frontend nếu cần)
-        return otp;
+    public ResponseEntity<ResponseData<Boolean>> verifyOtp(String email, String otpInput) {
+        String key = "otp:" + email;
+        String correctOtp = redisTemplate.opsForValue().get(key);
+        Boolean validOTP = otpInput.equals(correctOtp);
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                validOTP
+        ));
+
+    }
+
+    public ResponseEntity<ResponseData<String>> resendOtp(String email) throws MessagingException {
+        redisTemplate.delete("otp:" + email);
+        sendOtp(email);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                Message.OTP_REQUIRED.getMessage()
+        ));
     }
 }
 
