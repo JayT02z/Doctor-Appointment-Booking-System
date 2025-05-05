@@ -8,12 +8,11 @@ import dabs.DABS.model.Entity.Schedule;
 import dabs.DABS.model.Response.ResponseData;
 import dabs.DABS.model.request.CreateScheduleRequest;
 import dabs.DABS.service.ScheduleService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.print.Doc;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -50,7 +49,7 @@ public class ScheduleController {
 //    }
 
     @PostMapping("/create")
-    public ResponseEntity<ResponseData<Doctor>> createSchedule(@RequestBody CreateScheduleRequest createScheduleRequest) {
+    public ResponseEntity<ResponseData<Doctor>> createSchedule(@RequestBody @Valid CreateScheduleRequest createScheduleRequest) {
         return scheduleService.addSchedule(createScheduleRequest);
     }
 
