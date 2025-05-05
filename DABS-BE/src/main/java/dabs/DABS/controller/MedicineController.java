@@ -4,6 +4,7 @@ import dabs.DABS.model.Entity.Medicine;
 import dabs.DABS.model.Response.ResponseData;
 import dabs.DABS.model.request.MedicineRequest;
 import dabs.DABS.service.MedicineService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -18,7 +19,7 @@ public class MedicineController {
     private MedicineService medicineService;
 
     @PostMapping("/create")
-    public ResponseEntity<ResponseData<Medicine>> createMedicine(@RequestBody MedicineRequest request) {
+    public ResponseEntity<ResponseData<Medicine>> createMedicine(@Valid @RequestBody MedicineRequest request) {
         return medicineService.createRequest(request);
     }
 
@@ -33,7 +34,7 @@ public class MedicineController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<ResponseData<Medicine>> updateMedicine(@PathVariable String id, @RequestBody MedicineRequest request) {
+    public ResponseEntity<ResponseData<Medicine>> updateMedicine(@PathVariable String id, @Valid @RequestBody MedicineRequest request) {
         return medicineService.updateMedicine(id, request);
     }
 
@@ -41,5 +42,4 @@ public class MedicineController {
     public ResponseEntity<ResponseData<Void>> deleteMedicine(@PathVariable String id) {
         return medicineService.deleteMedicine(id);
     }
-
 }

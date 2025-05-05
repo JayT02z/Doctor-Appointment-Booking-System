@@ -1,8 +1,6 @@
 package dabs.DABS.controller;
 
-
 import dabs.DABS.model.DTO.AppointmentDTO;
-import dabs.DABS.model.Entity.Appointment;
 import dabs.DABS.model.Response.ResponseData;
 import dabs.DABS.model.request.AppointmentForm;
 import dabs.DABS.service.AppointmentService;
@@ -11,17 +9,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
+
 import java.util.List;
 
 @Controller
 @RestController
 @RequestMapping("api/appointment")
 public class AppointmentController {
+
     @Autowired
     AppointmentService appointmentService;
 
     @PostMapping("/create")
-    public ResponseEntity<ResponseData<AppointmentDTO>> createAppointment(@RequestBody AppointmentForm appointment) {
+    public ResponseEntity<ResponseData<AppointmentDTO>> createAppointment(
+            @Valid @RequestBody AppointmentForm appointment) {
         return appointmentService.addAppointment(appointment);
     }
 
@@ -38,7 +40,7 @@ public class AppointmentController {
     @PutMapping("/{id}/status")
     public ResponseEntity<ResponseData<AppointmentDTO>> updateAppointmentStatus(
             @PathVariable("id") Long appointmentId,
-            @RequestBody AppointmentForm appointmentForm) {
+            @Valid @RequestBody AppointmentForm appointmentForm) {
         return appointmentService.updateAppointmentStatus(appointmentId, appointmentForm.getStatus());
     }
 }

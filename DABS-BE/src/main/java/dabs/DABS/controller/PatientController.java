@@ -6,14 +6,13 @@ import dabs.DABS.model.Response.ResponseData;
 import dabs.DABS.model.request.RegisterPatientForm;
 import dabs.DABS.model.request.UpdatePatientrForm;
 import dabs.DABS.service.PatientService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @Controller
@@ -34,13 +33,13 @@ public class PatientController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<ResponseData<PatientDTO>> createPatient(@RequestBody RegisterPatientForm patient) {
+    public ResponseEntity<ResponseData<PatientDTO>> createPatient(@Valid @RequestBody RegisterPatientForm patient) {
         return patientService.addPatient(patient);
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<ResponseData<Patient>> updatePatient(@PathVariable Long id, @RequestBody UpdatePatientrForm patient) {
-        return patientService.updatePatient(id,patient);
+    public ResponseEntity<ResponseData<Patient>> updatePatient(@PathVariable Long id, @Valid @RequestBody UpdatePatientrForm patient) {
+        return patientService.updatePatient(id, patient);
     }
 
     @PutMapping("/delete/{id}")

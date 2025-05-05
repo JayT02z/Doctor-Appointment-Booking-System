@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/v1/auth")
 public class UsersController {
@@ -20,7 +22,7 @@ public class UsersController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ResponseData<UserDTO>> register(@RequestBody RegistrationRequest regRequest) {
+    public ResponseEntity<ResponseData<UserDTO>> register(@Valid @RequestBody RegistrationRequest regRequest) {
         return usersService.saveUser(regRequest);
     }
 
@@ -30,7 +32,7 @@ public class UsersController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ResponseData<UserDTO>> updateUser(@PathVariable Long id, @RequestBody Users updatedUser) {
+    public ResponseEntity<ResponseData<UserDTO>> updateUser(@PathVariable Long id, @Valid @RequestBody Users updatedUser) {
         return usersService.updateUserInfo(id, updatedUser);
     }
 

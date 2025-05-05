@@ -1,6 +1,7 @@
 package dabs.DABS.model.Entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.util.List;
@@ -11,35 +12,39 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Doctor {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name ="full_name", nullable = false)
+    @NotBlank(message = "Tên không được để trống")
+    @Column(name = "full_name", nullable = false)
     private String fullName;
 
+    @NotNull(message = "User không được null")
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
+    @NotBlank(message = "Chuyên khoa không được để trống")
     @Column(nullable = false)
     private String specialization;
 
+    @Min(value = 0, message = "Số năm kinh nghiệm phải >= 0")
     @Column(nullable = false)
     private int experience;
 
+    @NotBlank(message = "Bằng cấp không được để trống")
     @Column(nullable = false)
     private String qualification;
 
+    @NotBlank(message = "Bệnh viện không được để trống")
     @Column(nullable = false)
     private String hospital;
-
-//    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<ServiceEntity> serviceId;
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Schedule> availability;
 
-
-//    private Double rating;
+    //    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
+    //    private List<ServiceEntity> serviceId;
 }

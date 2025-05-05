@@ -8,12 +8,12 @@ import dabs.DABS.model.request.OTPVerificationRequest;
 import dabs.DABS.service.MailSenderService;
 import dabs.DABS.service.UsersService;
 import jakarta.mail.MessagingException;
+import jakarta.validation.Valid; // ✅ Import thêm
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
-
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -36,7 +36,7 @@ public class AuthController {
     private MailSenderService mailSenderService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
         return usersService.loginUser(request);
     }
 
@@ -51,17 +51,17 @@ public class AuthController {
     }
 
     @PostMapping("/sendOTP")
-    public ResponseEntity<?> sendOtp(@RequestBody OTP request) throws MessagingException {
+    public ResponseEntity<?> sendOtp(@Valid @RequestBody OTP request) throws MessagingException {
         return mailSenderService.sendOtp(request.getEmail());
     }
 
     @PostMapping("/verifyOTP")
-    public ResponseEntity<?> verifyOtp(@RequestBody OTPVerificationRequest request) {
+    public ResponseEntity<?> verifyOtp(@Valid @RequestBody OTPVerificationRequest request) {
         return mailSenderService.verifyOtp(request.getEmail(), request.getOtp());
     }
 
     @PostMapping("/resendOTP")
-    public ResponseEntity<?> resendOtp(@RequestBody OTP request) throws MessagingException {
+    public ResponseEntity<?> resendOtp(@Valid @RequestBody OTP request) throws MessagingException {
         return mailSenderService.resendOtp(request.getEmail());
     }
 }

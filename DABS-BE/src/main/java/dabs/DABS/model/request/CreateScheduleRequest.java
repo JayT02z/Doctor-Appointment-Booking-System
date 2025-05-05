@@ -1,6 +1,8 @@
 package dabs.DABS.model.request;
 
 import dabs.DABS.model.Entity.Schedule;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +15,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateScheduleRequest {
+    @NotNull(message = "Không được để trống")
     private Long doctorId;
+
+    @NotEmpty(message = "Danh sách lịch làm việc không được để trống")
     private List<Schedule> schedules;
 }
