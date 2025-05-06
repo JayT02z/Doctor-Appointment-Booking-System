@@ -1,6 +1,7 @@
 package dabs.DABS.service;
 
 import dabs.DABS.Enum.AppointmentStatus;
+import dabs.DABS.Enum.Status;
 import dabs.DABS.Enum.StatusApplication;
 import dabs.DABS.model.DTO.AppointmentDTO;
 import dabs.DABS.model.Entity.Appointment;
@@ -98,4 +99,9 @@ public class AppointmentService {
                 updatedAppointmentDTO
         ));
     }
+
+//    public ResponseEntity<ResponseData<List<AppointmentDTO>>> getAllAppointmentsByDoctorId(Long doctorId, AppointmentStatus status) {
+//        appointmentRepository.findAllByDoctorIdAndStatus(doctorId,status);
+//
+//    }
 }

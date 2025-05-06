@@ -54,7 +54,7 @@ public class AdminUserInitializer {
                 adminUser.setUsername(adminUsername);
                 adminUser.setEmail(adminEmail);
                 adminUser.setPassword(passwordEncoder.encode(adminPassword));
-                adminUser.setPhone("N/A");
+                adminUser.setPhone("0123456789");
                 adminUser.setCreatedAt(LocalDateTime.now());
                 adminUser.setStatus(Status.ACTIVE);
                 adminUser.setRoles(Collections.singleton(Role.ADMIN));

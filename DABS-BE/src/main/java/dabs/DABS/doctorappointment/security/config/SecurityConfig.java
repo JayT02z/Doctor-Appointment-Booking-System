@@ -56,6 +56,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/patient/create").hasRole("ADMIN")
                         .requestMatchers("/api/services/all").hasRole("ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/auth/users/all").hasRole("ADMIN")
 
                         // --- Private Endpoints: PATIENT only ---
                         .requestMatchers("/api/feedback/create").hasRole("PATIENT")

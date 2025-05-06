@@ -27,7 +27,9 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UsersService {
@@ -200,4 +202,18 @@ public class UsersService {
                 UserDTO.fromEntity(savedUser)
         ));
     }
+
+    public ResponseEntity<ResponseData<List<UserDTO>>> getAllUsers() {
+        List<Users> usersList = usersRepository.findAll();
+        List<UserDTO> userDTOs = usersList.stream()
+                .map(UserDTO::fromEntity)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                userDTOs
+        ));
+    }
+
 }

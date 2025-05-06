@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/auth")
 public class UsersController {
@@ -39,5 +41,10 @@ public class UsersController {
     @PatchMapping("/deactivate/{id}")
     public ResponseEntity<ResponseData<UserDTO>> updateStatus(@PathVariable Long id) {
         return usersService.updateUser(id);
+    }
+
+    @GetMapping("/users/all")
+    public ResponseEntity<ResponseData<List<UserDTO>>> getAllUsers() {
+        return usersService.getAllUsers();
     }
 }

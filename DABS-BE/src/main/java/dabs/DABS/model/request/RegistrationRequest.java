@@ -27,8 +27,8 @@ public class RegistrationRequest {
     @Pattern(regexp = "\\d{10}", message = "Phone number must contain only digits")  // Đảm bảo chỉ chứa số
     private String phone;
 
-    @NotBlank(message = "Role is required")  // Đảm bảo không rỗng
-    @Pattern(regexp = "^(ADMIN|USER|DOCTOR)$", message = "Role must be either ADMIN, USER, or DOCTOR")  // Đảm bảo role hợp lệ
+//    @NotBlank(message = "Role is required")  // Đảm bảo không rỗng
+//    @Pattern(regexp = "^(ADMIN|USER|DOCTOR)$", message = "Role must be either ADMIN, USER, or DOCTOR")  // Đảm bảo role hợp lệ
     private String role;
 
     // Ma except cho doctor
