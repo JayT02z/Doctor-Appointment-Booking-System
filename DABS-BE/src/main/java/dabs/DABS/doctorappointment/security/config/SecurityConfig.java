@@ -50,7 +50,8 @@ public class SecurityConfig {
                                          "/api/prescription/**",
                                          "/api/feedback/**",
                                          "/api/payment/**",
-                                        "/api/patient/create").permitAll()
+                                        "/api/patient/create",
+                                        "/api/appointments/doctor/**").permitAll()
 
                         // --- Private Endpoints: ADMIN only ---
                         .requestMatchers("/api/doctor/create").permitAll()

@@ -1,8 +1,10 @@
 package dabs.DABS.controller;
 
+import dabs.DABS.Enum.AppointmentStatus;
 import dabs.DABS.model.DTO.AppointmentDTO;
 import dabs.DABS.model.Response.ResponseData;
 import dabs.DABS.model.request.AppointmentForm;
+import dabs.DABS.model.request.SearchAppointmentByDoctor;
 import dabs.DABS.service.AppointmentService;
 import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,5 +45,10 @@ public class AppointmentController {
             @PathVariable("id") Long appointmentId,
             @Valid @RequestBody AppointmentForm appointmentForm) throws MessagingException {
         return appointmentService.updateAppointmentStatus(appointmentId, appointmentForm.getStatus());
+    }
+
+    @GetMapping("/doctor/status")
+    public ResponseEntity<ResponseData<List<AppointmentDTO>>> getAppointmentsByDoctorAndStatus(@RequestBody @Valid SearchAppointmentByDoctor search) {
+        return appointmentService.getAppointmentsByDoctorId(search.getDoctorId(), search.getStatus());
     }
 }
