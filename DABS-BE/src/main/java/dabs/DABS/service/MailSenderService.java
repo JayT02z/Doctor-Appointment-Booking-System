@@ -1,8 +1,10 @@
 package dabs.DABS.service;
 
+import dabs.DABS.Enum.AppointmentStatus;
 import dabs.DABS.Enum.Message;
 import dabs.DABS.Enum.StatusApplication;
 import dabs.DABS.model.DTO.PrescriptionDTO;
+import dabs.DABS.model.Entity.Appointment;
 import dabs.DABS.model.Response.ResponseData;
 import dabs.DABS.model.request.OTP;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,8 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
 import java.security.SecureRandom;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -81,6 +85,54 @@ public class MailSenderService {
                 StatusApplication.SUCCESS.getMessage(),
                 Message.OTP_REQUIRED.getMessage()
         ));
+    }
+
+    public void sendAppointmentConfirmationEmail(String toEmail, Appointment appointment) throws MessagingException {
+        // Format ngày và khung giờ
+        String formattedDate = appointment.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.forLanguageTag("vi")));
+        String formattedTime = appointment.getTimeSlot().getTimeRange();
+
+        // Tạo nội dung Thymeleaf
+        Context context = new Context();
+        context.setVariable("messageTitle", "Lịch hẹn của bạn đã được xác nhận.");
+        context.setVariable("appointmentDate", formattedDate);
+        context.setVariable("appointmentTime", formattedTime);
+
+        String htmlContent = templateEngine.process("ConfirmAppointmentTemplate", context);
+
+        // Gửi email
+        MimeMessage message = emailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+        helper.setTo(toEmail);
+        helper.setSubject("Xác nhận lịch hẹn bác ");
+        helper.setText(htmlContent, true); // true = HTML
+
+        emailSender.send(message);
+    }
+
+    public void sendAppointmentCancellationEmail(String toEmail, Appointment appointment) throws MessagingException {
+        // Format ngày và khung giờ
+        String formattedDate = appointment.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.forLanguageTag("vi")));
+        String formattedTime = appointment.getTimeSlot().getTimeRange();
+
+        // Tạo nội dung Thymeleaf
+        Context context = new Context();
+        context.setVariable("messageTitle", "Lịch hẹn của bạn đã bị hủy.");
+        context.setVariable("appointmentDate", formattedDate);
+        context.setVariable("appointmentTime", formattedTime);
+
+        String htmlContent = templateEngine.process("CancelAppointmentTemplate", context);
+
+        // Gửi email
+        MimeMessage message = emailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+        helper.setTo(toEmail);
+        helper.setSubject("Thông báo hủy lịch hẹn");
+        helper.setText(htmlContent, true); // true = HTML
+
+        emailSender.send(message);
     }
 
 

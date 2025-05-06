@@ -4,6 +4,7 @@ import dabs.DABS.model.DTO.AppointmentDTO;
 import dabs.DABS.model.Response.ResponseData;
 import dabs.DABS.model.request.AppointmentForm;
 import dabs.DABS.service.AppointmentService;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -40,7 +41,7 @@ public class AppointmentController {
     @PutMapping("/{id}/status")
     public ResponseEntity<ResponseData<AppointmentDTO>> updateAppointmentStatus(
             @PathVariable("id") Long appointmentId,
-            @Valid @RequestBody AppointmentForm appointmentForm) {
+            @Valid @RequestBody AppointmentForm appointmentForm) throws MessagingException {
         return appointmentService.updateAppointmentStatus(appointmentId, appointmentForm.getStatus());
     }
 }

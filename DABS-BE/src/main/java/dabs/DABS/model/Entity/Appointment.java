@@ -49,6 +49,7 @@ public class Appointment {
 
     @NotNull(message = "Trạng thái không được để trống")
     @Enumerated(EnumType.STRING)
+    @Column(length = 20)
     private AppointmentStatus status;
 
     @Size(max = 1000, message = "Ghi chú tối đa 1000 ký tự")

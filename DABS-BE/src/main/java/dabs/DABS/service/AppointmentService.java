@@ -14,6 +14,7 @@ import dabs.DABS.repository.AppointmentRepository;
 import dabs.DABS.repository.DoctorRepository;
 import dabs.DABS.repository.PatientRepository;
 import dabs.DABS.repository.ServiceRepository;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,8 @@ public class AppointmentService {
     private PatientRepository patientRepository;
     @Autowired
     private ServiceRepository serviceRepository;
+    @Autowired
+    private MailSenderService mailSenderService;
 
     public ResponseEntity<ResponseData<List<AppointmentDTO>>> getAllAppointments() {
         List<Appointment> appointments = appointmentRepository.findAll();
@@ -56,7 +59,7 @@ public class AppointmentService {
     }
 
     public ResponseEntity<ResponseData<AppointmentDTO>> addAppointment(AppointmentForm appointment) {
-        Doctor doctor = doctorRepository.findByUserId(appointment.getDoctorId())
+        Doctor doctor = doctorRepository.findById(appointment.getDoctorId())
                 .orElseThrow(() -> new RuntimeException("Doctor not found with userId: " + appointment.getDoctorId()));
 
         Patient patient = patientRepository.findById(appointment.getPatientId())
@@ -84,12 +87,19 @@ public class AppointmentService {
         ));
     }
 
-    public ResponseEntity<ResponseData<AppointmentDTO>> updateAppointmentStatus(Long appointmentId, AppointmentStatus newStatus) {
+    public ResponseEntity<ResponseData<AppointmentDTO>> updateAppointmentStatus(Long appointmentId, AppointmentStatus newStatus) throws MessagingException {
         Appointment appointment = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Appointment not found with id: " + appointmentId));
 
         appointment.setStatus(newStatus);
         appointmentRepository.save(appointment);
+
+        String email = appointment.getPatient().getUser().getEmail();
+        if (AppointmentStatus.CONFIRMED.equals(appointment.getStatus())) {
+            mailSenderService.sendAppointmentConfirmationEmail(email, appointment);
+        } else if (AppointmentStatus.CANCELLED.equals(appointment.getStatus())) {
+            mailSenderService.sendAppointmentCancellationEmail(email, appointment);
+        }
 
         AppointmentDTO updatedAppointmentDTO = new AppointmentDTO(appointment);
 
@@ -100,8 +110,4 @@ public class AppointmentService {
         ));
     }
 
-//    public ResponseEntity<ResponseData<List<AppointmentDTO>>> getAllAppointmentsByDoctorId(Long doctorId, AppointmentStatus status) {
-//        appointmentRepository.findAllByDoctorIdAndStatus(doctorId,status);
-//
-//    }
 }

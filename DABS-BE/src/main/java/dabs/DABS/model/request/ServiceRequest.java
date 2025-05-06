@@ -22,6 +22,5 @@ public class ServiceRequest {
 
     private Boolean isActive;
 
-    @NotEmpty(message = "Ít nhất phải có một slug ID")  // Đảm bảo danh sách slugId không rỗng
     private List<String> slugIds;
 }

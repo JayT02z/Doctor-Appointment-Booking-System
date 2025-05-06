@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>OTP Email</title>
+    <title>Hủy Lịch Hẹn</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -10,30 +10,33 @@
             margin: 0;
             padding: 0;
         }
+
         /* Header */
         .header {
-            background-color: #2196F3; /* Màu xanh dương nhẹ */
+            background-color: #2196F3;
             color: #ffffff;
             padding: 20px;
-            text-align: center;
             border-radius: 10px 10px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .header h1 {
+
+        .brand {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .title {
+            flex-grow: 1;
+            text-align: center;
             font-size: 24px;
             margin: 0;
         }
 
-        /* Thêm chữ DABS */
-        .header .brand {
-            font-size: 18px;
-            font-weight: bold;
-            color: #ffffff;
-            margin-top: 10px;
-        }
-
-        /* OTP container */
-        .otp-container {
-            max-width: 400px;
+        /* Content */
+        .content {
+            max-width: 500px;
             margin: 30px auto;
             padding: 30px 20px;
             background-color: #ffffff;
@@ -42,29 +45,22 @@
             text-align: center;
         }
 
-        .otp-container h2 {
+        .content h2 {
             color: #333333;
-            margin-bottom: 20px;
             font-size: 20px;
+            margin-bottom: 20px;
         }
 
-        .otp-code {
-            font-size: 32px;
-            font-weight: bold;
-            color: #2196F3; /* Màu xanh dương */
-            margin: 20px 0;
-            letter-spacing: 5px;
-        }
-
-        .otp-container p {
+        .content p {
             color: #555555;
             font-size: 16px;
-            margin-top: 20px;
+            margin: 10px 0;
+            line-height: 1.5;
         }
 
         /* Footer */
         .footer {
-            background-color: #2196F3; /* Màu xanh dương nhẹ */
+            background-color: #2196F3;
             color: #ffffff;
             text-align: center;
             padding: 10px;
@@ -81,19 +77,23 @@
 
 <!-- Header -->
 <div class="header">
-    <h1>Xác Minh Tài Khoản</h1>
+    <h1 class="title">Thông Báo Hủy Lịch Hẹn</h1>
+    <div style="width: 60px;"></div> <!-- khoảng trống để cân đối layout -->
 </div>
 
-<!-- OTP Container -->
-<div class="otp-container">
-    <h2>Mã OTP của bạn là:</h2>
-    <div class="otp-code" th:text="${otp}">123456</div> <!-- Thymeleaf sẽ thay thế giá trị otp -->
-    <p>Vui lòng nhập mã OTP này để hoàn tất việc xác minh tài khoản của bạn, mã sẽ hết hiệu lực sau 5 phút.</p>
+<!-- Content -->
+<div class="content">
+    <h2 th:text="${messageTitle}">Lịch hẹn của bạn đã bị hủy.</h2>
+    <p>Chúng tôi rất tiếc vì sự bất tiện này. Hãy đặt lại nếu cần hỗ trợ thêm.</p>
+    <p>
+        <strong>Ngày khám:</strong> <span th:text="${appointmentDate}">dd/MM/yyyy</span><br/>
+        <strong>Khung giờ:</strong> <span th:text="${appointmentTime}">HH:mm - HH:mm</span>
+    </p>
 </div>
 
 <!-- Footer -->
 <div class="footer">
-    <p>&copy;DABS copyright.</p>
+    <p>&copy; DABS copyright.</p>
 </div>
 
 </body>

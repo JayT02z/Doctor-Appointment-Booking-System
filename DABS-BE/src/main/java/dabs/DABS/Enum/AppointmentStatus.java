@@ -2,7 +2,7 @@ package dabs.DABS.Enum;
 
 public enum AppointmentStatus {
     PENDING,
-//    CONFIRMED,
+    CONFIRMED,
     CANCELLED,
     COMPLETED
 }

@@ -49,17 +49,18 @@ public class SecurityConfig {
                                          "/api/medicine/**",
                                          "/api/prescription/**",
                                          "/api/feedback/**",
-                                         "/api/payment/**").permitAll()
+                                         "/api/payment/**",
+                                        "/api/patient/create").permitAll()
 
                         // --- Private Endpoints: ADMIN only ---
-                        .requestMatchers("/api/doctor/create").hasRole("ADMIN")
+                        .requestMatchers("/api/doctor/create").permitAll()
                         .requestMatchers("/api/services/all").hasRole("ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/auth/users/all").hasRole("ADMIN")
 
                         // --- Private Endpoints: PATIENT only ---
                         .requestMatchers("/api/feedback/create").hasRole("PATIENT")
-                        .requestMatchers("/api/patient/create").hasRole("PATIENT")
+//                        .requestMatchers("/api/patient/create").hasRole("PATIENT")
 
                         // --- Private Endpoints: PATIENT or ADMIN ---
                         .requestMatchers("/api/patient/**").hasAnyRole("PATIENT", "ADMIN")
