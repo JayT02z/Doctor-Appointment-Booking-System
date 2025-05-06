@@ -53,7 +53,6 @@ public class SecurityConfig {
 
                         // --- Private Endpoints: ADMIN only ---
                         .requestMatchers("/api/doctor/create").hasRole("ADMIN")
-                        .requestMatchers("/api/patient/create").hasRole("ADMIN")
                         .requestMatchers("/api/services/all").hasRole("ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
