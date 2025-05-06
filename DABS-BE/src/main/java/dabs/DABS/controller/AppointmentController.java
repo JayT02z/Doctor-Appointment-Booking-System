@@ -51,4 +51,9 @@ public class AppointmentController {
     public ResponseEntity<ResponseData<List<AppointmentDTO>>> getAppointmentsByDoctorAndStatus(@RequestBody @Valid SearchAppointmentByDoctor search) {
         return appointmentService.getAppointmentsByDoctorId(search.getDoctorId(), search.getStatus());
     }
+
+    @GetMapping("/patient/status")
+    public ResponseEntity<ResponseData<List<AppointmentDTO>>> getAppointmentsByPatientAndStatus(@RequestBody @Valid SearchAppointmentByDoctor search) {
+        return appointmentService.getAppointmentsByDoctorId(search.getDoctorId(), search.getStatus());
+    }
 }

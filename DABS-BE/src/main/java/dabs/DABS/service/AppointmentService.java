@@ -122,4 +122,17 @@ public class AppointmentService {
         ));
 
     }
+
+    public ResponseEntity<ResponseData<List<AppointmentDTO>>> getAppointmentsByPatientId(Long doctorId, AppointmentStatus status) {
+        List<Appointment> appointments = appointmentRepository.findAllByPatientIdAndStatus(doctorId, status);
+        List<AppointmentDTO> appointmentDTOs = appointments.stream()
+                .map(AppointmentDTO::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                appointmentDTOs
+        ));
+
+    }
 }

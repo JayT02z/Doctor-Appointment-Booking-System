@@ -61,7 +61,7 @@ public class DoctorService {
         ));
     }
 
-    public ResponseEntity<ResponseData<Doctor>> updateDoctor(Long id, UpdateDoctorForm updateDoctorForm) {
+    public ResponseEntity<ResponseData<DoctorDTO>> updateDoctor(Long id, UpdateDoctorForm updateDoctorForm) {
         Doctor doctor = doctorRepository.findById(id).orElse(null);
 
         doctor.setFullName(updateDoctorForm.getFullName());
@@ -70,12 +70,13 @@ public class DoctorService {
         doctor.setExperience(updateDoctorForm.getExperience());
 //        doctor.setRating(updateDoctorForm.getRating());
         doctor.setHospital(updateDoctorForm.getHospital());
+        DoctorDTO doctorDTO = DoctorDTO.fromEntity(doctor);
 
         Doctor updatedDoctor = doctorRepository.save(doctor);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
                 StatusApplication.SUCCESS.getMessage(),
-                updatedDoctor
+                doctorDTO
         ));
     }
 
