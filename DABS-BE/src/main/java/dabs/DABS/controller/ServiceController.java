@@ -1,7 +1,9 @@
 package dabs.DABS.controller;
 
+import dabs.DABS.model.DTO.DoctorDTO;
 import dabs.DABS.model.Entity.ServiceEntity;
 import dabs.DABS.model.Response.ResponseData;
+import dabs.DABS.model.request.CreateServiceForm;
 import dabs.DABS.model.request.ServiceRequest;
 import dabs.DABS.service.ServiceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,5 +38,15 @@ public class ServiceController {
     @GetMapping("/{id}")
     public ResponseEntity<ResponseData<ServiceEntity>> getServiceById(@PathVariable Long id) {
         return serviceService.getServiceById(id);
+    }
+
+    @PutMapping("/inactive/{id}")
+    public ResponseEntity<ResponseData<Void>> inactiveService(@PathVariable Long id) {
+        return serviceService.deleteService(id);
+    }
+
+    @PostMapping("/doctor/addservice")
+    public ResponseEntity<ResponseData<DoctorDTO>> addServicetoDoctor(@Valid @RequestBody CreateServiceForm request) {
+        return  serviceService.addServicesToDoctor(request);
     }
 }

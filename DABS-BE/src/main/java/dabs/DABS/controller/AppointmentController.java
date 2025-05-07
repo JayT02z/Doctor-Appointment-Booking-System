@@ -4,6 +4,7 @@ import dabs.DABS.Enum.AppointmentStatus;
 import dabs.DABS.model.DTO.AppointmentDTO;
 import dabs.DABS.model.Response.ResponseData;
 import dabs.DABS.model.request.AppointmentForm;
+import dabs.DABS.model.request.AppointmentStatusForm;
 import dabs.DABS.model.request.SearchAppointmentByDoctor;
 import dabs.DABS.service.AppointmentService;
 import jakarta.mail.MessagingException;
@@ -40,11 +41,11 @@ public class AppointmentController {
         return appointmentService.getAppointmentById(id);
     }
 
-    @PutMapping("/{id}/status")
+    @PutMapping("/status/{id}")
     public ResponseEntity<ResponseData<AppointmentDTO>> updateAppointmentStatus(
             @PathVariable("id") Long appointmentId,
-            @Valid @RequestBody AppointmentForm appointmentForm) throws MessagingException {
-        return appointmentService.updateAppointmentStatus(appointmentId, appointmentForm.getStatus());
+            @Valid @RequestBody AppointmentStatusForm status) throws MessagingException {
+        return appointmentService.updateAppointmentStatus(appointmentId, status.getStatus());
     }
 
     @GetMapping("/doctor/{doctorId}")

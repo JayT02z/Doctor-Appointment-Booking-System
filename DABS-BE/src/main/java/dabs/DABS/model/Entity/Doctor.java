@@ -45,6 +45,6 @@ public class Doctor {
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Schedule> availability;
 
-    //    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
-    //    private List<ServiceEntity> serviceId;
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
+    private List<ServiceEntity> service;
 }

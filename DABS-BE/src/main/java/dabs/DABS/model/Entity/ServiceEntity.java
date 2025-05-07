@@ -1,5 +1,6 @@
 package dabs.DABS.model.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
@@ -37,4 +38,9 @@ public class ServiceEntity {
     @NotNull(message = "Trạng thái hoạt động không được để trống")
     @Column(nullable = false)
     private Boolean isActive = true;
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "doctor_id")
+    private Doctor doctor;
 }

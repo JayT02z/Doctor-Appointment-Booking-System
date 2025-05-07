@@ -3,6 +3,9 @@ package dabs.DABS.model.DTO;
 import dabs.DABS.model.Entity.Doctor;
 import lombok.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Getter
 @Setter
 @Builder
@@ -16,6 +19,7 @@ public class DoctorDTO {
     private String qualification;
     private String hospital;
     private Long userId;
+    private List<ServiceDTO> services;
 
     public static DoctorDTO fromEntity(Doctor doctor) {
         return DoctorDTO.builder()
@@ -26,6 +30,13 @@ public class DoctorDTO {
                 .qualification(doctor.getQualification())
                 .hospital(doctor.getHospital())
                 .userId(doctor.getUser() != null ? doctor.getUser().getId() : null)
+                .services(
+                        doctor.getService() != null
+                                ? doctor.getService().stream()
+                                .map(ServiceDTO::fromEntity)
+                                .collect(Collectors.toList())
+                                : null
+                )
                 .build();
     }
 }
