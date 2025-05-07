@@ -112,4 +112,28 @@ public class ServiceService {
         ));
     }
 
+    public ResponseEntity<ResponseData<DoctorDTO>> updateDoctorServices(CreateServiceForm request) {
+        Doctor doctor = doctorRepository.findById(request.getDoctorId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy bác sĩ với ID: " + request.getDoctorId()));
+        List<ServiceEntity> newServices = serviceRepository.findAllById(request.getServices());
+        newServices.forEach(service -> service.setDoctor(doctor));
+        List<ServiceEntity> currentServices = doctor.getService();
+        if (currentServices != null) {
+            currentServices.forEach(service -> service.setDoctor(null));
+        }
+
+        doctor.setService(newServices);
+
+        doctorRepository.save(doctor);
+
+        return ResponseEntity.ok(
+                new ResponseData<>(
+                        StatusApplication.SUCCESS.getCode(),
+                        "Cập nhật dịch vụ cho bác sĩ thành công",
+                        DoctorDTO.fromEntity(doctor)
+                )
+        );
+    }
+
+
 }

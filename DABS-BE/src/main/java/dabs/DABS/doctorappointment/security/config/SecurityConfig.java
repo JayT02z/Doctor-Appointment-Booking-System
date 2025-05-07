@@ -57,7 +57,9 @@ public class SecurityConfig {
                                         "/api/services/inactive/**",
                                 "/api/appointment/status/**",
                                 "/api/services/doctor/addservice",
-                                "/api/services/create").permitAll()
+                                "/api/services/create",
+                                "/api/services/doctor/updateservice",
+                                "/api/schedules/doctor/updateschedule").permitAll()
 
                         // --- Private Endpoints: ADMIN only ---
                         .requestMatchers("/api/doctor/create").permitAll()

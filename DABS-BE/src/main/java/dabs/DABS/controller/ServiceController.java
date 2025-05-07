@@ -49,4 +49,9 @@ public class ServiceController {
     public ResponseEntity<ResponseData<DoctorDTO>> addServicetoDoctor(@Valid @RequestBody CreateServiceForm request) {
         return  serviceService.addServicesToDoctor(request);
     }
+
+    @PostMapping("/doctor/updateservice")
+    public ResponseEntity<ResponseData<DoctorDTO>> updateServicetoDoctor(@Valid @RequestBody CreateServiceForm request) {
+        return  serviceService.updateDoctorServices(request);
+    }
 }

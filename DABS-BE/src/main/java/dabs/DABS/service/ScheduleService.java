@@ -3,6 +3,7 @@ package dabs.DABS.service;
 import dabs.DABS.Enum.DayOfWeek;
 import dabs.DABS.Enum.StatusApplication;
 import dabs.DABS.Enum.TimeSlot;
+import dabs.DABS.model.DTO.DoctorDTO;
 import dabs.DABS.model.Entity.Doctor;
 import dabs.DABS.model.Entity.Schedule;
 import dabs.DABS.model.Response.ResponseData;
@@ -98,7 +99,6 @@ public class ScheduleService {
     public ResponseEntity<ResponseData<List<Map<String, Object>>>> getSchedulesDay(DayOfWeek day) {
         List<Schedule> schedules = scheduleRepository.findAllByDayOfWeek(day);
 
-        // Chuyển danh sách Schedule thành danh sách Map để bao gồm thông tin Doctor
         List<Map<String, Object>> scheduleList = schedules.stream().map(schedule -> {
             Map<String, Object> result = new HashMap<>();
             result.put("scheduleId", schedule.getId());
@@ -123,6 +123,39 @@ public class ScheduleService {
                         StatusApplication.SUCCESS.getMessage(),
                         scheduleList));
     }
+
+    public ResponseEntity<ResponseData<DoctorDTO>> updateSchedule(CreateScheduleRequest request) {
+        // Tìm bác sĩ theo doctorId
+        Doctor doctor = doctorRepository.findById(request.getDoctorId())
+                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+
+        // Cập nhật danh sách lịch làm việc mới từ request
+        List<Schedule> schedules = request.getSchedules().stream()
+                .map(scheduleRequest -> {
+                    Schedule schedule = new Schedule();
+                    schedule.setDayOfWeek(scheduleRequest.getDayOfWeek());
+                    schedule.setDate(scheduleRequest.getDate());
+                    schedule.setTimeSlot(scheduleRequest.getTimeSlot());
+                    schedule.setAvailable(scheduleRequest.isAvailable());
+                    schedule.setDoctor(doctor);
+                    return schedule;
+                })
+                .collect(Collectors.toList());
+
+        // Lưu tất cả lịch làm việc mới vào cơ sở dữ liệu
+        doctor.setAvailability(schedules);
+
+
+        // Trả về phản hồi thành công
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                "Cập nhật lịch cho bác sĩ thành công",
+                null
+        ));
+    }
+
+
+
 
 
 //    //Get list doctor schedule

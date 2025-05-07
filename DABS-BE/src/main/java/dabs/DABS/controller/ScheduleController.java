@@ -3,6 +3,7 @@ package dabs.DABS.controller;
 
 import dabs.DABS.Enum.DayOfWeek;
 import dabs.DABS.Enum.TimeSlot;
+import dabs.DABS.model.DTO.DoctorDTO;
 import dabs.DABS.model.Entity.Doctor;
 import dabs.DABS.model.Entity.Schedule;
 import dabs.DABS.model.Response.ResponseData;
@@ -61,6 +62,11 @@ public class ScheduleController {
     @GetMapping("/dayschedules/{day}")
     public ResponseEntity<ResponseData<List<Map<String, Object>>>> getDaySchedule(@PathVariable DayOfWeek day) {
         return scheduleService.getSchedulesDay(day);
+    }
+
+    @PostMapping("/doctor/updateschedule")
+    public  ResponseEntity<ResponseData<DoctorDTO>> updateDoctorSchedule(@RequestBody @Valid CreateScheduleRequest createScheduleRequest) {
+        return scheduleService.updateSchedule(createScheduleRequest);
     }
 }
 
