@@ -25,7 +25,7 @@ public class DoctorController {
         return doctorService.getAllDoctors();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/doctor/{id}")
     public ResponseEntity<ResponseData<DoctorDTO>> getDoctorById(@PathVariable Long id) {
         return doctorService.getDoctorById(id);
     }
@@ -38,5 +38,10 @@ public class DoctorController {
     @PostMapping("/create")
     public ResponseEntity<ResponseData<Doctor>> createDoctor(@Valid @RequestBody RegisterDoctorForm doctor) {
         return doctorService.addDoctor(doctor);
+    }
+
+    @GetMapping("/user/{id}")
+    public ResponseEntity<ResponseData<DoctorDTO>> getDoctorByUserId(@PathVariable Long id) {
+        return doctorService.getDoctorByUserId(id);
     }
 }

@@ -136,4 +136,22 @@ public ResponseEntity<ResponseData<Doctor>> addDoctor(RegisterDoctorForm doctorF
             savedDoctor
     ));
 }
+    public ResponseEntity<ResponseData<DoctorDTO>> getDoctorByUserId(long id) {
+        Doctor doctor = doctorRepository.findDoctorByUserId(id).get();
+
+        if (doctor == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseData<>(
+                    ErrorCode.USER_NOT_FOUND.getCode(),
+                    "Doctor not found",
+                    null
+            ));
+        }
+
+        DoctorDTO doctorDTO = DoctorDTO.fromEntity(doctor);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                doctorDTO
+        ));
+    }
 }

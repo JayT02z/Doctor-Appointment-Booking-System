@@ -110,8 +110,8 @@ public class AppointmentService {
         ));
     }
 
-    public ResponseEntity<ResponseData<List<AppointmentDTO>>> getAppointmentsByDoctorId(Long doctorId, AppointmentStatus status) {
-        List<Appointment> appointments = appointmentRepository.findAllByDoctorIdAndStatus(doctorId, status);
+    public ResponseEntity<ResponseData<List<AppointmentDTO>>> getAppointmentsByDoctorId(Long doctorId) {
+        List<Appointment> appointments = appointmentRepository.findAllByDoctorId(doctorId);
         List<AppointmentDTO> appointmentDTOs = appointments.stream()
                 .map(AppointmentDTO::new)
                 .collect(Collectors.toList());
@@ -123,8 +123,8 @@ public class AppointmentService {
 
     }
 
-    public ResponseEntity<ResponseData<List<AppointmentDTO>>> getAppointmentsByPatientId(Long doctorId, AppointmentStatus status) {
-        List<Appointment> appointments = appointmentRepository.findAllByPatientIdAndStatus(doctorId, status);
+    public ResponseEntity<ResponseData<List<AppointmentDTO>>> getAppointmentsByPatientId(Long doctorId) {
+        List<Appointment> appointments = appointmentRepository.findAllByPatientId(doctorId);
         List<AppointmentDTO> appointmentDTOs = appointments.stream()
                 .map(AppointmentDTO::new)
                 .collect(Collectors.toList());

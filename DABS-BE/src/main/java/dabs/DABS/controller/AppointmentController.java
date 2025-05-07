@@ -47,13 +47,13 @@ public class AppointmentController {
         return appointmentService.updateAppointmentStatus(appointmentId, appointmentForm.getStatus());
     }
 
-    @GetMapping("/doctor/status")
-    public ResponseEntity<ResponseData<List<AppointmentDTO>>> getAppointmentsByDoctorAndStatus(@RequestBody @Valid SearchAppointmentByDoctor search) {
-        return appointmentService.getAppointmentsByDoctorId(search.getDoctorId(), search.getStatus());
+    @GetMapping("/doctor/{doctorId}")
+    public ResponseEntity<ResponseData<List<AppointmentDTO>>> getAppointmentsByDoctorAndStatus(@PathVariable Long doctorId) {
+        return appointmentService.getAppointmentsByDoctorId(doctorId);
     }
 
-    @GetMapping("/patient/status")
-    public ResponseEntity<ResponseData<List<AppointmentDTO>>> getAppointmentsByPatientAndStatus(@RequestBody @Valid SearchAppointmentByDoctor search) {
-        return appointmentService.getAppointmentsByDoctorId(search.getDoctorId(), search.getStatus());
+    @GetMapping("/patient/{patientId}")
+    public ResponseEntity<ResponseData<List<AppointmentDTO>>> getAppointmentsByPatientAndStatus(@PathVariable Long patientId) {
+        return appointmentService.getAppointmentsByPatientId(patientId);
     }
 }
