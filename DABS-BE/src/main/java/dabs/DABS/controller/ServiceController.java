@@ -1,6 +1,7 @@
 package dabs.DABS.controller;
 
 import dabs.DABS.model.DTO.DoctorDTO;
+import dabs.DABS.model.DTO.ServiceDTO;
 import dabs.DABS.model.Entity.ServiceEntity;
 import dabs.DABS.model.Response.ResponseData;
 import dabs.DABS.model.request.CreateServiceForm;
@@ -53,5 +54,10 @@ public class ServiceController {
     @PostMapping("/doctor/updateservice")
     public ResponseEntity<ResponseData<DoctorDTO>> updateServicetoDoctor(@Valid @RequestBody CreateServiceForm request) {
         return  serviceService.updateDoctorServices(request);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<ResponseData<List<ServiceDTO>>> searchService(@RequestParam String keyword) {
+        return serviceService.searchServices(keyword);
     }
 }

@@ -1,5 +1,6 @@
 package dabs.DABS.service;
 import dabs.DABS.model.DTO.DoctorDTO;
+import dabs.DABS.model.DTO.ServiceDTO;
 import dabs.DABS.model.Entity.Doctor;
 import dabs.DABS.model.request.CreateServiceForm;
 import dabs.DABS.repository.DoctorRepository;
@@ -135,5 +136,16 @@ public class ServiceService {
         );
     }
 
+    public ResponseEntity<ResponseData<List<ServiceDTO>>> searchServices(String keyword) {
+        List<ServiceEntity> services = serviceRepository.findByNameContainingIgnoreCase(keyword);
+        List<ServiceDTO> dtoList = services.stream()
+                .map(ServiceDTO::fromEntity)
+                .toList();
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                dtoList
+        ));
+    }
 
 }

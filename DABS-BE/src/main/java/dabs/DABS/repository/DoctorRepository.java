@@ -19,4 +19,6 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
     List<Doctor> findAllByServiceId(@Param("serviceId") Long serviceId);
 
     Optional<Doctor> findByUserId(Long userId);
+
+    List<Doctor> findByFullNameContainingIgnoreCase(String keyword);
 }

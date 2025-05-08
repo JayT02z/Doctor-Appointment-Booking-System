@@ -49,4 +49,9 @@ public class DoctorController {
     public ResponseEntity<ResponseData<List<DoctorDTO>>> getDoctorByServiceId(@PathVariable Long id) {
         return doctorService.getDoctorByServiceId(id);
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<ResponseData<List<DoctorDTO>>> searchDoctor(@RequestParam("keyword") String keyword) {
+        return doctorService.SearchDoctorbyFullname(keyword);
+    }
 }

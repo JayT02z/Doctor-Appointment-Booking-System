@@ -169,4 +169,16 @@ public ResponseEntity<ResponseData<Doctor>> addDoctor(RegisterDoctorForm doctorF
                 dtoList
         ));
     }
+
+    public  ResponseEntity<ResponseData<List<DoctorDTO>>> SearchDoctorbyFullname(String keyword) {
+        List<Doctor> doctors = doctorRepository.findByFullNameContainingIgnoreCase(keyword);
+        List<DoctorDTO> dtoList = doctors.stream()
+                .map(DoctorDTO::fromEntity)
+                .toList();
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                dtoList
+        ));
+    }
 }
