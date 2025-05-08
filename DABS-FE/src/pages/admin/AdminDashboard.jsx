@@ -15,7 +15,14 @@ const AdminDashboard = () => {
   const [doctors, setDoctors] = useState([]);
   const [patients, setPatients] = useState([]);
   const [appointments, setAppointments] = useState([]);
+  const [users, setUsers] = useState([]);
   const [activeSection, setActiveSection] = useState(null);
+
+  const itemsPerPage = 15;
+  const [doctorPage, setDoctorPage] = useState(1);
+  const [patientPage, setPatientPage] = useState(1);
+  const [appointmentPage, setAppointmentPage] = useState(1);
+  const [userPage, setUserPage] = useState(1);
 
   useEffect(() => {
     fetchDashboardStats();
@@ -23,7 +30,7 @@ const AdminDashboard = () => {
 
   const fetchDashboardStats = async () => {
     try {
-      const [doctorsRes, patientsRes, appointmentsRes] = await Promise.all([
+      const [doctorsRes, patientsRes, appointmentsRes, usersRes] = await Promise.all([
         axios.get("http://localhost:8080/api/doctor/all", {
           headers: { Authorization: `Bearer ${token}` },
         }),
@@ -33,15 +40,20 @@ const AdminDashboard = () => {
         axios.get("http://localhost:8080/api/appointment/all", {
           headers: { Authorization: `Bearer ${token}` },
         }),
+        axios.get("http://localhost:8080/api/v1/auth/users/all", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       ]);
 
       const doctors = doctorsRes.data.data || [];
       const patients = patientsRes.data.data || [];
       const appointments = appointmentsRes.data.data || [];
+      const users = usersRes.data.data || [];
 
       setDoctors(doctors);
       setPatients(patients);
       setAppointments(appointments);
+      setUsers(users);
 
       const activeAppointments = appointments.filter(
           (appt) => appt.status === "ACTIVE"
@@ -61,6 +73,25 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeletePatient = async (id) => {
+    try {
+      await axios.delete(`http://localhost:8080/api/patient/delete/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      toast.success("Patient deleted successfully");
+      setPatients(patients.filter((patient) => patient.id !== id));
+      setStats((prevStats) => ({
+        ...prevStats,
+        totalPatients: prevStats.totalPatients - 1,
+      }));
+    } catch (error) {
+      console.error("Error deleting patient:", error);
+      toast.error("Failed to delete patient");
+    }
+  };
+
   if (loading) {
     return (
         <div className="flex justify-center items-center h-64">
@@ -68,6 +99,11 @@ const AdminDashboard = () => {
         </div>
     );
   }
+
+  const paginatedDoctors = doctors.slice((doctorPage - 1) * itemsPerPage, doctorPage * itemsPerPage);
+  const paginatedPatients = patients.slice((patientPage - 1) * itemsPerPage, patientPage * itemsPerPage);
+  const paginatedAppointments = appointments.slice((appointmentPage - 1) * itemsPerPage, appointmentPage * itemsPerPage);
+  const paginatedUsers = users.slice((userPage - 1) * itemsPerPage, userPage * itemsPerPage);
 
   return (
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
@@ -98,27 +134,23 @@ const AdminDashboard = () => {
 
           {/* Quick Actions */}
           <div className="mt-8">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Quick Actions
-            </h3>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <button
-                  onClick={() => setActiveSection("doctors")}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-              >
-                Manage Doctors
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <button onClick={() => setActiveSection("doctors")}
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700">Manage
+                Doctors
               </button>
-              <button
-                  onClick={() => setActiveSection("patients")}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-              >
-                Manage Patients
+              <button onClick={() => setActiveSection("patients")}
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700">Manage
+                Patients
               </button>
-              <button
-                  onClick={() => setActiveSection("appointments")}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-              >
-                Manage Appointments
+              <button onClick={() => setActiveSection("appointments")}
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700">Manage
+                Appointments
+              </button>
+              <button onClick={() => setActiveSection("users")}
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700">Manage
+                Users
               </button>
             </div>
           </div>
@@ -151,7 +183,7 @@ const AdminDashboard = () => {
                     </tr>
                     </thead>
                     <tbody>
-                    {doctors.map((doctor) => (
+                    {paginatedDoctors.map((doctor) => (
                         <tr key={doctor.id}>
                           <td className="px-6 py-4 border-b text-sm text-gray-700">
                             {doctor.fullName}
@@ -173,6 +205,15 @@ const AdminDashboard = () => {
                     </tbody>
                   </table>
                 </div>
+                <div className="flex justify-end mt-4 space-x-2">
+                  <button onClick={() => setDoctorPage((p) => Math.max(1, p - 1))} disabled={doctorPage === 1}
+                          className="px-3 py-1 border rounded disabled:opacity-50">Prev
+                  </button>
+                  <button onClick={() => setDoctorPage((p) => p + 1)}
+                          disabled={doctorPage * itemsPerPage >= doctors.length}
+                          className="px-3 py-1 border rounded disabled:opacity-50">Next
+                  </button>
+                </div>
               </div>
           )}
 
@@ -180,13 +221,52 @@ const AdminDashboard = () => {
           {activeSection === "patients" && (
               <div className="mt-8">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Patients List</h3>
-                <ul className="bg-white shadow rounded divide-y divide-gray-200">
-                  {patients.map((patient) => (
-                      <li key={patient.id} className="px-4 py-3 text-gray-700">
-                        {patient.name}
-                      </li>
-                  ))}
-                </ul>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full bg-white border border-gray-200">
+                    <thead>
+                    <tr className="bg-gray-50">
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Username</th>
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Date of
+                        Birth
+                      </th>
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Gender</th>
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Address</th>
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Medical
+                        History
+                      </th>
+                      <th className="px-6 py-3 border-b"></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {paginatedPatients.map((patient) => (
+                        <tr key={patient.id}>
+                          <td className="px-6 py-4 border-b text-sm text-gray-700">{patient.username}</td>
+                          <td className="px-6 py-4 border-b text-sm text-gray-700">{patient.dob?.join("-")}</td>
+                          <td className="px-6 py-4 border-b text-sm text-gray-700">{patient.gender}</td>
+                          <td className="px-6 py-4 border-b text-sm text-gray-700">{patient.address}</td>
+                          <td className="px-6 py-4 border-b text-sm text-gray-700">{patient.medicalHistory}</td>
+                          <td className="px-6 py-4 border-b text-sm text-right">
+                            <button
+                                onClick={() => handleDeletePatient(patient.id)}
+                                className="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 rounded"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                    ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="flex justify-end mt-4 space-x-2">
+                  <button onClick={() => setPatientPage((p) => Math.max(1, p - 1))} disabled={patientPage === 1}
+                          className="px-3 py-1 border rounded disabled:opacity-50">Prev
+                  </button>
+                  <button onClick={() => setPatientPage((p) => p + 1)}
+                          disabled={patientPage * itemsPerPage >= patients.length}
+                          className="px-3 py-1 border rounded disabled:opacity-50">Next
+                  </button>
+                </div>
               </div>
           )}
 
@@ -194,13 +274,92 @@ const AdminDashboard = () => {
           {activeSection === "appointments" && (
               <div className="mt-8">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Appointments List</h3>
-                <ul className="bg-white shadow rounded divide-y divide-gray-200">
-                  {appointments.map((appt) => (
-                      <li key={appt.id} className="px-4 py-3 text-gray-700">
-                        Appointment #{appt.id} - Status: {appt.status}
-                      </li>
-                  ))}
-                </ul>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full bg-white border border-gray-200">
+                    <thead>
+                    <tr className="bg-gray-50">
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Patient</th>
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Doctor</th>
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Specialization</th>
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Service</th>
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Date</th>
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Time
+                        Slot
+                      </th>
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Status</th>
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Notes</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {paginatedAppointments.map((appt) => (
+                        <tr key={appt.id}>
+                          <td className="px-6 py-4 border-b text-sm text-gray-700">{appt.patientName}</td>
+                          <td className="px-6 py-4 border-b text-sm text-gray-700">{appt.doctorName}</td>
+                          <td className="px-6 py-4 border-b text-sm text-gray-700">{appt.specialization}</td>
+                          <td className="px-6 py-4 border-b text-sm text-gray-700">{appt.serviceName}</td>
+                          <td className="px-6 py-4 border-b text-sm text-gray-700">
+                            {appt.date?.join("-")}
+                          </td>
+                          <td className="px-6 py-4 border-b text-sm text-gray-700">{appt.timeSlot}</td>
+                          <td className="px-6 py-4 border-b text-sm text-gray-700">{appt.status}</td>
+                          <td className="px-6 py-4 border-b text-sm text-gray-700">{appt.notes}</td>
+                        </tr>
+                    ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="flex justify-end mt-4 space-x-2">
+                  <button onClick={() => setAppointmentPage((p) => Math.max(1, p - 1))} disabled={appointmentPage === 1}
+                          className="px-3 py-1 border rounded disabled:opacity-50">Prev
+                  </button>
+                  <button onClick={() => setAppointmentPage((p) => p + 1)}
+                          disabled={appointmentPage * itemsPerPage >= appointments.length}
+                          className="px-3 py-1 border rounded disabled:opacity-50">Next
+                  </button>
+                </div>
+              </div>
+          )}
+
+          {/* Users List */}
+          {activeSection === "users" && (
+              <div className="mt-8">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Users List</h3>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full bg-white border border-gray-200">
+                    <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Username</th>
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Email</th>
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Phone</th>
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Role</th>
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Created
+                        At
+                      </th>
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {paginatedUsers.map((user) => (
+                        <tr key={user.id}>
+                          <td className="px-6 py-4 border-b text-sm text-gray-700">{user.username}</td>
+                          <td className="px-6 py-4 border-b text-sm text-gray-700">{user.email}</td>
+                          <td className="px-6 py-4 border-b text-sm text-gray-700">{user.phone}</td>
+                          <td className="px-6 py-4 border-b text-sm text-gray-700">{user.role}</td>
+                          <td className="px-6 py-4 border-b text-sm text-gray-700">{user.createdAt?.slice(0, 3).join("-")}</td>
+                          <td className="px-6 py-4 border-b text-sm text-gray-700">{user.status}</td>
+                        </tr>
+                    ))}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="flex justify-end mt-4 space-x-2">
+                  <button onClick={() => setUserPage((p) => Math.max(1, p - 1))} disabled={userPage === 1}
+                          className="px-3 py-1 border rounded disabled:opacity-50">Prev
+                  </button>
+                  <button onClick={() => setUserPage((p) => p + 1)} disabled={userPage * itemsPerPage >= users.length}
+                          className="px-3 py-1 border rounded disabled:opacity-50">Next
+                  </button>
+                </div>
               </div>
           )}
         </div>
