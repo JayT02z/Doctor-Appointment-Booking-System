@@ -5,6 +5,7 @@ import dabs.DABS.Enum.Message;
 import dabs.DABS.Enum.StatusApplication;
 import dabs.DABS.model.DTO.PrescriptionDTO;
 import dabs.DABS.model.Entity.Appointment;
+import dabs.DABS.model.Entity.Prescription;
 import dabs.DABS.model.Response.ResponseData;
 import dabs.DABS.model.request.OTP;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,6 +136,36 @@ public class MailSenderService {
         emailSender.send(message);
     }
 
+    public ResponseEntity<ResponseData<Void>> sendPrescriptionEmail(PrescriptionDTO dto, String toEmail) throws MessagingException {
+        MimeMessage message = emailSender.createMimeMessage();
 
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+        helper.setTo(toEmail);
+        helper.setSubject("Đơn thuốc từ bác sĩ " + dto.getDoctorName());
+        helper.setFrom("your-email@gmail.com");
+
+        Context context = new Context();
+        context.setVariable("id", dto.getId());
+        context.setVariable("dosage", dto.getDosage());
+        context.setVariable("duration", dto.getDuration());
+        context.setVariable("frequency", dto.getFrequency());
+        context.setVariable("description", dto.getDescription());
+        context.setVariable("doctorName", dto.getDoctorName());
+        context.setVariable("patientName", dto.getPatientName());
+        context.setVariable("medicineNames", dto.getMedicineNames());
+
+        String htmlContent = templateEngine.process("PrescriptionTemplate.html", context);
+        helper.setText(htmlContent, true);
+
+        emailSender.send(message);
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                null
+        ));
+    }
 }
+
 

@@ -33,7 +33,7 @@ public class MedicineService {
         ));
     }
 
-    public ResponseEntity<ResponseData<Medicine>> updateMedicine(String id, MedicineRequest request) {
+    public ResponseEntity<ResponseData<Medicine>> updateMedicine(Long id, MedicineRequest request) {
         Medicine medicine = medicineRepository.findById(id).orElseThrow(() ->
             new RuntimeException("Medicine not found")
         );
@@ -50,7 +50,7 @@ public class MedicineService {
         ));
     }
 
-    public ResponseEntity<ResponseData<Void>> deleteMedicine(String id) {
+    public ResponseEntity<ResponseData<Void>> deleteMedicine(Long id) {
         Medicine medicine = medicineRepository.findById(id).orElseThrow(() ->
             new RuntimeException("Medicine not found")
         );
@@ -64,7 +64,7 @@ public class MedicineService {
         ));
     }
 
-    public ResponseEntity<ResponseData<Medicine>> getMedicineById(String id) {
+    public ResponseEntity<ResponseData<Medicine>> getMedicineById(Long id) {
         Optional<Medicine> medicine = medicineRepository.findById(id);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),

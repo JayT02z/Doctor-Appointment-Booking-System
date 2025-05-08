@@ -70,7 +70,7 @@ public class PrescriptionService {
         ));
     }
 
-    public ResponseEntity<ResponseData<PrescriptionDTO>> updatePrescription(String id, PrescriptionRequest request) {
+    public ResponseEntity<ResponseData<PrescriptionDTO>> updatePrescription(Long id, PrescriptionRequest request) {
         Prescription prescription = prescriptionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Prescription not found"));
 
@@ -113,7 +113,7 @@ public class PrescriptionService {
         ));
     }
 
-    public ResponseEntity<ResponseData<PrescriptionDTO>> getPrescriptionById(String id) {
+    public ResponseEntity<ResponseData<PrescriptionDTO>> getPrescriptionById(Long id) {
         Prescription prescription = prescriptionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Prescription not found"));
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
@@ -123,7 +123,7 @@ public class PrescriptionService {
         ));
     }
 
-    public ResponseEntity<ResponseData<Void>> deletePrescription(String id) {
+    public ResponseEntity<ResponseData<Void>> deletePrescription(Long id) {
         Prescription prescription = prescriptionRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Prescription not found"));
 

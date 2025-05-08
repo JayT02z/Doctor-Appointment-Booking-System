@@ -35,5 +35,5 @@ public class PrescriptionRequest {
     private Long patientId;
 
     @NotEmpty(message = "Danh sách medicine IDs không được để trống")
-    private List<String> medicineIds;
+    private List<Long> medicineIds;
 }

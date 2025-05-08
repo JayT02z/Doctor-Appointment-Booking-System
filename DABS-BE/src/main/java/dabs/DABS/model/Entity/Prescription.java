@@ -20,8 +20,8 @@ import java.util.List;
 public class Prescription {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Min(value = 1, message = "Liều dùng phải lớn hơn hoặc bằng 1")
     @Column(nullable = false)

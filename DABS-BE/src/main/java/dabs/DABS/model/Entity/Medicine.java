@@ -19,8 +19,8 @@ import java.util.List;
 public class Medicine {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @NotBlank(message = "Tên thuốc không được để trống")
     @Column(nullable = false, unique = true)

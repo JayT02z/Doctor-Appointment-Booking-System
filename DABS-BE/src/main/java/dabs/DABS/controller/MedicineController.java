@@ -24,7 +24,7 @@ public class MedicineController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ResponseData<Medicine>> getMedicineById(@PathVariable String id) {
+    public ResponseEntity<ResponseData<Medicine>> getMedicineById(@PathVariable Long id) {
         return medicineService.getMedicineById(id);
     }
 
@@ -34,12 +34,12 @@ public class MedicineController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<ResponseData<Medicine>> updateMedicine(@PathVariable String id, @Valid @RequestBody MedicineRequest request) {
+    public ResponseEntity<ResponseData<Medicine>> updateMedicine(@PathVariable Long id, @Valid @RequestBody MedicineRequest request) {
         return medicineService.updateMedicine(id, request);
     }
 
     @GetMapping("/delete/{id}")
-    public ResponseEntity<ResponseData<Void>> deleteMedicine(@PathVariable String id) {
+    public ResponseEntity<ResponseData<Void>> deleteMedicine(@PathVariable Long id) {
         return medicineService.deleteMedicine(id);
     }
 }

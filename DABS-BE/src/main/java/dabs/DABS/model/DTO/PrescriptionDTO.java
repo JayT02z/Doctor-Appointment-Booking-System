@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 public class PrescriptionDTO {
-    private String id;
+    private Long id;
     private int dosage;
     private int duration;
     private String frequency;
@@ -20,24 +20,24 @@ public class PrescriptionDTO {
     private String doctorName; // Newly added field
     private Long patientId;
     private String patientName; // Newly added field
-    private List<String> medicineIds;
-    private List<String> medicineNames; // Newly added field
+    private List<Long> medicineIds;
+    private List<String> medicineNames;
     public static PrescriptionDTO mapToDTO(Prescription prescription) {
         PrescriptionDTO dto = new PrescriptionDTO();
         dto.setId(prescription.getId());
         dto.setDosage(prescription.getDosage());
         dto.setDuration(prescription.getDuration());
-        dto.setFrequency(prescription.getFrequency().name());
+        dto.setFrequency(prescription.getFrequency().getDescription());
         dto.setDescription(prescription.getDescription());
 
         dto.setAppointmentId(prescription.getAppointment().getId());
         dto.setAppointmentSummary(prescription.getAppointment().toString());
 
         dto.setDoctorId(prescription.getDoctor().getId());
-//        dto.setDoctorName(prescription.getDoctor().getName());
+        dto.setDoctorName(prescription.getDoctor().getFullName());
 
         dto.setPatientId(prescription.getPatient().getId());
-//        dto.setPatientName(prescription.getPatient().getName());
+        dto.setPatientName(prescription.getPatient().getFullName());
 
         dto.setMedicineIds(
                 prescription.getMedicines().stream().map(Medicine::getId).toList()

@@ -61,7 +61,8 @@ public class SecurityConfig {
                                 "/api/services/doctor/updateservice",
                                 "/api/schedules/doctor/updateschedule",
                                 "/api/doctor/service/**",
-                                "/api/feedback/**").permitAll()
+                                "/api/feedback/**",
+                                "/api/prescription/mail").permitAll()
 
                         // --- Private Endpoints: ADMIN only ---
                         .requestMatchers("/api/doctor/create").permitAll()

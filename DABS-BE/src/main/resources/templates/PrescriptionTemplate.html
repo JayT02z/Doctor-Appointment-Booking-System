@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Đơn thuốc</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            padding: 20px;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #ccc;
+        }
+        .section {
+            margin-top: 20px;
+        }
+        .section h3 {
+            color: #007BFF;
+            margin-bottom: 10px;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .table th, .table td {
+            border: 1px solid #ccc;
+            padding: 8px 12px;
+        }
+        .table th {
+            background-color: #f7f7f7;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h2>ĐƠN THUỐC ĐIỆN TỬ</h2>
+    <p>Mã đơn: <strong th:text="${id}">1</strong></p>
+</div>
+
+<div class="section">
+    <h3>Thông tin bệnh nhân</h3>
+    <p><strong>Họ tên:</strong> <span th:text="${patientName}">Nguyễn Văn A</span></p>
+    <p><strong>Bác sĩ:</strong> <span th:text="${doctorName}">BS. Trần Văn B</span></p>
+</div>
+
+<div class="section">
+    <h3>Chi tiết đơn thuốc</h3>
+    <p><strong>Liều dùng:</strong> <span th:text="${dosage}">1</span> viên/lần</p>
+    <p><strong>Thời gian sử dụng:</strong> <span th:text="${duration}">7</span> ngày</p>
+    <p><strong>Tần suất:</strong> <span th:text="${frequency}">1 lần/ngày</span></p>
+    <p><strong>Mô tả:</strong> <span th:text="${description}">Dùng sau ăn</span></p>
+    <p><strong>Bệnh:</strong> <span th:text="${diseaseName}">Cảm cúm</span></p>
+</div>
+
+<div class="section">
+    <h3>Danh sách thuốc</h3>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>STT</th>
+            <th>Tên thuốc</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="medicine, stat : ${medicineNames}">
+            <td th:text="${stat.index + 1}">1</td>
+            <td th:text="${medicine}">Paradon</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="section">
+    <p><em>Vui lòng tuân thủ theo hướng dẫn sử dụng thuốc của bác sĩ.</em></p>
+</div>
+</body>
+</html>
