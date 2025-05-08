@@ -31,10 +31,6 @@ public class Feedback {
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
-    @NotNull(message = "Bác sĩ không được để trống")
-    @ManyToOne
-    @JoinColumn(name = "doctor_id", nullable = false)
-    private Doctor doctor;
 
     @NotNull(message = "Lịch hẹn không được để trống")
     @ManyToOne

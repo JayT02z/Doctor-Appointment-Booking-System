@@ -19,9 +19,6 @@ public class FeedbackRequest {
     @NotNull(message = "Patient ID is required")
     private Long patientId;
 
-    @NotNull(message = "Doctor ID is required")
-    private Long doctorId;
-
     @NotNull(message = "Appointment ID is required")
     private Long appointmentId;
 }

@@ -11,6 +11,7 @@ import dabs.DABS.model.Entity.Patient;
 import dabs.DABS.model.Entity.Users;
 import dabs.DABS.model.Response.AuthResponse;
 import dabs.DABS.model.Response.ResponseData;
+import dabs.DABS.model.request.ChangeRole;
 import dabs.DABS.model.request.LoginRequest;
 import dabs.DABS.model.request.RegistrationRequest;
 import dabs.DABS.repository.DoctorRepository;
@@ -230,6 +231,21 @@ public class UsersService {
                 StatusApplication.SUCCESS.getMessage(),
                 userDTOs
         ));
+    }
+
+    public ResponseEntity<ResponseData<UserDTO>> changeRole(ChangeRole role){
+        Users user = usersRepository.findById(role.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setRoles(role.getRole());
+        usersRepository.save(user);
+
+        UserDTO userDTO = UserDTO.fromEntity(user);
+        return ResponseEntity.ok(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                userDTO
+        ));
+
     }
 
 }

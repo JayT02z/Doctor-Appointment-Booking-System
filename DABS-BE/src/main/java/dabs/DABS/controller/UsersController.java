@@ -3,6 +3,7 @@ package dabs.DABS.controller;
 import dabs.DABS.model.DTO.UserDTO;
 import dabs.DABS.model.Entity.Users;
 import dabs.DABS.model.Response.ResponseData;
+import dabs.DABS.model.request.ChangeRole;
 import dabs.DABS.model.request.RegistrationRequest;
 import dabs.DABS.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,5 +47,10 @@ public class UsersController {
     @GetMapping("/users/all")
     public ResponseEntity<ResponseData<List<UserDTO>>> getAllUsers() {
         return usersService.getAllUsers();
+    }
+
+    @PostMapping("/changerole")
+    public ResponseEntity<ResponseData<UserDTO>> changeRole(@RequestBody ChangeRole role){
+        return usersService.changeRole(role);
     }
 }

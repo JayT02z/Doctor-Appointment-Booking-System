@@ -16,7 +16,6 @@ public class FeedbackDTO {
     private String feedbackText;
     private Rating rating;
     private Long patientId;
-    private Long doctorId;
 
     public FeedbackDTO(Feedback feedback) {
         this.id = feedback.getId();
@@ -25,7 +24,6 @@ public class FeedbackDTO {
         this.patientId = (feedback.getPatient() != null)
             ? feedback.getPatient().getId()
             : null;
-        this.doctorId = (feedback.getDoctor() != null) ? feedback.getDoctor().getId() : null;
     }
 
 }

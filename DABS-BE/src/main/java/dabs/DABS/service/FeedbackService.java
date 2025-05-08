@@ -29,8 +29,6 @@ public class FeedbackService {
     @Autowired
     private PatientRepository patientRepository;
 
-    @Autowired
-    private DoctorRepository doctorRepository;
 
     @Autowired
     private AppointmentRepository appointmentRepository;
@@ -47,9 +45,6 @@ public class FeedbackService {
 
         Patient patient = patientRepository.findById(request.getPatientId())
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
-        Doctor doctor = doctorRepository.findById(request.getDoctorId())
-                .orElseThrow(() -> new RuntimeException("Doctor not found"));
-
         Appointment appointment = appointmentRepository.findById(request.getAppointmentId())
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
@@ -59,7 +54,6 @@ public class FeedbackService {
 
         Feedback feedback = new Feedback();
         feedback.setPatient(patient);
-        feedback.setDoctor(doctor);
         feedback.setRating(request.getRating());
         feedback.setComment(request.getComment());
         feedback.setAppointment(appointment);
@@ -84,11 +78,9 @@ public class FeedbackService {
 
         Patient patient = patientRepository.findById(request.getPatientId())
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
-        Doctor doctor = doctorRepository.findById(request.getDoctorId())
-                .orElseThrow(() -> new RuntimeException("Doctor not found"));
+
 
         feedback.setPatient(patient);
-        feedback.setDoctor(doctor);
         feedback.setRating(request.getRating());
         feedback.setComment(request.getComment());
 
