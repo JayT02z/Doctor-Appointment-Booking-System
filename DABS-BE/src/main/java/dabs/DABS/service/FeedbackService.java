@@ -74,7 +74,7 @@ public class FeedbackService {
         ));
     }
 
-    public ResponseEntity<ResponseData<FeedbackDTO>> updateFeedback(String id, FeedbackRequest request) {
+    public ResponseEntity<ResponseData<FeedbackDTO>> updateFeedback(Long id, FeedbackRequest request) {
         if (request.getRating() == null) {
             throw new RuntimeException("Rating cannot be null");
         }
@@ -114,7 +114,7 @@ public class FeedbackService {
         ));
     }
 
-    public ResponseEntity<ResponseData<FeedbackDTO>> getFeedbackById(String id) {
+    public ResponseEntity<ResponseData<FeedbackDTO>> getFeedbackById(Long id) {
         Feedback feedback = feedbackRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Feedback not found"));
         FeedbackDTO feedbackDTO = new FeedbackDTO(feedback);
@@ -123,5 +123,17 @@ public class FeedbackService {
                 StatusApplication.SUCCESS.getMessage(),
                 feedbackDTO
         ));
+    }
+
+    public ResponseEntity<ResponseData<FeedbackDTO>> getfeedbackByApmId(Long id) {
+        Feedback feedback = feedbackRepository.findByAppointment_Id(id)
+                .orElseThrow(() -> new RuntimeException("Feedback not found"));
+        FeedbackDTO feedbackDTO = new FeedbackDTO(feedback);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                feedbackDTO
+        ));
+
     }
 }

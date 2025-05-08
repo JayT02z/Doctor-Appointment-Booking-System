@@ -18,8 +18,8 @@ import lombok.Setter;
 public class Feedback {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @NotNull(message = "Đánh giá không được để trống")
     @Enumerated(EnumType.STRING)

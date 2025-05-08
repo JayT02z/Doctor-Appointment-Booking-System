@@ -61,6 +61,7 @@ public class PatientService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         patients.setUser(user);
+        patients.setFullName(patient.getFullName());
         patients.setDob(patient.getDob());
         patients.setGender(patient.getGender());
         patients.setAddress(patient.getAddress());
@@ -82,6 +83,7 @@ public class PatientService {
         Patient patients = patientRepository.findById(id).orElseThrow();
         Users users = usersRepository.findById(patientForm.getUserId()).orElseThrow();
 
+        patients.setFullName(patientForm.getName());
         patients.setDob(patientForm.getDob());
         patients.setGender(patientForm.getGender());
         patients.setAddress(patientForm.getAddress());

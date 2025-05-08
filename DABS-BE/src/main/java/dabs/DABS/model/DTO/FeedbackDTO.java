@@ -12,7 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FeedbackDTO {
-    private String id;
+    private Long id;
     private String feedbackText;
     private Rating rating;
     private Long patientId;

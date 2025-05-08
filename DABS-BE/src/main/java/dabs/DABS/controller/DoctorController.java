@@ -44,4 +44,9 @@ public class DoctorController {
     public ResponseEntity<ResponseData<DoctorDTO>> getDoctorByUserId(@PathVariable Long id) {
         return doctorService.getDoctorByUserId(id);
     }
+
+    @GetMapping("/service/{id}")
+    public ResponseEntity<ResponseData<List<DoctorDTO>>> getDoctorByServiceId(@PathVariable Long id) {
+        return doctorService.getDoctorByServiceId(id);
+    }
 }

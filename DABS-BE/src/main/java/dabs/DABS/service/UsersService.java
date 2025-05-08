@@ -6,11 +6,15 @@ import dabs.DABS.Enum.StatusApplication;
 import dabs.DABS.doctorappointment.security.jwt.JwtUtil;
 import dabs.DABS.exception.ErrorCode;
 import dabs.DABS.model.DTO.UserDTO;
+import dabs.DABS.model.Entity.Doctor;
+import dabs.DABS.model.Entity.Patient;
 import dabs.DABS.model.Entity.Users;
 import dabs.DABS.model.Response.AuthResponse;
 import dabs.DABS.model.Response.ResponseData;
 import dabs.DABS.model.request.LoginRequest;
 import dabs.DABS.model.request.RegistrationRequest;
+import dabs.DABS.repository.DoctorRepository;
+import dabs.DABS.repository.PatientRepository;
 import dabs.DABS.repository.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,9 +59,13 @@ public class UsersService {
     @Value("${doctor.invitation.code}")
     private String validInvitationCode;
 
-    /**
-     * Xử lý đăng nhập user
-     */
+    @Autowired
+    private DoctorRepository doctorRepository;
+
+    @Autowired
+    private PatientRepository patientRepository;
+
+
     public ResponseEntity<ResponseData<AuthResponse>> loginUser(LoginRequest loginRequest) {
         Optional<Users> optionalUser = usersRepository.findByUsername(loginRequest.getUsername());
         if (!optionalUser.isPresent()) {
@@ -86,8 +94,15 @@ public class UsersService {
 
         foundUser.setLastLoginAt(LocalDateTime.now());
         usersRepository.save(foundUser);
+
         Long userId = foundUser.getId();
-        AuthResponse authResponse = new AuthResponse(token, userId);
+
+        // Tìm doctorId và patientId theo userId
+        Long doctorId = doctorRepository.findByUserId(userId).map(Doctor::getId).orElse(null);
+        Long patientId = patientRepository.findByUserId(userId).map(Patient::getId).orElse(null);
+
+        AuthResponse authResponse = new AuthResponse(token, userId, doctorId, patientId);
+
         return ResponseEntity.ok(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
                 StatusApplication.SUCCESS.getMessage(),
@@ -95,7 +110,8 @@ public class UsersService {
         ));
     }
 
-//register user
+
+    //register user
     //check dup mail
     public ResponseEntity<ResponseData<UserDTO>> saveUser(RegistrationRequest regRequest) {
         if (usersRepository.findByEmail(regRequest.getEmail()).isPresent()) {

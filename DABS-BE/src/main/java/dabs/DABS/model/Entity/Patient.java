@@ -28,6 +28,10 @@ public class Patient {
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
+    @NotNull(message = "Full Name không được để trống")
+    @Size(min = 3, max = 100, message = "Full Name phải có độ dài từ 3 đến 100 ký tự")
+    private String fullName;
+
     @Past(message = "Ngày sinh phải là ngày trong quá khứ")
     private LocalDate dob;
 

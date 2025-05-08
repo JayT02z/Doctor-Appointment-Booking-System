@@ -10,4 +10,6 @@ import lombok.Setter;
 public class AuthResponse {
     private String token;
     private Long userId;
+    private Long doctorId;   // null nếu không phải bác sĩ
+    private Long patientId;  // null nếu không phải bệnh nhân
 }

@@ -15,6 +15,10 @@ public class RegisterPatientForm {
     @NotNull(message = "User ID không được để trống")
     private Long userId;
 
+    @NotNull(message = "Full Name không được để trống")
+    @Size(min = 3, max = 100, message = "Full Name phải có độ dài từ 3 đến 100 ký tự")
+    private String fullName;
+
     @NotNull(message = "Ngày sinh không được để trống")
     @Past(message = "Ngày sinh phải là một ngày trong quá khứ")
     private LocalDate dob;

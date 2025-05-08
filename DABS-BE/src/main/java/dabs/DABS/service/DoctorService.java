@@ -30,6 +30,9 @@ public class DoctorService {
     @Autowired
     private UsersRepository usersRepository;
 
+    @Autowired
+    private ServiceService serviceService;
+
     public ResponseEntity<ResponseData<List<DoctorDTO>>> getAllDoctors() {
    List<Doctor> listAllDoctor = doctorRepository.findAll();
     List<DoctorDTO> dtoList = listAllDoctor.stream()
@@ -152,6 +155,18 @@ public ResponseEntity<ResponseData<Doctor>> addDoctor(RegisterDoctorForm doctorF
                 StatusApplication.SUCCESS.getCode(),
                 StatusApplication.SUCCESS.getMessage(),
                 doctorDTO
+        ));
+    }
+
+    public  ResponseEntity<ResponseData<List<DoctorDTO>>> getDoctorByServiceId(Long id) {
+        List<Doctor> doctor = doctorRepository.findAllByServiceId(id);
+        List<DoctorDTO> dtoList = doctor.stream()
+                .map(DoctorDTO::fromEntity)
+                .toList();
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                dtoList
         ));
     }
 }
