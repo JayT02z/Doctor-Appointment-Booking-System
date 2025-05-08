@@ -68,21 +68,47 @@ const AvatarDropdown = () => {
           )}
 
           {user?.role === "DOCTOR" && (
-            <Link
-              to="/doctor/dashboard"
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              Doctor Dashboard
-            </Link>
+              <>
+                <Link
+                    to="/doctor/dashboard"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Doctor Dashboard
+                </Link>
+                <Link
+                    to="/doctor/information"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Information
+                </Link>
+                <Link to={`/doctor/services`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Services
+                </Link>
+                <Link to={`/doctor/schedule`}
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                    Schedule
+                </Link>
+              </>
           )}
 
           {user?.role === "ADMIN" && (
-            <Link
-              to="/admin/dashboard"
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-            >
-              Admin Dashboard
-            </Link>
+              <>
+                <Link
+                    to="/admin/dashboard"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Admin Dashboard
+                </Link>
+                <Link
+                    to="/admin/services"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Services
+                </Link>
+              </>
           )}
 
           <button
