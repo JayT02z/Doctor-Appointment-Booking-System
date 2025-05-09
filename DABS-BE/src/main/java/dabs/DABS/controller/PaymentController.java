@@ -39,7 +39,7 @@ public class PaymentController {
     }
 
     @PutMapping("/confirmpayment/{id}")
-    public ResponseEntity<ResponseData<Payment>> confirmPayment(@PathVariable Long id,@RequestBody PaymentStatusForm payment) {
+    public ResponseEntity<ResponseData<PaymentDTO>> confirmPayment(@PathVariable Long id,@RequestBody PaymentStatusForm payment) {
         return paymentService.updatePayment(id,payment.getStatus());
     }
 }

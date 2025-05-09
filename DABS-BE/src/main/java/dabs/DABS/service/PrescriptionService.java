@@ -31,7 +31,7 @@ public class PrescriptionService {
 
     @Autowired
     private PatientRepository patientRepository;
-    
+
 
 
     public ResponseEntity<ResponseData<PrescriptionDTO>> createRequest(PrescriptionRequest request) {
