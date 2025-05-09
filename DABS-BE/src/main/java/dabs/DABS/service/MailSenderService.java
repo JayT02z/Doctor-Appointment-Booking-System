@@ -143,7 +143,7 @@ public class MailSenderService {
 
         helper.setTo(toEmail);
         helper.setSubject("Đơn thuốc từ bác sĩ " + dto.getDoctorName());
-        helper.setFrom("your-email@gmail.com");
+        helper.setFrom("anhoa1794@gmail.com");
 
         Context context = new Context();
         context.setVariable("id", dto.getId());

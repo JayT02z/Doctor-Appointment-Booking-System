@@ -226,6 +226,7 @@ const DoctorDashboard = () => {
   };
 
   const handleSendPrescription = async (email, prescriptionId) => {
+    console.log("Prescription sent:", email, prescriptionId);
     try {
       const res = await axios.post(
           "http://localhost:8080/api/prescription/mail",
@@ -557,7 +558,7 @@ const DoctorDashboard = () => {
             </button>
             {createdPrescriptionId && (
                 <button
-                    onClick={() => handleSendPrescription(selectedPatient.gmail, createdPrescriptionId)}
+                    onClick={() => handleSendPrescription(selectedPatient.email, createdPrescriptionId)}
                     className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none"
                 >
                   Send Prescription
