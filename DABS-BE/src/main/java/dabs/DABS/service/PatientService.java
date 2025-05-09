@@ -84,7 +84,7 @@ public class PatientService {
         Patient patients = patientRepository.findById(id).orElseThrow();
         Users users = usersRepository.findById(patientForm.getUserId()).orElseThrow();
 
-        patients.setFullName(patientForm.getName());
+        patients.setFullName(patientForm.getFullName());
         patients.setDob(patientForm.getDob());
         patients.setGender(patientForm.getGender());
         patients.setAddress(patientForm.getAddress());
@@ -93,7 +93,7 @@ public class PatientService {
 
         users.setEmail(patientForm.getEmail());
         users.setPhone(patientForm.getPhone());
-        users.setUsername(patientForm.getName());
+        users.setUsername(patientForm.getFullName());
 
         usersRepository.save(users);
         patientRepository.save(patients);

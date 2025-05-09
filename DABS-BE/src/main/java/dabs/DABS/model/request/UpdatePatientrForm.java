@@ -19,7 +19,7 @@ public class UpdatePatientrForm {
 
     @NotBlank(message = "Tên là bắt buộc")  // Đảm bảo trường này không rỗng
     @Size(min = 3, max = 100, message = "Tên phải có độ dài từ 3 đến 100 ký tự")  // Đảm bảo độ dài hợp lý
-    private String name;
+    private String fullName;
 
     @Email(message = "Email không hợp lệ")  // Đảm bảo email có định dạng hợp lệ
     private String email;

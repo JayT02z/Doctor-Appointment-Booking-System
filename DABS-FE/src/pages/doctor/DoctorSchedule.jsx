@@ -1,52 +1,75 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { useDoctor } from "../../context/DoctorContext";
+import { useAuth } from "../../context/AuthContext.jsx";
 import { motion, AnimatePresence } from "framer-motion";
-
-const daysOfWeek = [
-    "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"
-];
-const timeSlots = [
-    "SLOT_07_09", "SLOT_09_11", "SLOT_11_13",
-    "SLOT_13_15", "SLOT_15_17", "SLOT_17_19", "SLOT_19_22"
-];
-
-const formatSlot = (slot) => {
-    const [_, start, end] = slot.split("_"); // SLOT_15_17 -> ["SLOT", "15", "17"]
-    return `${start}:00 - ${end}:00`;
-};
-
-const getDateForDay = (dayIndex, offset = 0) => {
-    const today = new Date();
-
-    // Start from the most recent Monday
-    const monday = new Date(today);
-    monday.setDate(today.getDate() - today.getDay() + 1); // Monday of the current week
-    monday.setDate(monday.getDate() + offset * 7); // Apply week offset
-
-    console.log(`Base Monday Date (with offset ${offset}): ${monday.toLocaleDateString("en-GB")}`);
-
-    // Calculate the target date by adding dayIndex
-    const targetDate = new Date(monday);
-    targetDate.setDate(monday.getDate() + dayIndex); // DayIndex gives you the correct day from Monday
-
-    // Log the calculated target date
-    console.log(`Calculated Target Date for ${daysOfWeek[dayIndex]}: ${targetDate.toLocaleDateString("en-GB")}`);
-
-    // Ensure the date is correctly formatted as YYYY-MM-DD (ISO format)
-    const utcDate = new Date(Date.UTC(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate()));
-    console.log(`Calculated Target Date in UTC for ${daysOfWeek[dayIndex]}: ${utcDate.toISOString().slice(0, 10)}`);
-
-    return utcDate;
-};
-
-const formatDate = (date) => date.toLocaleDateString("en-GB"); // DD/MM/YYYY
+import consele from "react-modal/lib/helpers/bodyTrap.js";
 
 const DoctorSchedule = () => {
-    const { doctorId } = useDoctor();
+    const { doctorId } = useAuth();
     const [scheduleData, setScheduleData] = useState({});
     const [weekOffset, setWeekOffset] = useState(0);
+    const [serverSchedule, setServerSchedule] = useState({});
+
+    const daysOfWeek = [
+        "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"
+    ];
+    const timeSlots = [
+        "SLOT_07_09", "SLOT_09_11", "SLOT_11_13",
+        "SLOT_13_15", "SLOT_15_17", "SLOT_17_19", "SLOT_19_22"
+    ];
+
+    const formatSlot = (slot) => {
+        const [_, start, end] = slot.split("_");
+        return `${start}:00 - ${end}:00`;
+    };
+
+    const getDayIndex = (dayOfWeek) => daysOfWeek.indexOf(dayOfWeek);
+
+    const getDateForDay = (dayIndex, offset = 0) => {
+        const today = new Date();
+        const monday = new Date(today);
+        monday.setDate(today.getDate() - today.getDay() + 1 + offset * 7);
+        const targetDate = new Date(monday);
+        targetDate.setDate(monday.getDate() + dayIndex);
+        return new Date(Date.UTC(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate()));
+    };
+
+    const formatDate = (date) => date.toLocaleDateString("en-GB");
+
+    const fetchDoctorSchedule = async () => {
+        if (doctorId) {
+            try {
+                const response = await axios.get(`http://localhost:8080/api/schedules/doctorschedules/${doctorId}`);
+                const existingSchedule = response.data.data;
+                const processedSchedule = {};
+
+                existingSchedule.forEach(item => {
+                    const backendDate = new Date(Date.UTC(item.date[0], item.date[1] - 1, item.date[2]));
+                    const currentMonday = getDateForDay(0, weekOffset);
+                    const itemDayIndex = getDayIndex(item.dayOfWeek);
+                    const itemDateThisWeek = new Date(currentMonday);
+                    itemDateThisWeek.setDate(currentMonday.getDate() + itemDayIndex);
+
+                    if (backendDate.toDateString() === itemDateThisWeek.toDateString()) {
+                        if (!processedSchedule[item.dayOfWeek]) {
+                            processedSchedule[item.dayOfWeek] = [];
+                        }
+                        processedSchedule[item.dayOfWeek].push(...item.timeSlot);
+                    }
+                });
+                setServerSchedule(processedSchedule);
+                setScheduleData(processedSchedule); // Initialize local state with fetched data
+            } catch (error) {
+                console.error("Error fetching doctor's schedule:", error);
+                toast.error("Failed to load schedule.");
+            }
+        }
+    };
+
+    useEffect(() => {
+        fetchDoctorSchedule();
+    }, [doctorId, weekOffset]);
 
     const handleToggle = (day, slot) => {
         setScheduleData(prev => {
@@ -75,55 +98,53 @@ const DoctorSchedule = () => {
     };
 
     const handleSubmit = async () => {
-        // Log the current state of scheduleData for debugging
-        console.log("Schedule Data:", scheduleData);
+        const data = Object.entries(scheduleData).map(([day, slots]) => {
+            const originalSlots = serverSchedule[day] || []; // Lấy khung giờ gốc từ server
+            const addedSlots = slots.filter(slot => !originalSlots.includes(slot)); // Chỉ lấy khung giờ mới được thêm
+            const removedSlots = originalSlots.filter(slot => !slots.includes(slot)); // Lấy khung giờ bị bỏ chọn
 
-        const data = Object.entries(scheduleData).map(([day, slots], index) => {
-            if (slots && slots.length > 0) {
-                // Here we are using the correct dayIndex, which is the index of the selected day in the `daysOfWeek` array
-                const selectedDayIndex = daysOfWeek.indexOf(day); // Get the actual index of the selected day
-                const date = getDateForDay(selectedDayIndex, weekOffset); // Pass the correct index for the selected day
-                console.log(`Selected date for ${day}: ${date.toISOString().slice(0, 10)}`); // Log date being sent
-
+            if (addedSlots.length > 0 || removedSlots.length > 0) {
+                const dayIndex = getDayIndex(day);
+                const date = getDateForDay(dayIndex, weekOffset).toISOString().slice(0, 10);
                 return {
                     dayOfWeek: day,
-                    date: date.toISOString().slice(0, 10), // Format date as YYYY-MM-DD
-                    timeSlot: slots,
-                    available: true
+                    date: date,
+                    timeSlot: addedSlots.length > 0 ? addedSlots : removedSlots, // Gửi khung giờ thêm hoặc xóa
+                    available: addedSlots.length > 0 ? true : false // Thêm hoặc xóa
                 };
             }
-            return null; // Skip days with no time slots selected
-        }).filter(item => item !== null); // Remove null entries
+            return null;
+        }).filter(item => item !== null);
 
-        console.log("Prepared Request Data:", {
-            doctorId,
-            schedules: data
-        });
+        console.log("Sending to API:", { doctorId, schedules: data });
 
         try {
-            const response = await axios.post("http://localhost:8080/api/schedules/create", {
+            const response = await axios.post("http://localhost:8080/api/schedules/create", { // Hoặc có thể cần một API khác để update
                 doctorId,
                 schedules: data
             });
             const res = response.data;
 
             if (res.statusCode === 200) {
-                toast.success(res.message || "Schedule saved successfully!");
-            }
-            else {
+                toast.success(res.message || "Schedule updated successfully!");
+                fetchDoctorSchedule(); // Làm mới dữ liệu
+            } else {
                 toast.error(res.message || "Unexpected response from server.");
             }
         } catch (error) {
-            console.error("API Error:", error.response?.data || error.message);
-            toast.error("Failed to save schedule");
+            console.error("API Error:", error);
+            toast.error("Failed to update schedule");
         }
+    };
+
+    const isSlotSelectedFromServer = (day, slot) => {
+        return serverSchedule[day]?.includes(slot);
     };
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 bg-white rounded-xl shadow-lg">
             <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">Weekly Schedule</h2>
 
-            {/* Week Navigator */}
             <div className="flex justify-center gap-4 mb-8">
                 <button
                     onClick={() => setWeekOffset(weekOffset - 1)}
@@ -142,7 +163,6 @@ const DoctorSchedule = () => {
                 </button>
             </div>
 
-            {/* Schedule Table */}
             <AnimatePresence mode="wait">
                 <motion.div
                     key={weekOffset}
@@ -155,11 +175,7 @@ const DoctorSchedule = () => {
                     {daysOfWeek.map((day, dayIndex) => {
                         const date = getDateForDay(dayIndex, weekOffset);
                         const selectedSlots = scheduleData[day] || [];
-
-                        // Block past days
-                        const today = new Date();
-                        today.setHours(0, 0, 0, 0); // Remove time part
-                        const isPast = date < today;
+                        const isPast = date < new Date().setHours(0, 0, 0, 0);
 
                         return (
                             <div key={day} className={`rounded-lg border p-4 shadow-sm ${isPast ? 'bg-gray-100 opacity-60 pointer-events-none' : 'bg-gray-50'}`}>
@@ -188,17 +204,22 @@ const DoctorSchedule = () => {
 
                                 <div className="space-y-2">
                                     {timeSlots.map(slot => {
-                                        const isSelected = selectedSlots.includes(slot);
+                                        const isLocallySelected = selectedSlots.includes(slot);
+                                        const isSelectedFromServer = isSlotSelectedFromServer(day, slot);
+                                        const isHighlighted = isSelectedFromServer;
+
                                         return (
                                             <div
                                                 key={slot}
                                                 onClick={() => !isPast && handleToggle(day, slot)}
                                                 className={`text-center py-2 rounded-md text-sm font-medium border transition-all cursor-pointer
-                            ${isPast
+                                                    ${isPast
                                                     ? 'bg-gray-200 text-gray-500 border-gray-300 cursor-not-allowed'
-                                                    : isSelected
-                                                        ? 'bg-blue-600 text-white border-blue-700 hover:bg-blue-700'
-                                                        : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-100'
+                                                    : isHighlighted
+                                                        ? 'bg-blue-600 text-white border-blue-700 hover:bg-blue-700' // Nổi bật
+                                                        : isLocallySelected
+                                                            ? 'bg-blue-200 text-gray-700 border-blue-300 hover:bg-blue-300' // Đã chọn cục bộ (chưa save)
+                                                            : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-100'
                                                 }`}
                                             >
                                                 {formatSlot(slot)}
@@ -222,6 +243,5 @@ const DoctorSchedule = () => {
             </div>
         </div>
     );
-};
-
+}
 export default DoctorSchedule;

@@ -51,7 +51,7 @@ public class SecurityConfig {
                                          "/api/feedback/**",
                                          "/api/payment/**",
                                         "/api/patient/create",
-                                "/api/patient/get/**",
+                                        "/api/patient/get/**",
                                         "/api/appointments/doctor/**",
                                         "/api/appointments/patient/**",
                                         "/api/doctor/user/**",
@@ -63,8 +63,14 @@ public class SecurityConfig {
                                 "/api/schedules/doctor/updateschedule",
                                 "/api/doctor/service/**",
                                 "/api/feedback/**",
+                                "/api/schedules/doctor/updateschedule",
+                                "/api/services/**",
+                                "api/doctor/**",
+                                "/api/prescription/mail",
                                 "/api/prescription/mail",
                                 "/api/doctor/search",
+                                "/api/services/search",
+                                "/api/patient/get/**",
                                 "/api/services/search",
                                 "/api/v1/auth/changerole",
                                 "/api/v1/auth/forgetpassword",
@@ -72,7 +78,6 @@ public class SecurityConfig {
 
                         // --- Private Endpoints: ADMIN only ---
                         .requestMatchers("/api/doctor/create").permitAll()
-                        .requestMatchers("/api/services/all").hasRole("ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/auth/users/all").hasRole("ADMIN")
 
@@ -80,7 +85,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/patient/**").permitAll()
 
                         // --- Private Endpoints: DOCTOR or ADMIN ---
-                        .requestMatchers("/api/doctor/**").permitAll()
 
                         // --- Any other requests ---
                         .anyRequest().authenticated()

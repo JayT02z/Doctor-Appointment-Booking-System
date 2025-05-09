@@ -33,9 +33,8 @@ const Login = () => {
       console.log("Login response:", response.data); // Debug log
 
       if (response.data.statusCode === 200 && response.data.data) {
-        const { token, userId } = response.data.data;
-        console.log("Token:", token, "UserId:", userId); // Debug log
-        const result = await login(token, userId);
+        const { token, userId, doctorId, patientId } = response.data.data;
+        const result = await login(token, userId, doctorId, patientId);
         if (!result.success) {
           setError(result.error || "Login failed");
         }

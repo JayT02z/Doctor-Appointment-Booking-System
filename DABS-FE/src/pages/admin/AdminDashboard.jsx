@@ -17,6 +17,7 @@ const AdminDashboard = () => {
   const [appointments, setAppointments] = useState([]);
   const [users, setUsers] = useState([]);
   const [activeSection, setActiveSection] = useState(null);
+  const [payments, setPayments] = useState([]);
 
   const itemsPerPage = 15;
   const [doctorPage, setDoctorPage] = useState(1);
@@ -30,7 +31,7 @@ const AdminDashboard = () => {
 
   const fetchDashboardStats = async () => {
     try {
-      const [doctorsRes, patientsRes, appointmentsRes, usersRes] = await Promise.all([
+      const [doctorsRes, patientsRes, appointmentsRes, usersRes, paymentsRes] = await Promise.all([
         axios.get("http://localhost:8080/api/doctor/all", {
           headers: { Authorization: `Bearer ${token}` },
         }),
@@ -43,17 +44,22 @@ const AdminDashboard = () => {
         axios.get("http://localhost:8080/api/v1/auth/users/all", {
           headers: { Authorization: `Bearer ${token}` },
         }),
+        axios.get("http://localhost:8080/api/payment", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       ]);
 
       const doctors = doctorsRes.data.data || [];
       const patients = patientsRes.data.data || [];
       const appointments = appointmentsRes.data.data || [];
       const users = usersRes.data.data || [];
+      const payments = paymentsRes.data.data || [];
 
       setDoctors(doctors);
       setPatients(patients);
       setAppointments(appointments);
       setUsers(users);
+      setPayments(payments);
 
       const activeAppointments = appointments.filter(
           (appt) => appt.status === "ACTIVE"
@@ -89,6 +95,41 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error("Error deleting patient:", error);
       toast.error("Failed to delete patient");
+    }
+  };
+
+  const handleConfirmPayment = async (paymentId) => {
+    try {
+      // Optimistic update (cập nhật giao diện ngay lập tức)
+      const updatedPayments = payments.map((payment) =>
+          payment.id === paymentId
+              ? { ...payment, status: "PAID" }
+              : payment
+      );
+      setPayments(updatedPayments);
+
+      await axios.put(
+          `http://localhost:8080/api/payment/confirmpayment/${paymentId}`,
+          { status: "PAID" },
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+      );
+
+      toast.success("Payment confirmed successfully");
+    } catch (error) {
+      console.error("Error confirming payment:", error);
+      toast.error(
+          error.response?.data?.message || "Failed to confirm payment"
+      );
+      // Hoàn tác optimistic update nếu có lỗi
+      setPayments(
+          payments.map((payment) =>
+              payment.id === paymentId
+                  ? { ...payment, status: "PENDING" }
+                  : payment
+          )
+      );
     }
   };
 
@@ -288,24 +329,63 @@ const AdminDashboard = () => {
                       </th>
                       <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Status</th>
                       <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Notes</th>
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">
+                        Payment Status
+                      </th>
+                      <th className="px-6 py-3 border-b">
+                        Actions
+                      </th>
                     </tr>
                     </thead>
                     <tbody>
-                    {paginatedAppointments.map((appt) => (
-                        <tr key={appt.id}>
-                          <td className="px-6 py-4 border-b text-sm text-gray-700">{appt.patientName}</td>
-                          <td className="px-6 py-4 border-b text-sm text-gray-700">{appt.doctorName}</td>
-                          <td className="px-6 py-4 border-b text-sm text-gray-700">{appt.specialization}</td>
-                          <td className="px-6 py-4 border-b text-sm text-gray-700">{appt.serviceName}</td>
-                          <td className="px-6 py-4 border-b text-sm text-gray-700">
-                            {appt.date?.join("-")}
-                          </td>
-                          <td className="px-6 py-4 border-b text-sm text-gray-700">{appt.timeSlot}</td>
-                          <td className="px-6 py-4 border-b text-sm text-gray-700">{appt.status}</td>
-                          <td className="px-6 py-4 border-b text-sm text-gray-700">{appt.notes}</td>
-                        </tr>
-                    ))}
-                    </tbody>
+                    {paginatedAppointments.map((appt) => {
+                      const payment = payments.find(
+                          (p) => p.appointment.id === appt.id
+                      ); // Tìm thông tin thanh toán tương ứng
+
+                      return (
+                          <tr key={appt.id}>
+                            <td className="px-6 py-4 border-b text-sm text-gray-700">
+                              {appt.patientName.username}
+                            </td>
+                            <td className="px-6 py-4 border-b text-sm text-gray-700">
+                              {appt.doctorName}
+                            </td>
+                            <td className="px-6 py-4 border-b text-sm text-gray-700">
+                              {appt.specialization}
+                            </td>
+                            <td className="px-6 py-4 border-b text-sm text-gray-700">
+                              {appt.serviceName}
+                            </td>
+                            <td className="px-6 py-4 border-b text-sm text-gray-700">
+                              {appt.date?.join("-")}
+                            </td>
+                            <td className="px-6 py-4 border-b text-sm text-gray-700">
+                              {appt.timeSlot}
+                            </td>
+                            <td className="px-6 py-4 border-b text-sm text-gray-700">
+                              {appt.status}
+                            </td>
+                            <td className="px-6 py-4 border-b text-sm text-gray-700">
+                              {appt.notes}
+                            </td>
+                            <td className="px-6 py-4 border-b text-sm text-gray-700">
+                              {payment ? payment.status : "N/A"} {/* Hiển thị trạng thái thanh toán */}
+                            </td>
+                            <td className="px-6 py-4 border-b text-sm text-right">
+                              {payment && payment.status === "PENDING" && (
+                                  <button
+                                      onClick={() => handleConfirmPayment(payment.id)}
+                                      className="bg-green-500 hover:bg-green-700 text-white text-xs px-3 py-1 rounded"
+                                  >
+                                    Confirm
+                                  </button>
+                              )}
+                            </td>
+                          </tr>
+                      );
+                    })}
+                  </tbody>
                   </table>
                 </div>
                 <div className="flex justify-end mt-4 space-x-2">

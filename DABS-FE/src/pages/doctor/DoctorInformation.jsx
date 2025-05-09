@@ -2,11 +2,9 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../../context/AuthContext";
 import { toast } from "react-hot-toast";
-import DoctorDashboard from "./DoctorDashboard";
-import {useDoctor} from "../../context/DoctorContext.jsx";
 
 const DoctorInformation = () => {
-    const { user, token } = useAuth();
+    const { token, user, setDoctorId, doctorId } = useAuth();
     const [tab, setTab] = useState("doctor");
     const [doctorInfo, setDoctorInfo] = useState({
         fullName: "",
@@ -19,7 +17,6 @@ const DoctorInformation = () => {
     const [loading, setLoading] = useState(true);
     const [isEditingDoctor, setIsEditingDoctor] = useState(false);
     const [isEditingAccount, setIsEditingAccount] = useState(false);
-    const { setDoctorId, doctorId } = useDoctor();
 
     useEffect(() => {
         fetchDoctorByUserId();
@@ -32,13 +29,18 @@ const DoctorInformation = () => {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (res.data.statusCode === 200 && res.data.data) {
+                toast.success(doctorId ? "Doctor info updated" : "Doctor profile created");
+                setIsEditingDoctor(false);
                 setDoctorInfo(res.data.data);
-                setDoctorId(res.data.data.id);
-            } else {
-                setDoctorId(null);
+
+                setDoctorId(res.data.data.id); // ✅ update context state
+                localStorage.setItem("doctorId", res.data.data.id); // ✅ update localStorage
+            }
+            else {
+                localStorage.removeItem("doctorId");
             }
         } catch (err) {
-            setDoctorId(null);
+            localStorage.removeItem("doctorId");
         }
     };
 
@@ -79,10 +81,16 @@ const DoctorInformation = () => {
             });
 
             if (res.data.statusCode === 200) {
-                toast.success(doctorId ? "Doctor info updated" : "Doctor profile created");
+                const isNewDoctor = !doctorId;
+                toast.success(isNewDoctor ? "Doctor profile created" : "Doctor info updated");
                 setIsEditingDoctor(false);
                 setDoctorInfo(res.data.data);
-                setDoctorId(res.data.data.id); // store newly created doctor ID
+                localStorage.setItem("doctorId", res.data.data.id);
+                setDoctorId(res.data.data.id);
+
+                if (isNewDoctor) {
+                    window.location.reload(); // Reload to ensure updated doctorId is reflected globally
+                }
             }
         } catch (err) {
             toast.error("Failed to save doctor info");
@@ -118,13 +126,21 @@ const DoctorInformation = () => {
             <div className="flex space-x-4 border-b mb-6">
                 <button
                     onClick={() => setTab("doctor")}
-                    className={`px-4 py-2 font-semibold transition ${tab === "doctor" ? "border-b-2 border-primary-600 text-primary-600" : "text-gray-500 hover:text-primary-600"}`}
+                    className={`px-4 py-2 font-semibold transition ${
+                        tab === "doctor"
+                            ? "border-b-2 border-primary-600 text-primary-600"
+                            : "text-gray-500 hover:text-primary-600"
+                    }`}
                 >
                     Doctor Info
                 </button>
                 <button
                     onClick={() => setTab("account")}
-                    className={`px-4 py-2 font-semibold transition ${tab === "account" ? "border-b-2 border-primary-600 text-primary-600" : "text-gray-500 hover:text-primary-600"}`}
+                    className={`px-4 py-2 font-semibold transition ${
+                        tab === "account"
+                            ? "border-b-2 border-primary-600 text-primary-600"
+                            : "text-gray-500 hover:text-primary-600"
+                    }`}
                 >
                     Account Info
                 </button>
@@ -152,7 +168,13 @@ const DoctorInformation = () => {
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {[["fullName", "Full Name"], ["specialization", "Specialization"], ["experience", "Experience"], ["qualification", "Qualification"], ["hospital", "Hospital"]].map(([field, label]) => (
+                            {[
+                                ["fullName", "Full Name"],
+                                ["specialization", "Specialization"],
+                                ["experience", "Experience"],
+                                ["qualification", "Qualification"],
+                                ["hospital", "Hospital"],
+                            ].map(([field, label]) => (
                                 <input
                                     key={field}
                                     name={field}
@@ -198,7 +220,11 @@ const DoctorInformation = () => {
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {[["username", "Username"], ["email", "Email"], ["phone", "Phone"]].map(([field, label]) => (
+                            {[
+                                ["username", "Username"],
+                                ["email", "Email"],
+                                ["phone", "Phone"],
+                            ].map(([field, label]) => (
                                 <input
                                     key={field}
                                     name={field}

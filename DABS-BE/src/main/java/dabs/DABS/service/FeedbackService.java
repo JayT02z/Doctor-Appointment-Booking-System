@@ -43,14 +43,15 @@ public class FeedbackService {
             throw new RuntimeException("Feedback has already been created for this appointment");
         }
 
-        Patient patient = patientRepository.findById(request.getPatientId())
-                .orElseThrow(() -> new RuntimeException("Patient not found"));
         Appointment appointment = appointmentRepository.findById(request.getAppointmentId())
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
 
         if (!appointment.getStatus().equals(AppointmentStatus.COMPLETED)) {
             throw new RuntimeException("Feedback can only be created after the appointment is completed");
         }
+
+        Patient patient = patientRepository.findById(request.getPatientId())
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
 
         Feedback feedback = new Feedback();
         feedback.setPatient(patient);
