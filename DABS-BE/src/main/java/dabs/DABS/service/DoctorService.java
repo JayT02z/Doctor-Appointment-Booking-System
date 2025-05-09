@@ -73,6 +73,7 @@ public class DoctorService {
         doctor.setExperience(updateDoctorForm.getExperience());
 //        doctor.setRating(updateDoctorForm.getRating());
         doctor.setHospital(updateDoctorForm.getHospital());
+        doctor.setImgpath(updateDoctorForm.getImgpath());
         DoctorDTO doctorDTO = DoctorDTO.fromEntity(doctor);
 
         Doctor updatedDoctor = doctorRepository.save(doctor);
@@ -129,6 +130,8 @@ public ResponseEntity<ResponseData<Doctor>> addDoctor(RegisterDoctorForm doctorF
     doctor.setQualification(doctorForm.getQualification());
     doctor.setHospital(doctorForm.getHospital());
     doctor.setUser(user);
+    doctor.setImgpath(doctorForm.getImgpath());
+
 
     // Lưu vào DB
     Doctor savedDoctor = doctorRepository.save(doctor);

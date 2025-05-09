@@ -44,4 +44,6 @@ public class Patient {
     @Size(max = 5000, message = "Tiền sử bệnh tối đa 5000 ký tự")
     @Column(columnDefinition = "TEXT")
     private String medicalHistory;
+
+    private String imgpath;
 }

@@ -34,6 +34,7 @@ public class RegisterDoctorForm {
     @Size(min = 3, max = 200, message = "Hospital phải có độ dài từ 3 đến 200 ký tự")
     private String hospital;
 
+    private String imgpath;
 //    @Min(value = 0, message = "Rating phải lớn hơn hoặc bằng 0")
 //    @Max(value = 5, message = "Rating không thể lớn hơn 5")
 //    private Double rating;

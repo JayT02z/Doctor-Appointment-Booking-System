@@ -31,6 +31,7 @@ public class UpdateDoctorForm {
     @Size(min = 3, max = 100, message = "Tên bệnh viện phải có độ dài từ 3 đến 100 ký tự")  // Đảm bảo độ dài hợp lý
     private String hospital;
 
+    private String imgpath;
 //    @DecimalMin(value = "0.0", inclusive = false, message = "Đánh giá phải lớn hơn 0")  // Đảm bảo đánh giá là số dương
 //    @DecimalMax(value = "5.0", inclusive = true, message = "Đánh giá không được vượt quá 5")  // Đảm bảo đánh giá không vượt quá 5
     private Double rating;

@@ -47,4 +47,6 @@ public class Doctor {
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
     private List<ServiceEntity> service;
+
+    private String imgpath;
 }

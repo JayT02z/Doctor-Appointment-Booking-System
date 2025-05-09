@@ -42,4 +42,6 @@ public class UpdatePatientrForm {
     @NotBlank(message = "Lịch sử bệnh lý là bắt buộc")  // Đảm bảo trường này không rỗng
     @Size(min = 10, message = "Lịch sử bệnh lý phải có độ dài ít nhất 10 ký tự")  // Đảm bảo độ dài hợp lý
     private String medicalHistory;
+
+    private String imgpath;
 }

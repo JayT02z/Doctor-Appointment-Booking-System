@@ -20,7 +20,6 @@ public class PrescriptionDTO {
     private String doctorName; // Newly added field
     private Long patientId;
     private String patientName; // Newly added field
-    private List<Long> medicineIds;
     private List<String> medicineNames;
     public static PrescriptionDTO mapToDTO(Prescription prescription) {
         PrescriptionDTO dto = new PrescriptionDTO();
@@ -38,10 +37,6 @@ public class PrescriptionDTO {
 
         dto.setPatientId(prescription.getPatient().getId());
         dto.setPatientName(prescription.getPatient().getFullName());
-
-        dto.setMedicineIds(
-                prescription.getMedicines().stream().map(Medicine::getId).toList()
-        );
 
         dto.setMedicineNames(
                 prescription.getMedicines().stream().map(Medicine::getName).toList()

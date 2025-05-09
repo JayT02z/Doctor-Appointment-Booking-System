@@ -33,4 +33,6 @@ public class RegisterPatientForm {
 
     @Size(max = 2000, message = "Lịch sử bệnh không được vượt quá 2000 ký tự")
     private String medicalHistory;
+
+    private String imgpath;
 }

@@ -66,6 +66,7 @@ public class PatientService {
         patients.setGender(patient.getGender());
         patients.setAddress(patient.getAddress());
         patients.setMedicalHistory(patient.getMedicalHistory());
+        patients.setImgpath(patient.getImgpath());
 
         patientRepository.save(patients);
 
@@ -88,6 +89,7 @@ public class PatientService {
         patients.setGender(patientForm.getGender());
         patients.setAddress(patientForm.getAddress());
         patients.setMedicalHistory(patientForm.getMedicalHistory());
+        patients.setImgpath(patientForm.getImgpath());
 
         users.setEmail(patientForm.getEmail());
         users.setPhone(patientForm.getPhone());

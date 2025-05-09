@@ -75,7 +75,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/users/all").hasRole("ADMIN")
 
                         // --- Private Endpoints: PATIENT or ADMIN ---
-                        .requestMatchers("/api/patient/**").hasAnyRole("PATIENT", "ADMIN")
+                        .requestMatchers("/api/patient/**").permitAll()
 
                         // --- Private Endpoints: DOCTOR or ADMIN ---
                         .requestMatchers("/api/doctor/**").hasAnyRole("DOCTOR", "ADMIN")
