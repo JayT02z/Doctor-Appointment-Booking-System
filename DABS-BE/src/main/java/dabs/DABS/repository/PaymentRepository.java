@@ -9,6 +9,5 @@ import java.util.List;
 
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
-    @Query("SELECT p FROM Payment p WHERE p.appointment.patient.id = :patientId")
-    List<Payment> findAllByPatientId(@Param("patientId") Long patientId);
+    List<Payment> findByAppointment_Patient_Id(long id);
 }
