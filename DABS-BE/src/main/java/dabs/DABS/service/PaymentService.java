@@ -59,7 +59,7 @@ public class PaymentService {
     }
 
     public ResponseEntity<ResponseData<List<PaymentDTO>>> getpaymentBypatient(Long patientId) {
-        List<Payment> payments = paymentRepository.findByAppointment_Patient_Id(patientId);
+        List<Payment> payments = paymentRepository.findByAppointment_Id(patientId);
         List<PaymentDTO> paymentDTOs = payments.stream()
                 .map(PaymentDTO::new)
                 .toList();
