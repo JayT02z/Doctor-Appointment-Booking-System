@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -39,8 +41,7 @@ public class ServiceEntity {
     @Column(nullable = false)
     private Boolean isActive = true;
 
+    @ManyToMany(mappedBy = "services")
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "doctor_id")
-    private Doctor doctor;
+    private List<Doctor> doctors;
 }

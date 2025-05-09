@@ -45,8 +45,13 @@ public class Doctor {
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Schedule> availability;
 
-    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
-    private List<ServiceEntity> service;
+    @ManyToMany
+    @JoinTable(
+            name = "doctor_service",
+            joinColumns = @JoinColumn(name = "doctor_id"),
+            inverseJoinColumns = @JoinColumn(name = "service_id")
+    )
+    private List<ServiceEntity> services;
 
     private String imgpath;
 }

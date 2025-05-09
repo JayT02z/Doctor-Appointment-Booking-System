@@ -31,8 +31,8 @@ public class DoctorDTO {
                 .hospital(doctor.getHospital())
                 .userId(doctor.getUser() != null ? doctor.getUser().getId() : null)
                 .services(
-                        doctor.getService() != null
-                                ? doctor.getService().stream()
+                        doctor.getServices() != null
+                                ? doctor.getServices().stream()
                                 .map(ServiceDTO::fromEntity)
                                 .collect(Collectors.toList())
                                 : null

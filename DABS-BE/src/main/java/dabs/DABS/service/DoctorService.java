@@ -162,7 +162,7 @@ public ResponseEntity<ResponseData<Doctor>> addDoctor(RegisterDoctorForm doctorF
     }
 
     public  ResponseEntity<ResponseData<List<DoctorDTO>>> getDoctorByServiceId(Long id) {
-        List<Doctor> doctor = doctorRepository.findAllByServiceId(id);
+        List<Doctor> doctor = doctorRepository.findAllByServicesId(id);
         List<DoctorDTO> dtoList = doctor.stream()
                 .map(DoctorDTO::fromEntity)
                 .toList();

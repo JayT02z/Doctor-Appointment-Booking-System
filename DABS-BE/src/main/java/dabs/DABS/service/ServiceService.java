@@ -102,7 +102,7 @@ public class ServiceService {
         if (services.isEmpty()) {
             throw new RuntimeException("Không tìm thấy dịch vụ nào phù hợp với danh sách ID đã cung cấp");
         }
-        doctor.setService(services);
+        doctor.setServices(services);
         doctorRepository.save(doctor);
         DoctorDTO dto = DoctorDTO.fromEntity(doctor);
 
@@ -114,19 +114,24 @@ public class ServiceService {
     }
 
     public ResponseEntity<ResponseData<DoctorDTO>> updateDoctorServices(CreateServiceForm request) {
+        // 1. Tìm bác sĩ theo ID
         Doctor doctor = doctorRepository.findById(request.getDoctorId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy bác sĩ với ID: " + request.getDoctorId()));
+
+        // 2. Lấy danh sách dịch vụ mới theo ID
         List<ServiceEntity> newServices = serviceRepository.findAllById(request.getServices());
-        newServices.forEach(service -> service.setDoctor(doctor));
-        List<ServiceEntity> currentServices = doctor.getService();
-        if (currentServices != null) {
-            currentServices.forEach(service -> service.setDoctor(null));
+
+        if (newServices.isEmpty()) {
+            throw new RuntimeException("Không tìm thấy dịch vụ nào phù hợp với danh sách ID đã cung cấp");
         }
 
-        doctor.setService(newServices);
+        // 3. Gán danh sách dịch vụ mới cho bác sĩ
+        doctor.setServices(newServices);
 
+        // 4. Lưu bác sĩ đã cập nhật dịch vụ
         doctorRepository.save(doctor);
 
+        // 5. Trả về phản hồi
         return ResponseEntity.ok(
                 new ResponseData<>(
                         StatusApplication.SUCCESS.getCode(),
@@ -135,6 +140,8 @@ public class ServiceService {
                 )
         );
     }
+
+
 
     public ResponseEntity<ResponseData<List<ServiceDTO>>> searchServices(String keyword) {
         List<ServiceEntity> services = serviceRepository.findByNameContainingIgnoreCase(keyword);

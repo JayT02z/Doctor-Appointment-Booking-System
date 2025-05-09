@@ -67,7 +67,8 @@ public class SecurityConfig {
                                 "/api/doctor/search",
                                 "/api/services/search",
                                 "/api/v1/auth/changerole",
-                                "/api/v1/auth/forgetpassword").permitAll()
+                                "/api/v1/auth/forgetpassword",
+                                "/api/schedules/doctorschedules/**").permitAll()
 
                         // --- Private Endpoints: ADMIN only ---
                         .requestMatchers("/api/doctor/create").permitAll()
@@ -79,7 +80,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/patient/**").permitAll()
 
                         // --- Private Endpoints: DOCTOR or ADMIN ---
-                        .requestMatchers("/api/doctor/**").hasAnyRole("DOCTOR", "ADMIN")
+                        .requestMatchers("/api/doctor/**").permitAll()
 
                         // --- Any other requests ---
                         .anyRequest().authenticated()
