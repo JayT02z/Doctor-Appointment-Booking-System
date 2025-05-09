@@ -4,6 +4,7 @@ import dabs.DABS.model.DTO.UserDTO;
 import dabs.DABS.model.Entity.Users;
 import dabs.DABS.model.Response.ResponseData;
 import dabs.DABS.model.request.ChangeRole;
+import dabs.DABS.model.request.ForgetPasswordForm;
 import dabs.DABS.model.request.RegistrationRequest;
 import dabs.DABS.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,5 +53,10 @@ public class UsersController {
     @PostMapping("/changerole")
     public ResponseEntity<ResponseData<UserDTO>> changeRole(@RequestBody ChangeRole role){
         return usersService.changeRole(role);
+    }
+
+    @PostMapping("/forgetpassword")
+    public  ResponseEntity<ResponseData<Void>> forgetPassword(@RequestBody ForgetPasswordForm form){
+        return usersService.forgetPassword(form);
     }
 }

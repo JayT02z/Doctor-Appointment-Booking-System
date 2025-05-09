@@ -66,7 +66,8 @@ public class SecurityConfig {
                                 "/api/prescription/mail",
                                 "/api/doctor/search",
                                 "/api/services/search",
-                                "/api/v1/auth/changerole").permitAll()
+                                "/api/v1/auth/changerole",
+                                "/api/v1/auth/forgetpassword").permitAll()
 
                         // --- Private Endpoints: ADMIN only ---
                         .requestMatchers("/api/doctor/create").permitAll()

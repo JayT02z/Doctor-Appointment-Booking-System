@@ -12,6 +12,7 @@ import dabs.DABS.model.Entity.Users;
 import dabs.DABS.model.Response.AuthResponse;
 import dabs.DABS.model.Response.ResponseData;
 import dabs.DABS.model.request.ChangeRole;
+import dabs.DABS.model.request.ForgetPasswordForm;
 import dabs.DABS.model.request.LoginRequest;
 import dabs.DABS.model.request.RegistrationRequest;
 import dabs.DABS.repository.DoctorRepository;
@@ -245,6 +246,20 @@ public class UsersService {
                 StatusApplication.SUCCESS.getMessage(),
                 userDTO
         ));
+
+    }
+
+    public ResponseEntity<ResponseData<Void>> forgetPassword(ForgetPasswordForm form) {
+        Users optionalUser = usersRepository.findByEmail(form.getEmail()).orElseThrow(() -> new RuntimeException("User not found"));
+        optionalUser.setPassword(passwordEncoder.encode(form.getPassword()));
+
+        usersRepository.save(optionalUser);
+        return ResponseEntity.ok(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                null
+        ));
+
 
     }
 
