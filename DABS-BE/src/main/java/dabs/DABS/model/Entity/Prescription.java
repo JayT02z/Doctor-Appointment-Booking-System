@@ -54,12 +54,9 @@ public class Prescription {
     @JoinColumn(name = "patient_id")
     private Patient patient;
 
-    @NotNull(message = "Phải có ít nhất một loại thuốc")
-    @ManyToMany
-    @JoinTable(
-            name = "prescription_medicine",
-            joinColumns = @JoinColumn(name = "prescription_id"),
-            inverseJoinColumns = @JoinColumn(name = "medicine_id")
-    )
-    private List<Medicine> medicines;
+    @ElementCollection
+    @CollectionTable(name = "prescription_medicine_names", joinColumns = @JoinColumn(name = "prescription_id"))
+    @Column(name = "medicine_name")
+    private List<String> medicineNames;
+
 }

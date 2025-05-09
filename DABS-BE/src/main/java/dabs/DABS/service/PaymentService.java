@@ -90,7 +90,7 @@ public class PaymentService {
     }
 
     public ResponseEntity<ResponseData<Payment>> updatePayment(Long id,PaymentStatus status) {
-        Payment payment = paymentRepository.findById(id).get();
+        Payment payment = paymentRepository.findById(id).orElseThrow();
         payment.setStatus(status);
         paymentRepository.save(payment);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(

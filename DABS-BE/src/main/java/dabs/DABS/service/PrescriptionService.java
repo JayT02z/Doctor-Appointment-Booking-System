@@ -7,7 +7,6 @@ import dabs.DABS.repository.PrescriptionRepository;
 import dabs.DABS.repository.AppointmentRepository;
 import dabs.DABS.repository.DoctorRepository;
 import dabs.DABS.repository.PatientRepository;
-import dabs.DABS.repository.MedicineRepository;
 import dabs.DABS.Enum.StatusApplication;
 import dabs.DABS.Enum.Frequency;
 import dabs.DABS.model.request.PrescriptionRequest;
@@ -32,15 +31,14 @@ public class PrescriptionService {
 
     @Autowired
     private PatientRepository patientRepository;
-
-    @Autowired
-    private MedicineRepository medicineRepository;
+    
 
 
-    public ResponseEntity<ResponseData<PrescriptionDTO>> createRequest(PrescriptionRequest request){
+    public ResponseEntity<ResponseData<PrescriptionDTO>> createRequest(PrescriptionRequest request) {
         if (prescriptionRepository.existsByAppointment_Id(request.getAppointmentId())) {
             throw new RuntimeException("Appointment already has a prescription");
         }
+
         Prescription prescription = new Prescription();
 
         prescription.setDosage(request.getDosage());
@@ -54,21 +52,23 @@ public class PrescriptionService {
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
         Patient patient = patientRepository.findById(request.getPatientId())
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
-        List<Medicine> medicines = medicineRepository.findAllById(request.getMedicineIds());
 
         prescription.setAppointment(appointment);
         prescription.setDoctor(doctor);
         prescription.setPatient(patient);
-        prescription.setMedicines(medicines);
+
+        // Lấy danh sách tên thuốc từ request và gán
+        prescription.setMedicineNames(request.getMedicineIds());
 
         Prescription savedPrescription = prescriptionRepository.save(prescription);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
-            StatusApplication.SUCCESS.getCode(),
-            StatusApplication.SUCCESS.getMessage(),
-            PrescriptionDTO.mapToDTO(savedPrescription)
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                PrescriptionDTO.mapToDTO(savedPrescription)
         ));
     }
+
 
     public ResponseEntity<ResponseData<PrescriptionDTO>> updatePrescription(Long id, PrescriptionRequest request) {
         Prescription prescription = prescriptionRepository.findById(id)
@@ -78,6 +78,7 @@ public class PrescriptionService {
         prescription.setDuration(request.getDuration());
         prescription.setFrequency(Frequency.valueOf(request.getFrequency()));
         prescription.setDescription(request.getDescription());
+        prescription.setMedicineNames(request.getMedicineIds()); // chỉ còn 1 tên thuốc
 
         Appointment appointment = appointmentRepository.findById(request.getAppointmentId())
                 .orElseThrow(() -> new RuntimeException("Appointment not found"));
@@ -85,21 +86,20 @@ public class PrescriptionService {
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
         Patient patient = patientRepository.findById(request.getPatientId())
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
-        List<Medicine> medicines = medicineRepository.findAllById(request.getMedicineIds());
 
         prescription.setAppointment(appointment);
         prescription.setDoctor(doctor);
         prescription.setPatient(patient);
-        prescription.setMedicines(medicines);
 
         Prescription updatedPrescription = prescriptionRepository.save(prescription);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
-            StatusApplication.SUCCESS.getCode(),
-            StatusApplication.SUCCESS.getMessage(),
-            PrescriptionDTO.mapToDTO(updatedPrescription)
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                PrescriptionDTO.mapToDTO(updatedPrescription)
         ));
     }
+
 
     public ResponseEntity<ResponseData<List<PrescriptionDTO>>> getAllPrescriptions() {
         List<Prescription> prescriptions = prescriptionRepository.findAll();

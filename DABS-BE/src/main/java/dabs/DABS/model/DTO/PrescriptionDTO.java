@@ -1,6 +1,5 @@
 package dabs.DABS.model.DTO;
 
-import dabs.DABS.model.Entity.Medicine;
 import dabs.DABS.model.Entity.Prescription;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,12 +14,13 @@ public class PrescriptionDTO {
     private String frequency;
     private String description;
     private Long appointmentId;
-    private String appointmentSummary; // Newly added field
+    private String appointmentSummary;
     private Long doctorId;
-    private String doctorName; // Newly added field
+    private String doctorName;
     private Long patientId;
-    private String patientName; // Newly added field
+    private String patientName;
     private List<String> medicineNames;
+
     public static PrescriptionDTO mapToDTO(Prescription prescription) {
         PrescriptionDTO dto = new PrescriptionDTO();
         dto.setId(prescription.getId());
@@ -38,10 +38,10 @@ public class PrescriptionDTO {
         dto.setPatientId(prescription.getPatient().getId());
         dto.setPatientName(prescription.getPatient().getFullName());
 
-        dto.setMedicineNames(
-                prescription.getMedicines().stream().map(Medicine::getName).toList()
-        );
+        // Sửa chỗ này: giờ prescription chỉ có List<String> medicineNames
+        dto.setMedicineNames(prescription.getMedicineNames());
 
         return dto;
     }
 }
+

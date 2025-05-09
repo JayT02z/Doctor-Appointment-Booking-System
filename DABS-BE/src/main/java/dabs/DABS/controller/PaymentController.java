@@ -1,10 +1,13 @@
 package dabs.DABS.controller;
 
+import dabs.DABS.Enum.AppointmentStatus;
 import dabs.DABS.Enum.PaymentStatus;
 import dabs.DABS.model.DTO.PaymentDTO;
 import dabs.DABS.model.Entity.Payment;
 import dabs.DABS.model.Response.ResponseData;
+import dabs.DABS.model.request.AppointmentStatusForm;
 import dabs.DABS.model.request.PaymentForm;
+import dabs.DABS.model.request.PaymentStatusForm;
 import dabs.DABS.service.PaymentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +38,8 @@ public class PaymentController {
         return paymentService.addPayment(payment);
     }
 
-    @PutMapping("/confirmpayment")
-    public ResponseEntity<ResponseData<Payment>> confirmPayment(
-            @RequestParam Long paymentId,
-            @RequestParam PaymentStatus status
-    ) {
-        return paymentService.updatePayment(paymentId, status);
+    @PutMapping("/confirmpayment/{id}")
+    public ResponseEntity<ResponseData<Payment>> confirmPayment(@PathVariable Long id,@RequestBody PaymentStatusForm payment) {
+        return paymentService.updatePayment(id,payment.getStatus());
     }
 }
