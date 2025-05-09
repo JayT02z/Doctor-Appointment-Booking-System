@@ -15,6 +15,7 @@ import java.time.LocalDate;
 public class PatientDTO {
     private Long id;
     private String username;
+    private String email;
     private LocalDate dob;
     private String gender;
     private String address;
@@ -23,6 +24,7 @@ public class PatientDTO {
     public PatientDTO(Patient patient) {
         this.id = patient.getId();
         this.username = patient.getUser().getUsername();
+        this.email = patient.getUser().getEmail();
         this.dob = patient.getDob();
         this.gender = patient.getGender();
         this.address = patient.getAddress();

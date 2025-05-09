@@ -16,7 +16,6 @@ import java.time.LocalDate;
 public class AppointmentDTO {
     private Long id;
     private PatientDTO patientName;
-    private String patientEmail;
     private String doctorName;
     private String specialization;
     private String serviceName;
@@ -28,7 +27,6 @@ public class AppointmentDTO {
     public AppointmentDTO(Appointment appointment) {
         this.id = appointment.getId();
         this.patientName = new PatientDTO(appointment.getPatient());
-        this.patientEmail = appointment.getPatient() != null ? appointment.getPatient().getUser().getEmail() : "N/A";
         this.doctorName = appointment.getDoctor() != null && appointment.getDoctor().getUser() != null ? appointment.getDoctor().getUser().getUsername() : "N/A";
         this.specialization = appointment.getDoctor() != null ? appointment.getDoctor().getSpecialization() : "N/A";
         this.serviceName = appointment.getService() != null ? appointment.getService().getName() : "N/A";
