@@ -225,18 +225,30 @@ const DoctorDashboard = () => {
     }
   };
 
-  const handleSendPrescription = async (email, prescriptionId) => {
-    console.log("Prescription sent:", email, prescriptionId);
+  const handleSendPrescription = async (appointmentId, prescriptionId) => {
     try {
-      const res = await axios.post(
-          "http://localhost:8080/api/prescription/mail",
-          { email, prescriptionId }
-      );
-      if (res.data.statusCode === 200) {
-        toast.success("Prescription sent to patient's email!");
-        closePrescriptionModal();
+      // Gọi API để lấy thông tin chi tiết cuộc hẹn, bao gồm email của bệnh nhân
+      const appointmentRes = await axios.get(`http://localhost:8080/api/appointment/${appointmentId}`);
+
+      if (appointmentRes.data.statusCode === 200 && appointmentRes.data.data) {
+        const email = appointmentRes.data.data.patientName.email;
+
+        console.log("Prescription sent:", email, prescriptionId); // Log email và prescriptionId
+
+        // Gọi API để gửi email đơn thuốc
+        const sendRes = await axios.post(
+            "http://localhost:8080/api/prescription/mail",
+            { email: email, prescriptionId: prescriptionId } // Sử dụng email lấy được từ response
+        );
+
+        if (sendRes.data.statusCode === 200) {
+          toast.success("Prescription sent to patient's email!");
+          closePrescriptionModal();
+        } else {
+          toast.error("Failed to send prescription.");
+        }
       } else {
-        toast.error("Failed to send prescription.");
+        toast.error("Failed to fetch appointment details.");
       }
     } catch (error) {
       console.error("Error sending prescription:", error);
