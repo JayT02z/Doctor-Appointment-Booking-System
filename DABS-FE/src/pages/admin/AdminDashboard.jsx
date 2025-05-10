@@ -18,6 +18,10 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [activeSection, setActiveSection] = useState(null);
   const [payments, setPayments] = useState([]);
+  const [editingUser, setEditingUser] = useState(null);
+  const [newRole, setNewRole] = useState([]);
+  const [editingAppointmentStatus, setEditingAppointmentStatus] = useState(null);
+  const [newAppointmentStatus, setNewAppointmentStatus] = useState("");
 
   const itemsPerPage = 15;
   const [doctorPage, setDoctorPage] = useState(1);
@@ -79,6 +83,32 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleUpdateAppointmentStatus = async (appointmentId, newStatus) => {
+    try {
+      if (window.confirm("Bạn có chắc chắn muốn thay đổi trạng thái cuộc hẹn này?")) {
+        await axios.put(
+            `http://localhost:8080/api/appointment/status/${appointmentId}`,
+            { status: newStatus },
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+        );
+        toast.success("Trạng thái cuộc hẹn đã được cập nhật");
+
+        // Cập nhật state appointments
+        setAppointments(
+            appointments.map((appt) =>
+                appt.id === appointmentId ? { ...appt, status: newStatus } : appt
+            )
+        );
+        setEditingAppointmentStatus(null); // Reset trạng thái chỉnh sửa
+      }
+    } catch (error) {
+      console.error("Lỗi khi cập nhật trạng thái cuộc hẹn:", error);
+      toast.error("Không thể cập nhật trạng thái cuộc hẹn");
+    }
+  };
+
   const handleDeletePatient = async (id) => {
     try {
       await axios.delete(`http://localhost:8080/api/patient/delete/${id}`, {
@@ -122,7 +152,6 @@ const AdminDashboard = () => {
       toast.error(
           error.response?.data?.message || "Failed to confirm payment"
       );
-      // Hoàn tác optimistic update nếu có lỗi
       setPayments(
           payments.map((payment) =>
               payment.id === paymentId
@@ -130,6 +159,34 @@ const AdminDashboard = () => {
                   : payment
           )
       );
+    }
+  };
+
+  const handleEditRole = (user) => {
+    setEditingUser(user);
+    setNewRole(user.role);
+  };
+
+  const handleSaveRole = async () => {
+    try {
+      console.log("Saving role:", newRole, editingUser.id);
+      await axios.post(
+          "http://localhost:8080/api/v1/auth/changerole",
+          { id: editingUser.id, role: [newRole] },
+      );
+      toast.success("Role updated successfully");
+
+      // Cập nhật state users
+      setUsers(
+          users.map((user) =>
+              user.id === editingUser.id ? { ...user, role: newRole } : user
+          )
+      );
+
+      setEditingUser(null); // Reset trạng thái chỉnh sửa
+    } catch (error) {
+      console.error("Error updating role:", error);
+      toast.error("Failed to update role");
     }
   };
 
@@ -321,14 +378,14 @@ const AdminDashboard = () => {
                     <tr className="bg-gray-50">
                       <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Patient</th>
                       <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Doctor</th>
-                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Specialization</th>
                       <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Service</th>
                       <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Date</th>
                       <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Time
                         Slot
                       </th>
-                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Status</th>
-                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Notes</th>
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">
+                        Trạng thái
+                      </th>
                       <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">
                         Payment Status
                       </th>
@@ -341,7 +398,7 @@ const AdminDashboard = () => {
                     {paginatedAppointments.map((appt) => {
                       const payment = payments.find(
                           (p) => p.appointment.id === appt.id
-                      ); // Tìm thông tin thanh toán tương ứng
+                      );
 
                       return (
                           <tr key={appt.id}>
@@ -350,9 +407,6 @@ const AdminDashboard = () => {
                             </td>
                             <td className="px-6 py-4 border-b text-sm text-gray-700">
                               {appt.doctorName}
-                            </td>
-                            <td className="px-6 py-4 border-b text-sm text-gray-700">
-                              {appt.specialization}
                             </td>
                             <td className="px-6 py-4 border-b text-sm text-gray-700">
                               {appt.serviceName}
@@ -364,13 +418,50 @@ const AdminDashboard = () => {
                               {appt.timeSlot}
                             </td>
                             <td className="px-6 py-4 border-b text-sm text-gray-700">
-                              {appt.status}
+                              {editingAppointmentStatus === appt.id ? (
+                                  <select
+                                      value={newAppointmentStatus}
+                                      onChange={(e) => setNewAppointmentStatus(e.target.value)}
+                                  >
+                                    <option value="PENDING">PENDING</option>
+                                    <option value="CONFIRMED">CONFIRMED</option>
+                                    <option value="CANCELLED">CANCELLED</option>
+                                    <option value="COMPLETED">COMPLETED</option>
+                                  </select>
+                              ) : (
+                                  appt.status
+                              )}
+                            </td>
+                            <td className="px-6 py-4 border-b text-sm text-right">
+                              {editingAppointmentStatus === appt.id ? (
+                                  <>
+                                    <button
+                                        onClick={() => handleUpdateAppointmentStatus(appt.id, newAppointmentStatus)}
+                                        className="bg-green-500 hover:bg-green-700 text-white text-xs px-2 py-1 rounded mr-2"
+                                    >
+                                      Lưu
+                                    </button>
+                                    <button
+                                        onClick={() => setEditingAppointmentStatus(null)}
+                                        className="bg-gray-300 hover:bg-gray-400 text-gray-700 text-xs px-2 py-1 rounded"
+                                    >
+                                      Hủy
+                                    </button>
+                                  </>
+                              ) : (
+                                  <button
+                                      onClick={() => {
+                                        setEditingAppointmentStatus(appt.id);
+                                        setNewAppointmentStatus(appt.status);
+                                      }}
+                                      className="bg-blue-500 hover:bg-blue-700 text-white text-xs px-2 py-1 rounded"
+                                  >
+                                    Sửa
+                                  </button>
+                              )}
                             </td>
                             <td className="px-6 py-4 border-b text-sm text-gray-700">
-                              {appt.notes}
-                            </td>
-                            <td className="px-6 py-4 border-b text-sm text-gray-700">
-                              {payment ? payment.status : "N/A"} {/* Hiển thị trạng thái thanh toán */}
+                              {payment ? payment.status : "N/A"}
                             </td>
                             <td className="px-6 py-4 border-b text-sm text-right">
                               {payment && payment.status === "PENDING" && (
@@ -385,7 +476,7 @@ const AdminDashboard = () => {
                           </tr>
                       );
                     })}
-                  </tbody>
+                    </tbody>
                   </table>
                 </div>
                 <div className="flex justify-end mt-4 space-x-2">
@@ -416,6 +507,8 @@ const AdminDashboard = () => {
                         At
                       </th>
                       <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Status</th>
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Role</th>
+                      <th className="px-6 py-3 border-b text-left text-sm font-medium text-gray-500 uppercase">Edit</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -427,6 +520,53 @@ const AdminDashboard = () => {
                           <td className="px-6 py-4 border-b text-sm text-gray-700">{user.role}</td>
                           <td className="px-6 py-4 border-b text-sm text-gray-700">{user.createdAt?.slice(0, 3).join("-")}</td>
                           <td className="px-6 py-4 border-b text-sm text-gray-700">{user.status}</td>
+                          <td className="px-6 py-4 border-b text-sm text-gray-700">
+                            {editingUser === user ? (
+                                <select
+                                    value={newRole}
+                                    onChange={(e) => setNewRole(e.target.value)}
+                                >
+                                  <option value="DOCTOR">DOCTOR</option>
+                                  <option value="PATIENT">PATIENT</option>
+                                </select>
+                            ) : (
+                                user.role
+                            )}
+                          </td>
+                          <td className="px-6 py-4 border-b text-sm text-right">
+                            {editingUser === user ? (
+                                <>
+                                  <button
+                                      onClick={handleSaveRole}
+                                      className="bg-green-500 hover:bg-green-700 text-white text-xs px-2 py-1 rounded mr-2"
+                                  >
+                                    Save
+                                  </button>
+                                  <button
+                                      onClick={() => setEditingUser(null)}
+                                      className="bg-gray-300 hover:bg-gray-400 text-gray-700 text-xs px-2 py-1 rounded"
+                                  >
+                                    Cancel
+                                  </button>
+                                </>
+                            ) : (
+                                user.role === "PATIENT" || user.role === "DOCTOR" ? (
+                                    <button
+                                        onClick={() => handleEditRole(user)}
+                                        className="bg-blue-500 hover:bg-blue-700 text-white text-xs px-2 py-1 rounded"
+                                    >
+                                      Edit Role
+                                    </button>
+                                ) : (
+                                    <button
+                                        disabled
+                                        className="bg-gray-400 text-white text-xs px-2 py-1 rounded cursor-not-allowed"
+                                    >
+                                      Edit Role
+                                    </button>
+                                )
+                            )}
+                          </td>
                         </tr>
                     ))}
                     </tbody>
