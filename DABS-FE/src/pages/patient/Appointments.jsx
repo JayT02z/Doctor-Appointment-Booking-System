@@ -90,6 +90,15 @@ const Appointments = () => {
     setShowFeedbackModal(false);
   };
 
+  const formatTimeSlot = (slot) => {
+    if (!slot) return "";
+    const parts = slot.replace("SLOT_", "").split("_");
+    if (parts.length === 2) {
+      return `${parts[0]}:00 - ${parts[1]}:00`;
+    }
+    return slot;
+  };
+
   if (loading) {
     return (
         <div className="flex justify-center items-center h-64">
@@ -151,11 +160,14 @@ const Appointments = () => {
                               Dr. {appointment.doctorName}
                             </h3>
                             <p className="text-sm text-gray-500">
-                              {dayjs(appointment.date).format("YYYY-MM-DD")} at{" "}
-                              {appointment.timeSlot}
+                              {dayjs(appointment.date).format("DD-MM-YYYY")} at{" "}
+                              {formatTimeSlot(appointment.timeSlot)}
                             </p>
                             <p className="text-sm text-gray-500 mt-1">
-                              {appointment.specialization}
+                              specialization: {appointment.specialization}
+                            </p>
+                            <p className="text-sm text-gray-500 mt-1">
+                              Note of patient: {appointment.notes}
                             </p>
                             {payment && (
                                 <>

@@ -24,7 +24,7 @@ const Home = () => {
             <div className="mt-5 max-w-md mx-auto sm:flex sm:justify-center md:mt-8">
               <div className="rounded-md shadow">
                 <Link
-                  to="/doctors"
+                  to="/patient/book-appointment"
                   className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 md:py-4 md:text-lg md:px-10"
                 >
                   Find a Doctor
@@ -32,7 +32,7 @@ const Home = () => {
               </div>
               <div className="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
                 <Link
-                  to="/services"
+                  to="/patient/book-appointment"
                   className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-primary-600 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10"
                 >
                   Our Services
@@ -76,12 +76,6 @@ const Home = () => {
                     >
                       Book New Appointment
                     </Link>
-                    <Link
-                      to="/patient/medical-history"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-md"
-                    >
-                      View Medical History
-                    </Link>
                   </div>
                 </div>
               </div>
@@ -95,20 +89,6 @@ const Home = () => {
                   <div className="mt-4">
                     <p className="text-sm text-gray-500">
                       No upcoming appointments
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Recent Medical History */}
-              <div className="bg-white overflow-hidden shadow rounded-lg">
-                <div className="px-4 py-5 sm:p-6">
-                  <h3 className="text-lg font-medium text-gray-900">
-                    Recent Medical History
-                  </h3>
-                  <div className="mt-4">
-                    <p className="text-sm text-gray-500">
-                      No recent medical history
                     </p>
                   </div>
                 </div>

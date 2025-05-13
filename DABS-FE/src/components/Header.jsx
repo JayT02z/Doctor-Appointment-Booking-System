@@ -26,7 +26,7 @@ const Header = () => {
               Home
             </Link>
             <Link
-              to="/doctors"
+              to="/patient/book-appointment"
               className="text-gray-600 hover:text-primary-600"
             >
               Find Doctors
