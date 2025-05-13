@@ -1,5 +1,6 @@
 package dabs.DABS.controller;
 
+import dabs.DABS.model.DTO.AppointmentDTO;
 import dabs.DABS.model.DTO.PrescriptionDTO;
 import dabs.DABS.model.Response.ResponseData;
 import dabs.DABS.model.request.PrecriptionEmail;
@@ -56,5 +57,10 @@ public class PrescriptionController {
     public ResponseEntity<ResponseData<Void>> sendMail(@Valid @RequestBody PrecriptionEmail request) throws MessagingException {
         PrescriptionDTO dto = PrescriptionDTO.mapToDTO(prescriptionRepository.findById(request.getPrescriptionId()).get());
         return mailSenderService.sendPrescriptionEmail(dto, request.getEmail());
+    }
+
+    @GetMapping("/appointment/{id}")
+    public ResponseEntity<ResponseData<PrescriptionDTO>> getbyAppointment(@PathVariable Long id) {
+        return prescriptionService.getPrescriptionbyAppId(id);
     }
 }

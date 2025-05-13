@@ -135,4 +135,16 @@ public class PrescriptionService {
             null
         ));
     }
+
+    public ResponseEntity<ResponseData<PrescriptionDTO>> getPrescriptionbyAppId(Long id) {
+        Prescription prescription = prescriptionRepository.findByAppointment_Id(id)
+                .orElseThrow(() -> new RuntimeException("Prescription not found"));
+
+        PrescriptionDTO dto = PrescriptionDTO.mapToDTO(prescription);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                dto
+        ));
+    }
 }
