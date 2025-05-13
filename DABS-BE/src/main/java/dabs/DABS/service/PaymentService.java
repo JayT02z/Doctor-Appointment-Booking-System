@@ -28,7 +28,7 @@ public class PaymentService {
 
     public ResponseEntity<ResponseData<PaymentDTO>> findByAppointmentById(Long paymentId){
         Payment payment = paymentRepository.findById(paymentId).get();
-        PaymentDTO paymentDTO = new PaymentDTO(payment);
+        PaymentDTO paymentDTO = new PaymentDTO(null, payment, payment.getStatus());
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
                 StatusApplication.SUCCESS.getMessage(),
@@ -49,7 +49,7 @@ public class PaymentService {
     public ResponseEntity<ResponseData<List<PaymentDTO>>> getallPayment() {
         List<Payment> payments = paymentRepository.findAll();
         List<PaymentDTO> paymentDTOs = payments.stream()
-                .map(PaymentDTO::new)
+                .map(payment -> new PaymentDTO(null, payment, payment.getStatus()))
                 .toList();
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
@@ -58,10 +58,10 @@ public class PaymentService {
         ));
     }
 
-    public ResponseEntity<ResponseData<List<PaymentDTO>>> getpaymentByAppId(Long patientId) {
+    public ResponseEntity<ResponseData<List<PaymentDTO>>> getpaymentBypatient(Long patientId) {
         List<Payment> payments = paymentRepository.findByAppointment_Id(patientId);
         List<PaymentDTO> paymentDTOs = payments.stream()
-                .map(PaymentDTO::new)
+                .map(payment -> new PaymentDTO(null, payment, payment.getStatus()))
                 .toList();
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
@@ -79,7 +79,7 @@ public class PaymentService {
         payment.setAmount(paymentForm.getAmount());
         paymentRepository.save(payment);
 
-        PaymentDTO paymentDTO = new PaymentDTO(payment);
+        PaymentDTO paymentDTO = new PaymentDTO(null, payment, payment.getStatus());
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
@@ -97,18 +97,7 @@ public class PaymentService {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
                 StatusApplication.SUCCESS.getMessage(),
-                new PaymentDTO(payment)
-        ));
-    }
-
-    public ResponseEntity<ResponseData<PaymentDTO>> getPaymentbyId(Long id) {
-        Payment payment = paymentRepository.findById(id).get();
-        PaymentDTO paymentDTO = new PaymentDTO(payment);
-
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
-                StatusApplication.SUCCESS.getCode(),
-                StatusApplication.SUCCESS.getMessage(),
-                paymentDTO
+                new PaymentDTO(null, payment, payment.getStatus())
         ));
     }
 }
