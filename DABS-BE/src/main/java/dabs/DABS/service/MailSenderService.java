@@ -137,14 +137,7 @@ public class MailSenderService {
     }
 
     public ResponseEntity<ResponseData<Void>> sendPrescriptionEmail(PrescriptionDTO dto, String toEmail) throws MessagingException {
-        MimeMessage message = emailSender.createMimeMessage();
-
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-        helper.setTo(toEmail);
-        helper.setSubject("Đơn thuốc từ bác sĩ " + dto.getDoctorName());
-        helper.setFrom("anhoa1794@gmail.com");
-
+        // Tạo nội dung Thymeleaf
         Context context = new Context();
         context.setVariable("id", dto.getId());
         context.setVariable("dosage", dto.getDosage());
@@ -155,8 +148,15 @@ public class MailSenderService {
         context.setVariable("patientName", dto.getPatientName());
         context.setVariable("medicineNames", dto.getMedicineNames());
 
-        String htmlContent = templateEngine.process("PrescriptionTemplate.html", context);
-        helper.setText(htmlContent, true);
+        String htmlContent = templateEngine.process("PrescriptionTemplate", context); // Không cần .html nếu là Thymeleaf template
+
+        // Gửi email
+        MimeMessage message = emailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+        helper.setTo(toEmail);
+        helper.setSubject("Đơn thuốc từ bác sĩ " + dto.getDoctorName());
+        helper.setText(htmlContent, true); // true = HTML
 
         emailSender.send(message);
 
@@ -166,6 +166,7 @@ public class MailSenderService {
                 null
         ));
     }
+
 }
 
 
