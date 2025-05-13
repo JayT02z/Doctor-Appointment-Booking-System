@@ -30,7 +30,7 @@ public class PaymentController {
 
     @GetMapping("/patient/{id}")
     public ResponseEntity<ResponseData<List<PaymentDTO>>> getPatientById(@PathVariable Long id) {
-        return paymentService.getpaymentBypatient(id);
+        return paymentService.getpaymentByAppId(id);
     }
 
     @PostMapping("/add")
@@ -41,5 +41,10 @@ public class PaymentController {
     @PutMapping("/confirmpayment/{id}")
     public ResponseEntity<ResponseData<PaymentDTO>> confirmPayment(@PathVariable Long id,@RequestBody PaymentStatusForm payment) {
         return paymentService.updatePayment(id,payment.getStatus());
+    }
+
+    @GetMapping("/get/{id}")
+    public ResponseEntity<ResponseData<PaymentDTO>> getPaymentById(@PathVariable Long id) {
+        return paymentService.getPaymentbyId(id);
     }
 }
