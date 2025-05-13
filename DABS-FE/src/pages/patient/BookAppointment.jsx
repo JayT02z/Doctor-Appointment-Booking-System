@@ -114,16 +114,14 @@ const BookAppointment = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    console.log("handleInput - name:", name, "value:", value); // Thêm log
-
     if (name === 'serviceId' && selectedDoctor) {
-      const selectedService = selectedDoctor.services.find(s => s.id === value);
+      const selectedService = selectedDoctor.services.find(s => s.id === Number(e.target.value));
 
-      console.log("handleInput - selectedService:", selectedService); // Thêm log
-
-      setSelectedServicePrice(selectedService ? selectedService.price : 0);
-
-      console.log("handleInput - selectedServicePrice:", selectedServicePrice); // Thêm log
+      if (selectedService) {
+        setSelectedServicePrice(selectedService.price);
+      } else {
+        setSelectedServicePrice(0);
+      }
     }
   };
 
@@ -156,6 +154,14 @@ const BookAppointment = () => {
 
   const formatCurrency = (amount) => {
     return amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+  };
+
+  const formatTimeSlot = (slot) => {
+    const timeParts = slot.replace('SLOT_', '').split('_');
+    if (timeParts.length === 2) {
+      return `${timeParts[0]}:00 - ${timeParts[1]}:00`;
+    }
+    return slot;
   };
 
   return (
@@ -196,14 +202,14 @@ const BookAppointment = () => {
               </Dialog.Title>
 
               <form onSubmit={handleSubmit} className="space-y-4">
-              <textarea
-                  name="notes"
-                  value={formData.notes}
-                  onChange={handleInput}
-                  placeholder="Notes or reason for visit..."
-                  required
-                  className="w-full p-2 border rounded"
-              />
+                            <textarea
+                                name="notes"
+                                value={formData.notes}
+                                onChange={handleInput}
+                                placeholder="Notes or reason for visit..."
+                                required
+                                className="w-full p-2 border rounded"
+                            />
 
                 {selectedDoctor?.services?.length > 0 && (
                     <div>
@@ -259,7 +265,7 @@ const BookAppointment = () => {
                                           : 'bg-gray-100 hover:bg-gray-200'
                                   }`}
                               >
-                                {slot.replace('SLOT_', '').replace('_', ':')}
+                                {formatTimeSlot(slot)}
                               </button>
                           ))}
                     </div>

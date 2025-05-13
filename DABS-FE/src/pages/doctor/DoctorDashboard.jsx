@@ -4,6 +4,7 @@ import { toast } from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
 import Modal from 'react-modal';
+import app from "../../App.jsx";
 
 Modal.setAppElement('#root');
 
@@ -27,6 +28,11 @@ const DoctorDashboard = () => {
     medicineIds: [""],
   });
   const [createdPrescriptionId, setCreatedPrescriptionId] = useState(null);
+  const [isSending, setIsSending] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState({
+    accept: false,
+    reject: false,
+  })
 
   const { doctorId, user } = useAuth();
   const navigate = useNavigate();
@@ -127,6 +133,7 @@ const DoctorDashboard = () => {
   };
 
   const handleUpdateStatus = async (appointmentId, status) => {
+    setUpdatingStatus((prev) => ({ ...prev, [status === "CONFIRMED" ? "accept" : "reject"]: true })); // Bắt đầu cập nhật
     try {
       const res = await axios.put(
           `http://localhost:8080/api/appointment/status/${appointmentId}`,
@@ -147,6 +154,8 @@ const DoctorDashboard = () => {
     } catch (err) {
       console.error("Failed to update status", err);
       toast.error("Update failed");
+    } finally {
+      setUpdatingStatus((prev) => ({ ...prev, [status === "CONFIRMED" ? "accept" : "reject"]: false })); // Kết thúc cập nhật
     }
   };
 
@@ -155,7 +164,7 @@ const DoctorDashboard = () => {
     if (!match) return slot;
     const from = match[1];
     const to = match[2];
-    return to ? `${from}h - ${to}h` : `${from}h`;
+    return to ? `${from}:00 - ${to}:00` : `${from}:00`;
   };
 
   const openPatientDetailModal = (patient) => {
@@ -225,34 +234,49 @@ const DoctorDashboard = () => {
     }
   };
 
-  const handleSendPrescription = async (appointmentId, prescriptionId) => {
+  const handleSendPrescription = async () => {
+    console.log("handleSendPrescription called with:", { createdPrescriptionId });
+    console.log("Type of prescriptionId:", typeof createdPrescriptionId);
+    console.log("Selected patient email:", selectedPatient.patientName.email);
+
+    setIsSending(true); // Bắt đầu gửi
+
     try {
-      // Gọi API để lấy thông tin chi tiết cuộc hẹn, bao gồm email của bệnh nhân
-      const appointmentRes = await axios.get(`http://localhost:8080/api/appointment/${appointmentId}`);
+      const email = selectedPatient.patientName.email;
+      console.log("Prescription sent to:", email, createdPrescriptionId);
 
-      if (appointmentRes.data.statusCode === 200 && appointmentRes.data.data) {
-        const email = appointmentRes.data.data.patientName.email;
-
-        console.log("Prescription sent:", email, prescriptionId); // Log email và prescriptionId
-
-        // Gọi API để gửi email đơn thuốc
-        const sendRes = await axios.post(
-            "http://localhost:8080/api/prescription/mail",
-            { email: email, prescriptionId: prescriptionId } // Sử dụng email lấy được từ response
-        );
-
-        if (sendRes.data.statusCode === 200) {
-          toast.success("Prescription sent to patient's email!");
-          closePrescriptionModal();
-        } else {
-          toast.error("Failed to send prescription.");
+      const sendRes = await axios.post(
+          "http://localhost:8080/api/prescription/mail",
+          { email: email, prescriptionId: createdPrescriptionId }
+      );
+      if (sendRes.data.statusCode === 200) {
+        toast.success("Prescription sent to patient's email!");
+        closePrescriptionModal();
+        // Gọi API để cập nhật trạng thái cuộc hẹn
+        try {
+          const appointmentId = selectedPatient.id; // Lấy appointmentId từ selectedPatient
+          const updateRes = await axios.put(
+              `http://localhost:8080/api/appointment/status/${appointmentId}`,
+              { status: "COMPLETED" }
+          );
+          if (updateRes.data.statusCode === 200) {
+            toast.success("Appointment status updated to COMPLETED!");
+            fetchAppointments(); // Cập nhật lại danh sách cuộc hẹn
+          } else {
+            toast.error("Failed to update appointment status.");
+          }
+        } catch (updateError) {
+          console.error("Error updating appointment status:", updateError);
+          toast.error("Error updating appointment status.");
         }
       } else {
-        toast.error("Failed to fetch appointment details.");
+        toast.error("Failed to send prescription.");
       }
     } catch (error) {
       console.error("Error sending prescription:", error);
       toast.error("Error sending prescription.");
+    } finally {
+      setIsSending(false); // Kết thúc gửi (dù thành công hay thất bại)
     }
   };
 
@@ -335,7 +359,7 @@ const DoctorDashboard = () => {
                                 onClick={() => openPatientDetailModal(appointment.patientName)}
                                 className="hover:underline text-blue-600 focus:outline-none" // Thêm focus:outline-none
                             >
-                              {appointment.patientName.username}
+                              Patient: {appointment.patientName.username}
                             </button>
                           </h3>
                           <p className="text-sm text-gray-500">
@@ -382,18 +406,24 @@ const DoctorDashboard = () => {
                       {["today", "upcoming"].includes(activeTab) &&
                           appointment.status === "PENDING" && (
                               <div className="mt-4 flex justify-end space-x-2">
-                                <button
-                                    onClick={() => handleUpdateStatus(appointment.id, "CONFIRMED")}
-                                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-                                >
-                                  Accept
-                                </button>
-                                <button
-                                    onClick={() => handleUpdateStatus(appointment.id, "CANCELLED")}
-                                    className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-                                >
-                                  Reject
-                                </button>
+                                {!updatingStatus.reject && ( // Chỉ hiển thị khi !updatingStatus.reject
+                                    <button
+                                        onClick={() => handleUpdateStatus(appointment.id, "CONFIRMED")}
+                                        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                                        disabled={updatingStatus.accept}
+                                    >
+                                      {updatingStatus.accept ? "Updating..." : "Accept"}
+                                    </button>
+                                )}
+                                {!updatingStatus.accept && (  // Chỉ hiển thị khi !updatingStatus.accept
+                                    <button
+                                        onClick={() => handleUpdateStatus(appointment.id, "CANCELLED")}
+                                        className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                                        disabled={updatingStatus.reject}
+                                    >
+                                      {updatingStatus.reject ? "Updating..." : "Reject"}
+                                    </button>
+                                )}
                               </div>
                           )}
 
@@ -570,10 +600,11 @@ const DoctorDashboard = () => {
             </button>
             {createdPrescriptionId && (
                 <button
-                    onClick={() => handleSendPrescription(selectedPatient.email, createdPrescriptionId)}
+                    onClick={() => handleSendPrescription()}
                     className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none"
+                    disabled={isSending}
                 >
-                  Send Prescription
+                  {isSending ? "Sending..." : "Send Prescription"}
                 </button>
             )}
           </div>
