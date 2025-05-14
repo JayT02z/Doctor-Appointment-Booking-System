@@ -138,6 +138,7 @@ public class PaymentController {
         payment.setPaymentMethod(paymentForm.getPaymentMethod());
         payment.setStatus(PaymentStatus.PENDING);
         payment.setAmount(amount / 100.0);
+        payment.setTxnRef(vnp_TxnRef); // thêm dòng này nếu có field txnRef trong Payment
         paymentRepository.save(payment);
 
         PaymentDTO paymentDTO = new PaymentDTO(paymentUrl, payment, PaymentStatus.PENDING);
@@ -157,23 +158,38 @@ public class PaymentController {
     public ResponseEntity<?> transaction(
             @RequestParam(value = "vnp_Amount") String amount,
             @RequestParam(value = "vnp_BankCode") String bankCode,
-            @RequestParam(value = "vnp_OrderInfo") String oderInfo,
-            @RequestParam(value = "vnp_ResponseCode") String responseCode
+            @RequestParam(value = "vnp_OrderInfo") String orderInfo,
+            @RequestParam(value = "vnp_ResponseCode") String responseCode,
+            @RequestParam(value = "vnp_TxnRef") String txnRef
     ) {
         TransactionStatusDTO transactionStatusDTO = new TransactionStatusDTO();
-        if(responseCode.equals("00")) {
-            transactionStatusDTO.setStatus("Ok");
-            transactionStatusDTO.setMessage("Thanh toán thành công");
 
+        // Tìm Payment dựa trên txnRef
+        Optional<Payment> optionalPayment = paymentRepository.findByTxnRef(txnRef);
+        if (optionalPayment.isPresent()) {
+            Payment payment = optionalPayment.get();
+
+            if ("00".equals(responseCode)) {
+                payment.setStatus(PaymentStatus.PAID);
+                paymentRepository.save(payment);
+
+                transactionStatusDTO.setStatus("Ok");
+                transactionStatusDTO.setMessage("Thanh toán thành công");
+            } else {
+                transactionStatusDTO.setStatus("No");
+                transactionStatusDTO.setMessage("Thanh toán thất bại");
+            }
         } else {
-            transactionStatusDTO.setStatus("No");
-            transactionStatusDTO.setMessage("Thanh toán thất bại");
+            transactionStatusDTO.setStatus("Error");
+            transactionStatusDTO.setMessage("Không tìm thấy giao dịch");
         }
+
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
                 StatusApplication.SUCCESS.getMessage(),
                 transactionStatusDTO
-        ));    }
+        ));
+    }
 
 
         @PostMapping("/add")

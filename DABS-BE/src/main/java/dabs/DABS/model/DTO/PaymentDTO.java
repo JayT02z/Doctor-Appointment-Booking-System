@@ -19,7 +19,7 @@ public class PaymentDTO implements Serializable {
     private PaymentMethod paymentMethod;
     private PaymentStatus status;
     private String URL;
-
+    private String txnRef;
     public PaymentDTO() {
         this.url = null; // bắt buộc gán vì 'final'
     }

@@ -39,6 +39,8 @@ public class Payment {
     @NotNull(message = "Trạng thái thanh toán không được để trống")
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
+    @Column(name = "txn_ref")
+    private String txnRef;
 
     private LocalDate paymentDate;
 }
