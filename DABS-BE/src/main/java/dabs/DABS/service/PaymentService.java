@@ -111,4 +111,16 @@ public class PaymentService {
                 paymentDTO
         ));
     }
+
+    public ResponseEntity<ResponseData<List<PaymentDTO>>> getPaymentbyPatientID(Long id) {
+        List<Payment> payments = paymentRepository.findByAppointment_Patient_Id(id);
+        List<PaymentDTO> paymentDTOs = payments.stream()
+                .map(PaymentDTO::new)
+                .toList();
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                paymentDTOs
+        ));
+    }
 }
