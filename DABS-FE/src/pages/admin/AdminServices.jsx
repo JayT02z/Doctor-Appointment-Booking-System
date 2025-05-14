@@ -131,7 +131,9 @@ const AdminServices = () => {
                             <tr key={s.id} className="hover:bg-gray-50">
                                 <td className="p-2 border text-center">{s.name}</td>
                                 <td className="p-2 border text-center">{s.description}</td>
-                                <td className="p-2 border text-center">{s.price}</td>
+                                <td className="p-2 border text-center">
+                                    {Number(s.price).toLocaleString("vi-VN", {style: "currency", currency: "VND"})}
+                                </td>
                                 <td className="p-2 border text-center">{s.isActive ? "Active" : "Inactive"}</td>
                                 <td className="p-2 border text-center space-x-2">
                                     <button
@@ -151,7 +153,7 @@ const AdminServices = () => {
                         ))}
                         {services.length === 0 && (
                             <tr>
-                                <td colSpan="5" className="text-center p-4 text-gray-500">
+                            <td colSpan="5" className="text-center p-4 text-gray-500">
                                     No services found.
                                 </td>
                             </tr>

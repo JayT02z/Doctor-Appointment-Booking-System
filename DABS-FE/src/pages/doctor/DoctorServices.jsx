@@ -93,7 +93,9 @@ const DoctorServices = () => {
                     >
                         <h4 className="font-semibold text-lg mb-1">{service.name}</h4>
                         <p className="text-sm text-gray-600">{service.description}</p>
-                        <p className="text-sm text-gray-700">Giá: ${service.price}</p>
+                        <p className="text-sm text-gray-700">
+                            Giá: {service.price.toLocaleString("vi-VN")}₫
+                        </p>
                     </div>
                 ))}
             </div>
@@ -104,13 +106,15 @@ const DoctorServices = () => {
                     <div key={service.id} className="p-4 rounded border shadow bg-gray-50">
                         <h4 className="font-semibold text-lg mb-1">{service.name}</h4>
                         <p className="text-sm text-gray-600">{service.description}</p>
-                        <p className="text-sm text-gray-700">Giá: ${service.price}</p>
+                        <p className="text-sm text-gray-700">
+                            Giá: {service.price.toLocaleString("vi-VN")}₫
+                        </p>
                     </div>
                 ))}
             </div>
 
             <div className="mt-6 text-right">
-                <button
+            <button
                     onClick={handleSave}
                     className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded"
                 >
