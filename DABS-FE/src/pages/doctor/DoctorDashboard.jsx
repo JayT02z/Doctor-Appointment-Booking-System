@@ -33,6 +33,8 @@ const DoctorDashboard = () => {
     accept: false,
     reject: false,
   })
+  const [isViewPrescriptionModalOpen, setIsViewPrescriptionModalOpen] = useState(false);
+  const [viewPrescriptionData, setViewPrescriptionData] = useState(null);
 
   const { doctorId, user } = useAuth();
   const navigate = useNavigate();
@@ -116,6 +118,26 @@ const DoctorDashboard = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchPrescriptionDetails = async (appointmentId) => {
+    try {
+      const res = await axios.get(`http://localhost:8080/api/prescription/appointment/${appointmentId}`);
+      if (res.data.statusCode === 200) {
+        setViewPrescriptionData(res.data.data);
+        setIsViewPrescriptionModalOpen(true);
+      } else {
+        toast.error("Failed to fetch prescription details.");
+      }
+    } catch (error) {
+      console.error("Error fetching prescription details:", error);
+      toast.error("Error fetching prescription details.");
+    }
+  };
+
+  const closeViewPrescriptionModal = () => {
+    setIsViewPrescriptionModalOpen(false);
+    setViewPrescriptionData(null);
   };
 
   const fetchFeedback = async (appointmentId) => {
@@ -428,26 +450,38 @@ const DoctorDashboard = () => {
                           )}
 
                       {appointment.status === "COMPLETED" && (
-                          <div className="mt-4 p-3 border rounded bg-gray-50">
-                            {feedbacks[appointment.id] ? (
-                                <>
-                                  <p className="text-sm font-semibold text-gray-700">
-                                    Patient Feedback
-                                  </p>
-                                  <p className="text-sm text-gray-600 mt-1">
-                                    <strong>Comment:</strong>{" "}
-                                    {feedbacks[appointment.id].feedbackText || "No comment provided."}
-                                  </p>
-                                  {feedbacks[appointment.id].rating && (
-                                      <p className="text-sm text-yellow-600 mt-1">
-                                        <strong>Rating:</strong> {ratingStringToNumber(feedbacks[appointment.id].rating)} / 5
-                                      </p>
-                                  )}
-                                </>
-                            ) : (
-                                <p className="text-sm italic text-gray-400">No feedback available.</p>
-                            )}
-                          </div>
+                          <>
+                            <div className="mt-4 flex justify-end">
+                              <button
+                                  onClick={() => fetchPrescriptionDetails(appointment.id)}
+                                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 focus:outline-none mr-2"
+                              >
+                                View Prescription
+                              </button>
+                            </div>
+                            <div className="mt-4 p-3 border rounded bg-gray-50">
+
+                              {feedbacks[appointment.id] ? (
+                                  <>
+                                    <p className="text-sm font-semibold text-gray-700">
+                                      Patient Feedback
+                                    </p>
+                                    <p className="text-sm text-gray-600 mt-1">
+                                      <strong>Comment:</strong>{" "}
+                                      {feedbacks[appointment.id].feedbackText || "No comment provided."}
+                                    </p>
+                                    {feedbacks[appointment.id].rating && (
+                                        <p className="text-sm text-yellow-600 mt-1">
+                                          <strong>Rating:</strong> {ratingStringToNumber(feedbacks[appointment.id].rating)} /
+                                          5
+                                        </p>
+                                    )}
+                                  </>
+                              ) : (
+                                  <p className="text-sm italic text-gray-400">No feedback available.</p>
+                              )}
+                            </div>
+                          </>
                       )}
                     </div>
                 ))}
@@ -464,7 +498,11 @@ const DoctorDashboard = () => {
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-gray-900">Patient Details</h2>
             <button onClick={closePatientDetailModal} className="text-gray-500 hover:text-gray-700 focus:outline-none">
-              <svg className="h-6 w-6 fill-current" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M6.293 6.293a1 1 0 011.414 0L10 8.586l2.293-2.293a1 1 0 111.414 1.414L11.414 10l2.293 2.293a1 1 0 01-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 01-1.414-1.414L8.586 10 6.293 7.707a1 1 0 010-1.414z"/></svg>
+              <svg className="h-6 w-6 fill-current" role="button" xmlns="http://www.w3.org/2000/svg"
+                   viewBox="0 0 20 20"><title>Close</title>
+                <path
+                    d="M6.293 6.293a1 1 0 011.414 0L10 8.586l2.293-2.293a1 1 0 111.414 1.414L11.414 10l2.293 2.293a1 1 0 01-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 01-1.414-1.414L8.586 10 6.293 7.707a1 1 0 010-1.414z"/>
+              </svg>
             </button>
           </div>
           {selectedPatient && (
@@ -607,6 +645,39 @@ const DoctorDashboard = () => {
                   {isSending ? "Sending..." : "Send Prescription"}
                 </button>
             )}
+          </div>
+        </Modal>
+
+        {/* View Prescription Modal */}
+        <Modal
+            isOpen={isViewPrescriptionModalOpen}
+            onRequestClose={closeViewPrescriptionModal}
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl p-6 w-full max-w-md outline-none"
+            overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
+        >
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold text-gray-900">Prescription Details</h2>
+            <button onClick={closeViewPrescriptionModal} className="text-gray-500 hover:text-gray-700 focus:outline-none">
+              {/* ... (close icon) */}
+              <svg className="h-6 w-6 fill-current" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M6.293 6.293a1 1 0 011.414 0L10 8.586l2.293-2.293a1 1 0 111.414 1.414L10 11.414l2.293 2.293a1 1 0 01-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 01-1.414-1.414L8.586 10 6.293 7.707a1 1 0 010-1.414z"/></svg>
+            </button>
+          </div>
+          {viewPrescriptionData && (
+              <div>
+                <p><strong>Dosage:</strong> {viewPrescriptionData.dosage}</p>
+                <p><strong>Duration:</strong> {viewPrescriptionData.duration} days</p>
+                <p><strong>Frequency:</strong> {viewPrescriptionData.frequency}</p>
+                <p><strong>Description:</strong> {viewPrescriptionData.description}</p>
+                <p><strong>Doctor:</strong> {viewPrescriptionData.doctorName}</p>
+                <p><strong>Patient:</strong> {viewPrescriptionData.patientName}</p>
+                <p><strong>Medicine Names:</strong> {viewPrescriptionData.medicineNames.join(", ")}</p>
+                {/* ... (add other details as needed) */}
+              </div>
+          )}
+          <div className="flex justify-end">
+            <button onClick={closeViewPrescriptionModal} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 focus:outline-none">
+              Close
+            </button>
           </div>
         </Modal>
       </div>
