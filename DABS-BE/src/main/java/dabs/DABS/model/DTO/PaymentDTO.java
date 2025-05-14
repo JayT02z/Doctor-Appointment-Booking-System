@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.util.Date;
 
 
 @Getter
@@ -20,6 +21,7 @@ public class PaymentDTO implements Serializable {
     private PaymentStatus status;
     private String URL;
     private String txnRef;
+    private Date paymentDate;
     public PaymentDTO() {
         this.url = null; // bắt buộc gán vì 'final'
     }
@@ -47,5 +49,6 @@ public PaymentDTO(String url, Payment payment, PaymentStatus status) {
     this.paymentMethod = payment.getPaymentMethod();
     this.status = payment.getStatus(); // optional
     this.status = status; // override
+    this.paymentDate = payment.getPaymentDate();
 }
 }

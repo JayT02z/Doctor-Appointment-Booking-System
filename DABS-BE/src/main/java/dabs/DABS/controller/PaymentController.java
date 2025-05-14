@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -160,7 +161,8 @@ public class PaymentController {
             @RequestParam(value = "vnp_BankCode") String bankCode,
             @RequestParam(value = "vnp_OrderInfo") String orderInfo,
             @RequestParam(value = "vnp_ResponseCode") String responseCode,
-            @RequestParam(value = "vnp_TxnRef") String txnRef
+            @RequestParam(value = "vnp_TxnRef") String txnRef,
+            @RequestParam(value = "vnp_PayDate") String payDate
     ) {
         TransactionStatusDTO transactionStatusDTO = new TransactionStatusDTO();
 
@@ -171,6 +173,13 @@ public class PaymentController {
 
             if ("00".equals(responseCode)) {
                 payment.setStatus(PaymentStatus.PAID);
+                try {
+                    SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+                    Date paymentDate = formatter.parse(payDate);
+                    payment.setPaymentDate(paymentDate);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
                 paymentRepository.save(payment);
 
                 transactionStatusDTO.setStatus("Ok");
