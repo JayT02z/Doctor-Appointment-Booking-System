@@ -1,6 +1,7 @@
 package dabs.DABS.model.Entity;
 
 import dabs.DABS.Enum.AppointmentStatus;
+import dabs.DABS.Enum.PaymentMethod;
 import dabs.DABS.Enum.TimeSlot;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.FutureOrPresent;
@@ -55,4 +56,8 @@ public class Appointment {
     @Size(max = 1000, message = "Ghi chú tối đa 1000 ký tự")
     @Column(columnDefinition = "TEXT")
     private String notes;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private PaymentMethod paymentMethod;
 }

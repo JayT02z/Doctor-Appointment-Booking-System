@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.Date;
 
 @Entity
 @Getter
@@ -39,6 +40,9 @@ public class Payment {
     @NotNull(message = "Trạng thái thanh toán không được để trống")
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
+    @Column(name = "txn_ref")
+    private String txnRef;
 
-    private LocalDate paymentDate;
+    @Column(name = "payment_date")
+    private Date paymentDate;
 }

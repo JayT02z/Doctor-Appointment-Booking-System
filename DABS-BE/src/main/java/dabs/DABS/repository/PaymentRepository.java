@@ -13,5 +13,9 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     List<Payment> findByAppointment_Id(long id);
 
+<<<<<<< HEAD
     List<Payment> findByAppointment_Patient_Id(long id);
+=======
+    Optional<Payment> findByTxnRef(String txnRef);
+>>>>>>> 0bea4cc96e547512cf8fd28ab138dc2f98aa66bb
 }

@@ -13,11 +13,44 @@ const Appointments = () => {
   const [activeTab, setActiveTab] = useState("today");
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [payments, setPayments] = useState({}); // State để lưu trữ thông tin thanh toán
+  const [payments, setPayments] = useState({});
+  const [statusFilter, setStatusFilter] = useState("ALL"); // New state for status filter
+  const [prescription, setPrescription] = useState(null); // New state for prescription
+  const [showPrescriptionModal, setShowPrescriptionModal] = useState(false); // New state for modal visibility
 
   useEffect(() => {
     fetchAppointments();
   }, []);
+
+  const fetchPayments = async (appointments) => {
+    try {
+      const paymentsData = {};
+      await Promise.all(
+          appointments.map(async (appointment) => {
+                const paymentResponse = await axios.get(
+                    `http://localhost:8080/api/payment/patient/${appointment.id}`,
+                    {
+                      headers: {
+                        Authorization: `Bearer ${token}`,
+                      },
+                    }
+                );
+                if (paymentResponse.data.statusCode === 200) {
+                  paymentsData[appointment.id] = paymentResponse.data.data[0];
+                } else {
+                  console.warn(
+                      `Failed to fetch payment for appointment ID ${appointment.id}`
+                  );
+                }
+              }
+          )
+      );
+      setPayments(paymentsData);
+    } catch (error) {
+      console.error("Error fetching payments:", error);
+      toast.error("Failed to fetch payment information");
+    }
+  };
 
   const fetchAppointments = async () => {
     try {
@@ -31,8 +64,7 @@ const Appointments = () => {
       );
       if (response.data.statusCode === 200) {
         setAppointments(response.data.data);
-        // Sau khi lấy được thông tin appointment, gọi API để lấy thông tin thanh toán
-        fetchPayments();
+        fetchPayments(response.data.data);
       }
     } catch (error) {
       console.error("Error fetching appointments:", error);
@@ -42,27 +74,23 @@ const Appointments = () => {
     }
   };
 
-  const fetchPayments = async () => {
+  const fetchPrescription = async (appointmentId) => {
     try {
-      const paymentResponse = await axios.get(
-          `http://localhost:8080/api/payment/patient/${patientId}`,
+      const response = await axios.get(
+          `http://localhost:8080/api/prescription/appointment/${appointmentId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           }
       );
-      if (paymentResponse.data.statusCode === 200) {
-        // Chuyển đổi dữ liệu thanh toán sang một object để dễ dàng truy cập
-        const paymentsData = {};
-        paymentResponse.data.data.forEach((payment) => {
-          paymentsData[payment.appointmentId] = payment;
-        });
-        setPayments(paymentsData);
+      if (response.data.statusCode === 200) {
+        setPrescription(response.data.data);
+        setShowPrescriptionModal(true); // Show the modal
       }
     } catch (error) {
-      console.error("Error fetching payments:", error);
-      toast.error("Failed to fetch payment information");
+      console.error("Error fetching prescription:", error);
+      toast.error("Failed to fetch prescription information");
     }
   };
 
@@ -70,13 +98,17 @@ const Appointments = () => {
     const now = dayjs();
     return appointments.filter((appointment) => {
       const appointmentDate = dayjs(appointment.date);
-      if (tab === "today") {
-        return appointmentDate.isSame(now, "day");
-      } else if (tab === "upcoming") {
-        return appointmentDate.isAfter(now, "day");
-      } else {
-        return appointmentDate.isBefore(now, "day");
-      }
+      const dateFilter =
+          tab === "today"
+              ? appointmentDate.isSame(now, "day")
+              : tab === "upcoming"
+                  ? appointmentDate.isAfter(now, "day")
+                  : appointmentDate.isBefore(now, "day");
+
+      const statusCondition =
+          statusFilter === "ALL" || appointment.status === statusFilter;
+
+      return dateFilter && statusCondition;
     });
   };
 
@@ -99,6 +131,11 @@ const Appointments = () => {
     return slot;
   };
 
+  const closePrescriptionModal = () => {
+    setShowPrescriptionModal(false);
+    setPrescription(null);
+  };
+
   if (loading) {
     return (
         <div className="flex justify-center items-center h-64">
@@ -113,7 +150,9 @@ const Appointments = () => {
       <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="bg-white shadow rounded-lg p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">My Appointments</h2>
+            <h2 className="text-2xl font-bold text-gray-900">
+              My Appointments
+            </h2>
             <Link
                 to="/patient/book-appointment"
                 className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
@@ -141,9 +180,27 @@ const Appointments = () => {
             </nav>
           </div>
 
+          {/* Status Filters */}
+          <div className="mb-4">
+            <label className="mr-2 font-semibold">Filter by Status:</label>
+            <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="p-2 border rounded"
+            >
+              <option value="ALL">All</option>
+              <option value="PENDING">Pending</option>
+              <option value="CONFIRMED">Confirmed</option>
+              <option value="COMPLETED">Completed</option>
+              <option value="CANCELLED">Cancelled</option>
+            </select>
+          </div>
+
           {filteredAppointments.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-500">No {activeTab} appointments found.</p>
+                <p className="text-gray-500">
+                  No {activeTab} appointments found.
+                </p>
               </div>
           ) : (
               <div className="space-y-4">
@@ -160,8 +217,8 @@ const Appointments = () => {
                               Dr. {appointment.doctorName}
                             </h3>
                             <p className="text-sm text-gray-500">
-                              {dayjs(appointment.date).format("DD-MM-YYYY")} at{" "}
-                              {formatTimeSlot(appointment.timeSlot)}
+                              {dayjs(appointment.date).format("DD-MM-YYYY")}{" "}
+                              at {formatTimeSlot(appointment.timeSlot)}
                             </p>
                             <p className="text-sm text-gray-500 mt-1">
                               specialization: {appointment.specialization}
@@ -199,15 +256,17 @@ const Appointments = () => {
                                               : "bg-gray-100 text-gray-800"
                               }`}
                           >
-                      {appointment.status}
-                    </span>
+                                             {appointment.status}
+                                         </span>
                         </div>
 
                         <div className="mt-4 flex justify-end space-x-2">
                           {appointment.status === "SCHEDULED" && (
                               <button
                                   onClick={() =>
-                                      toast("Cancel functionality not yet implemented.")
+                                      toast(
+                                          "Cancel functionality not yet implemented."
+                                      )
                                   }
                                   className="px-4 py-2 text-red-600 border border-red-600 rounded-md hover:bg-red-50"
                               >
@@ -225,12 +284,24 @@ const Appointments = () => {
                               </button>
                           )}
                           {appointment.status === "COMPLETED" && (
-                              <button
-                                  onClick={() => openFeedbackModal(appointment)}
-                                  className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
-                              >
-                                {appointment.feedback ? "Update Feedback" : "Give Feedback"}
-                              </button>
+                              <>
+                                <button
+                                    onClick={() => openFeedbackModal(appointment)}
+                                    className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
+                                >
+                                  {appointment.feedback
+                                      ? "Update Feedback"
+                                      : "Give Feedback"}
+                                </button>
+                                <button
+                                    onClick={() =>
+                                        fetchPrescription(appointment.id)
+                                    }
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                                >
+                                  View Prescription
+                                </button>
+                              </>
                           )}
                         </div>
                       </div>
@@ -247,6 +318,57 @@ const Appointments = () => {
                 appointment={selectedAppointment}
                 patientId={user.id}
             />
+        )}
+
+        {/* Prescription Modal */}
+        {showPrescriptionModal && prescription && (
+            <div className="fixed z-10 inset-0 overflow-y-auto">
+              <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div className="fixed inset-0 transition-opacity" aria-hidden="true">
+                  <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+                </div>
+                <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                  <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <h3 className="text-lg leading-6 font-medium text-gray-900">
+                      Prescription Details
+                    </h3>
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-500">
+                        Doctor: {prescription.doctorName}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Patient: {prescription.patientName}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Dosage: {prescription.dosage}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Duration: {prescription.duration}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Frequency: {prescription.frequency}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Description: {prescription.description}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Medicine Names:{" "}
+                        {prescription.medicineNames.join(", ")}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button
+                        type="button"
+                        className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                        onClick={closePrescriptionModal}
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
         )}
       </div>
   );
