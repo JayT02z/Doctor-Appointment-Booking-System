@@ -46,6 +46,9 @@ public class PaymentController {
     @Autowired
     private PaymentRepository paymentRepository;
 
+    @Autowired
+    private VnPayConfig VnPayConfig;
+
     @GetMapping("")
     public ResponseEntity<ResponseData<List<PaymentDTO>>> getAllPatients() {
         return paymentService.getallPayment();
@@ -124,7 +127,9 @@ public class PaymentController {
             }
         }
         String queryUrl = query.toString();
-        String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.secretKey, hashData.toString());
+        String secretKey = VnPayConfig.secretKey;
+        String vnp_SecureHash = VnPayConfig.hmacSHA512(secretKey, hashData.toString());
+//        String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.secretKey, hashData.toString());
         queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
         String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + queryUrl;
 
