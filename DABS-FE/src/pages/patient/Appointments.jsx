@@ -14,9 +14,10 @@ const Appointments = () => {
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [payments, setPayments] = useState({});
-  const [statusFilter, setStatusFilter] = useState("ALL"); // New state for status filter
-  const [prescription, setPrescription] = useState(null); // New state for prescription
-  const [showPrescriptionModal, setShowPrescriptionModal] = useState(false); // New state for modal visibility
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [prescription, setPrescription] = useState(null);
+  const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
+  const [existingFeedback, setExistingFeedback] = useState(null);
 
   useEffect(() => {
     fetchAppointments();
@@ -28,7 +29,7 @@ const Appointments = () => {
       await Promise.all(
           appointments.map(async (appointment) => {
                 const paymentResponse = await axios.get(
-                    `http://localhost:8080/api/payment/patient/${appointment.id}`,
+                    `http://localhost:8080/api/payment/appointment/${appointment.id}`,
                     {
                       headers: {
                         Authorization: `Bearer ${token}`,
@@ -112,9 +113,26 @@ const Appointments = () => {
     });
   };
 
-  const openFeedbackModal = (appointment) => {
+  const openFeedbackModal = async (appointment) => {
     setSelectedAppointment(appointment);
-    setShowFeedbackModal(true);
+    try {
+      const res = await axios.get(
+          `http://localhost:8080/api/feedback/get/appointment/${appointment.id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+      );
+      if (res.data?.statusCode === 200 && res.data.data) {
+        setExistingFeedback(res.data.data);
+      } else {
+        setExistingFeedback(null);
+      }
+    } catch (err) {
+        console.error("Error fetching feedback:", err);
+      setExistingFeedback(null); // Nếu lỗi, vẫn mở modal để tạo mới
+    } finally {
+      setShowFeedbackModal(true);
+    }
   };
 
   const closeFeedbackModal = () => {
@@ -289,9 +307,7 @@ const Appointments = () => {
                                     onClick={() => openFeedbackModal(appointment)}
                                     className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
                                 >
-                                  {appointment.feedback
-                                      ? "Update Feedback"
-                                      : "Give Feedback"}
+                                  View Feedback
                                 </button>
                                 <button
                                     onClick={() =>
@@ -316,8 +332,11 @@ const Appointments = () => {
                 isOpen={showFeedbackModal}
                 onClose={closeFeedbackModal}
                 appointment={selectedAppointment}
-                patientId={user.id}
+                existingFeedback={existingFeedback}
+                token={token}
+                refreshAppointments={fetchAppointments}
             />
+
         )}
 
         {/* Prescription Modal */}

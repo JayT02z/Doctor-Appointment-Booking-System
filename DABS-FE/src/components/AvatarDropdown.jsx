@@ -52,6 +52,7 @@ const AvatarDropdown = () => {
                     <Link to="/patient/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile Settings</Link>
                     <Link to="/patient/appointments" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Appointments</Link>
                     <Link to="/patient/book-appointment" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Book Appointment</Link>
+                    <Link to="/patient/payment" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Payment History</Link>
                   </>
               )}
 

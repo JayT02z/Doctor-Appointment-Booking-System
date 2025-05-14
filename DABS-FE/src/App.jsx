@@ -20,6 +20,7 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import ProfileSettings from "./pages/patient/ProfileSettings";
 import Appointments from "./pages/patient/Appointments";
 import BookAppointment from "./pages/patient/BookAppointment";
+import Payment from "./pages/patient/PaymentHistory";
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 import DoctorInformation from "./pages/doctor/DoctorInformation";
 import DoctorServices from "./pages/doctor/DoctorServices";
@@ -56,6 +57,7 @@ function App() {
                     <Route path="profile" element={<ProfileSettings />} />
                     <Route path="appointments" element={<Appointments />} />
                     <Route path="book-appointment" element={<BookAppointment />} />
+                    <Route path="payment" element={<Payment />} />
                   </Route>
 
                   {/* Protected Doctor Routes */}
