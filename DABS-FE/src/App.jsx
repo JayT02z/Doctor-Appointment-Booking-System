@@ -14,6 +14,7 @@ import MainLayout from "./components/MainLayout";
 import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import ForgotPassword from "./pages/auth/ForgotPassword";
 import ProfileSettings from "./pages/patient/ProfileSettings";
 import Appointments from "./pages/patient/Appointments";
 import BookAppointment from "./pages/patient/BookAppointment";
@@ -37,6 +38,7 @@ function App() {
                   <Route path="/" element={<Home />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
 
                   {/* Protected Patient Routes */}
                   <Route
