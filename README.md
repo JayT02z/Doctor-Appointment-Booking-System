@@ -24,17 +24,68 @@ Welcome to the **Doctor Appointment Booking System**, a modern and user-friendly
 
 ## 📸 Screenshot
 ***
-*![img_1.png](img_1.png)*
-
+*![img_1.png](Img/img_1.png)*
+*Home Page*
+***
+![img_2.png](Img/img_2.png)
+![img_3.png](Img/img_3.png)
+*Booking Appointment*
+***
+![img_4.png](Img/img_4.png)
+*My Appointment*
+![img_5.png](Img/img_5.png)
+*Admin Dashboard*
 ## 🛠️ Setup Instructions
 ***
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/doctor-appointment-booking-system.git
-cd doctor-appointment-booking-system
+    # Clone the repository
+    git clone https://github.com/Ho4Vit/Doctor-Appointment-Booking-System.git
+    cd Doctor-Appointment-Booking-System
+    code .
+    
+    # Install dependencies
+    npm install
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    brew install redis
+    redis-server
+    brew services start redis
+```
+FE
+```bash
+    # Start the development server
+    npm run dev
+```
+Open: http://localhost:5173/
 
-# Install dependencies
-npm install
+## <span style="color: yellow;"> 📁 Project Structure
+***
+```
+├── .idea                 
+├── DABS-BE/                    
+├── DABS-FE/                
+├── Img/                               
+└── README.md
+```
 
-# Start the development server
-npm start
+## <span style="color: #FF9999;"> 🤝 Contribute
+***
+
+
+<div style="display: flex; flex-wrap: wrap; justify-content: center;">
+    <a href="https://github.com/Ho4Vit">
+        <img src="Img/Hoavit.png" width="80px" style="margin: 5px; border-radius: 50%;">
+    </a>
+    <a href="https://github.com/Newbie1402">
+        <img src="Img/Newbie.png" width="80px" style="margin: 5px; border-radius: 50%;">
+    </a>
+    <a href="https://github.com/JayT02z">
+        <img src="Img/JayT02z.png" width="80px" style="margin: 5px; border-radius: 50%;">
+    </a>
+</div>
+
+<div style="text-align: center;">We look forward to your contributions to help make the project even better!</div>
+
+## 📞 Contact
+***
+For bug reports and feature requests related to this software, please visit [GitHub Issues](https://github.com/Newbie1402/License-Plate-detection/issues). For questions, discussions, and community support, join our active communities on [Discord](https://discord.gg/3DmcPURR), and the [Zalo Community](https://zalo.me/g/uyzmad500). We're here to help with all things this project!
+
