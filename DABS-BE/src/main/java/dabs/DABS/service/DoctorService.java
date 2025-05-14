@@ -208,7 +208,7 @@ public ResponseEntity<ResponseData<Doctor>> addDoctor(RegisterDoctorForm doctorF
         Doctor doctor = doctorRepository.findById(id).get(); // Giả sử ID luôn tồn tại trong DB
         String imgPath = doctor.getImgpath(); // Lấy tên file đã lưu trong DB
 
-        String publicUrl = "/uploads/avatars/" + imgPath;
+        String publicUrl = "/uploads/images/" + imgPath;
 
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),

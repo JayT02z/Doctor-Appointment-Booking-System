@@ -80,7 +80,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/doctor/create").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/auth/users/all").hasRole("ADMIN")
-
+                        .requestMatchers("/uploads/**").permitAll()
                         // --- Private Endpoints: PATIENT or ADMIN ---
                         .requestMatchers("/api/patient/**").permitAll()
 
