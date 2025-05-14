@@ -58,7 +58,7 @@ public class PaymentService {
         ));
     }
 
-    public ResponseEntity<ResponseData<List<PaymentDTO>>> getpaymentBypatient(Long patientId) {
+    public ResponseEntity<ResponseData<List<PaymentDTO>>> getpaymentByAppId(Long patientId) {
         List<Payment> payments = paymentRepository.findByAppointment_Id(patientId);
         List<PaymentDTO> paymentDTOs = payments.stream()
                 .map(payment -> new PaymentDTO(null, payment, payment.getStatus()))
@@ -104,7 +104,7 @@ public class PaymentService {
     public ResponseEntity<ResponseData<List<PaymentDTO>>> getPaymentbyPatientID(Long id) {
         List<Payment> payments = paymentRepository.findByAppointment_Patient_Id(id);
         List<PaymentDTO> paymentDTOs = payments.stream()
-                .map(PaymentDTO::new)
+                .map(payment -> new PaymentDTO(null, payment, payment.getStatus()))
                 .toList();
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
