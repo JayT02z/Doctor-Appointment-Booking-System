@@ -63,7 +63,7 @@ public class DoctorController {
     }
 
     @GetMapping("/getimage/{id}")
-    public ResponseEntity<ResponseData<byte[]>> getImage(@PathVariable Long id) {
-        return  doctorService.getDoctorimg(id);
+    public ResponseEntity<ResponseData<String>> getImage(@PathVariable Long id) {
+        return doctorService.getDoctorimg(id);
     }
 }

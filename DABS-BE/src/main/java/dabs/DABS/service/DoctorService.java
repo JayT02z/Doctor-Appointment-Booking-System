@@ -204,26 +204,17 @@ public ResponseEntity<ResponseData<Doctor>> addDoctor(RegisterDoctorForm doctorF
     }
 
 
-    public ResponseEntity<ResponseData<byte[]>> getDoctorimg(Long id) {
+    public ResponseEntity<ResponseData<String>> getDoctorimg(Long id) {
         Doctor doctor = doctorRepository.findById(id).get(); // Giả sử ID luôn tồn tại trong DB
         String imgPath = doctor.getImgpath(); // Lấy tên file đã lưu trong DB
 
-        Path path = Paths.get(uploadDir, imgPath); // Kết hợp thư mục với tên file
+        String publicUrl = "/uploads/avatars/" + imgPath;
 
-        try {
-            byte[] imageBytes = Files.readAllBytes(path);
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(
-                    StatusApplication.SUCCESS.getCode(),
-                    StatusApplication.SUCCESS.getMessage(),
-                    imageBytes
-            ));
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseData<>(
-                    StatusApplication.NOT_FOUND.getCode(),
-                    "Failed to get image",
-                    null
-            ));
-        }
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                publicUrl
+        ));
     }
 
 }
