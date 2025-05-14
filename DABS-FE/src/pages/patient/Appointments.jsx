@@ -247,7 +247,7 @@ const Appointments = () => {
                             {payment && (
                                 <>
                                   <p className="text-sm text-gray-700 mt-1">
-                                    Price: ${payment.amount}
+                                    Price: {payment.amount.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
                                   </p>
                                   <p
                                       className={`text-sm font-medium mt-1 ${

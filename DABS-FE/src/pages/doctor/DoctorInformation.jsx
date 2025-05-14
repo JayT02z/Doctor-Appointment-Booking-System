@@ -70,7 +70,6 @@ const DoctorInformation = () => {
                 headers: { Authorization: `Bearer ${token}` },
             });
             if (res.data.statusCode === 200 && res.data.data) {
-                console.log("Image fetched:", res.data.data);
                 setDoctorImage(res.data.data);
             }
         } catch (err) {
@@ -248,12 +247,13 @@ const DoctorInformation = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {doctorImage && (
                                 <div className="md:col-span-2 flex justify-center">
-                                    <img
-                                        src={`http://localhost:8080/uploads/images/doctor1.png`} // Assuming the API returns a relative path
-                                        alt="Doctor"
-                                        className="max-w-full h-auto rounded-full"
-                                        style={{ maxHeight: "200px" }}
-                                    />
+                                    <div className="relative w-48 h-48 rounded-full overflow-hidden shadow-lg border-4 border-white hover:scale-105 transition-transform duration-300 ease-in-out">
+                                        <img
+                                            src={`http://localhost:8080${doctorImage}`}
+                                            alt="Doctor"
+                                            className="object-cover w-full h-full"
+                                        />
+                                    </div>
                                 </div>
                             )}
                             <p><strong>Full Name:</strong> {doctorInfo?.fullName}</p>
