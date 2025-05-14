@@ -130,7 +130,6 @@ public class PaymentController {
         String queryUrl = query.toString();
         String secretKey = VnPayConfig.secretKey;
         String vnp_SecureHash = VnPayConfig.hmacSHA512(secretKey, hashData.toString());
-//        String vnp_SecureHash = VnPayConfig.hmacSHA512(VnPayConfig.secretKey, hashData.toString());
         queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
         String paymentUrl = VnPayConfig.vnp_PayUrl + "?" + queryUrl;
 
@@ -139,19 +138,10 @@ public class PaymentController {
         payment.setPaymentMethod(paymentForm.getPaymentMethod());
         payment.setStatus(PaymentStatus.PENDING);
         payment.setAmount(amount / 100.0);
-        payment.setTxnRef(vnp_TxnRef); // thêm dòng này nếu có field txnRef trong Payment
+        payment.setTxnRef(vnp_TxnRef);
         paymentRepository.save(payment);
 
         PaymentDTO paymentDTO = new PaymentDTO(paymentUrl, payment, PaymentStatus.PENDING);
-
-
-
-//        com.google.gson.JsonObject job = new JsonObject();
-//        job.addProperty("code", "00");
-//        job.addProperty("message", "success");
-//        job.addProperty("data", paymentUrl);
-//        Gson gson = new Gson();
-//        resp.getWriter().write(gson.toJson(job));
         return ResponseEntity.ok(paymentDTO);
     }
 
@@ -159,10 +149,16 @@ public class PaymentController {
     public ResponseEntity<?> transaction(
             @RequestParam(value = "vnp_Amount") String amount,
             @RequestParam(value = "vnp_BankCode") String bankCode,
+            @RequestParam(value = "vnp_BankTranNo", required = false) String bankTranNo,
+            @RequestParam(value = "vnp_CardType", required = false) String cardType,
             @RequestParam(value = "vnp_OrderInfo") String orderInfo,
+            @RequestParam(value = "vnp_PayDate") String payDate,
             @RequestParam(value = "vnp_ResponseCode") String responseCode,
+            @RequestParam(value = "vnp_TmnCode", required = false) String tmnCode,
+            @RequestParam(value = "vnp_TransactionNo", required = false) String transactionNo,
+            @RequestParam(value = "vnp_TransactionStatus", required = false) String transactionStatus,
             @RequestParam(value = "vnp_TxnRef") String txnRef,
-            @RequestParam(value = "vnp_PayDate") String payDate
+            @RequestParam(value = "vnp_SecureHash", required = false) String secureHash
     ) {
         TransactionStatusDTO transactionStatusDTO = new TransactionStatusDTO();
 
@@ -192,6 +188,20 @@ public class PaymentController {
             transactionStatusDTO.setStatus("Error");
             transactionStatusDTO.setMessage("Không tìm thấy giao dịch");
         }
+
+        // Populate all VNPAY fields
+        transactionStatusDTO.setAmount(amount);
+        transactionStatusDTO.setBankCode(bankCode);
+        transactionStatusDTO.setBankTranNo(bankTranNo);
+        transactionStatusDTO.setCardType(cardType);
+        transactionStatusDTO.setOrderInfo(orderInfo);
+        transactionStatusDTO.setPayDate(payDate);
+        transactionStatusDTO.setResponseCode(responseCode);
+        transactionStatusDTO.setTmnCode(tmnCode);
+        transactionStatusDTO.setTransactionNo(transactionNo);
+        transactionStatusDTO.setTransactionStatus(transactionStatus);
+        transactionStatusDTO.setTxnRef(txnRef);
+        transactionStatusDTO.setSecureHash(secureHash);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),

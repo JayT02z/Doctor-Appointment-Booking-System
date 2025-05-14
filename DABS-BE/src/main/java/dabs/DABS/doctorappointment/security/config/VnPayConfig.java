@@ -18,12 +18,10 @@ public class VnPayConfig {
 //    public static String vnp_ReturnUrl = "http://localhost:8080/vnpay_jsp/vnpay_return.jsp";
 @Value("${vnpay.return-url}")
 public String vnp_ReturnUrl;
-//    public static String vnp_TmnCode = "VXHDKY6H";
     @Value("${vnpay.tmn-code}")
     public String vnp_TmnCode;
     public static String vnp_Version = "2.1.0";
     public static String vnp_Command = "pay";
-//    public static String secretKey = "7MMUETQO1I6BBTS4JUJ2NDGWFECP79CW";
     @Value("${vnpay.secret-key}")
     public String secretKey;
     public static String vnp_ApiUrl = "https://sandbox.vnpayment.vn/merchant_webapi/api/transaction";
