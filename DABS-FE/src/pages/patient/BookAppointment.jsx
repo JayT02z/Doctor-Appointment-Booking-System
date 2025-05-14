@@ -257,11 +257,170 @@ const BookAppointment = () => {
         </div>
 
         <Dialog open={showModal} onClose={() => setShowModal(false)} className="fixed z-50 inset-0">
-          {/* ... (Modal code - No changes needed) */}
+          <div className="flex items-center justify-center min-h-screen p-4">
+            <Dialog.Panel className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">
+              <Dialog.Title className="text-xl font-bold mb-4">
+                Book with Dr. {selectedDoctor?.fullName}
+              </Dialog.Title>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                            <textarea
+                                name="notes"
+                                value={formData.notes}
+                                onChange={handleInput}
+                                placeholder="Notes or reason for visit..."
+                                required
+                                className="w-full p-2 border rounded"
+                            />
+
+                {selectedDoctor?.services?.length > 0 && (
+                    <div>
+                      <select
+                          name="serviceId"
+                          value={formData.serviceId}
+                          onChange={handleInput}
+                          required
+                          className="w-full p-2 border rounded"
+                      >
+                        <option value="">-- Chọn dịch vụ --</option>
+                        {selectedDoctor.services.map((s) => (
+                            <option key={s.id} value={s.id}>
+                              {s.name}
+                            </option>
+                        ))}
+                      </select>
+                      {selectedServicePrice > 0 && (
+                          <p className="text-sm text-green-600 font-semibold mt-2">
+                            Giá: <span className="font-bold">{formatCurrency(selectedServicePrice)}</span>
+                          </p>
+                      )}
+                    </div>
+                )}
+
+                <select
+                    name="date"
+                    value={formData.date}
+                    onChange={handleInput}
+                    required
+                    className="w-full p-2 border rounded"
+                >
+                  <option value="">-- Select date --</option>
+                  {schedule.map((s) => (
+                      <option key={s.date} value={s.date}>
+                        {s.date}
+                      </option>
+                  ))}
+                </select>
+
+                {formData.date && (
+                    <div className="grid grid-cols-3 gap-2">
+                      {schedule
+                          .find((s) => s.date === formData.date)
+                          ?.timeSlots.map((slot) => (
+                              <button
+                                  key={slot}
+                                  type="button"
+                                  onClick={() => setFormData((prev) => ({ ...prev, timeSlot: slot }))}
+                                  className={`p-2 rounded border text-sm ${
+                                      formData.timeSlot === slot
+                                          ? 'bg-blue-600 text-white'
+                                          : 'bg-gray-100 hover:bg-gray-200'
+                                  }`}
+                              >
+                                {formatTimeSlot(slot)}
+                              </button>
+                          ))}
+                    </div>
+                )}
+
+                <div className="flex justify-end gap-2 pt-4">
+                  <button
+                      type="button"
+                      onClick={() => setShowModal(false)}
+                      className="px-4 py-2 border rounded"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                      type="submit"
+                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    Confirm
+                  </button>
+                </div>
+              </form>
+            </Dialog.Panel>
+          </div>
         </Dialog>
 
-        <Dialog open={showPaymentModal} onClose={() => { }} className="fixed z-50 inset-0">
-          {/* ... (Payment Modal code - No changes needed) */}
+        <Dialog open={showPaymentModal} onClose={() => {}} className="fixed z-50 inset-0">
+          <div className="flex items-center justify-center min-h-screen p-4">
+            <Dialog.Panel className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">
+              <Dialog.Title className="text-xl font-bold mb-4">
+                Thông tin thanh toán
+              </Dialog.Title>
+
+              <p>
+                Tổng tiền: {selectedServicePrice}
+              </p>
+
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Phương thức thanh toán:
+                </label>
+                <select
+                    value={paymentData.paymentMethod}
+                    onChange={(e) => setPaymentData({...paymentData, paymentMethod: e.target.value})}
+                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                >
+                  <option value="CASH">Tiền mặt</option>
+                  <option value="VNPAYQR">VNPAYQR</option>
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4">
+                <button
+                    type="button"
+                    onClick={handleCancelPayment}
+                    className="px-4 py-2 border rounded"
+                >
+                  Hủy
+                </button>
+                <button
+                    type="button"
+                    onClick={handlePayment}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  Xác nhận thanh toán
+                </button>
+              </div>
+
+              {showCancelConfirm && (
+                  <div className="absolute top-0 left-0 w-full h-full bg-gray-200 bg-opacity-75 flex items-center justify-center">
+                    <div className="bg-white p-4 rounded-md shadow-md">
+                      <p className="mb-4">Bạn có chắc chắn muốn hủy thanh toán?</p>
+                      <div className="flex justify-end gap-2">
+                        <button
+                            onClick={() => setShowCancelConfirm(false)}
+                            className="px-4 py-2 rounded border"
+                        >
+                          Không
+                        </button>
+                        <button
+                            onClick={() => {
+                              setShowPaymentModal(false);
+                              setShowCancelConfirm(false);
+                            }}
+                            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                        >
+                          Có, hủy
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+              )}
+            </Dialog.Panel>
+          </div>
         </Dialog>
       </div>
   );
