@@ -24,7 +24,9 @@ const BookAppointment = () => {
   });
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
-  const [doctorImages, setDoctorImages] = useState(new Map()); // Store doctor images
+  const [doctorImages, setDoctorImages] = useState(new Map());
+  const [selectedServiceDescription, setSelectedServiceDescription] = useState('');
+
 
   const [formData, setFormData] = useState({
     serviceId: '',
@@ -148,12 +150,14 @@ const BookAppointment = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
 
     if (name === 'serviceId' && selectedDoctor) {
-      const selectedService = selectedDoctor.services.find(s => s.id === Number(e.target.value));
+      const selectedService = selectedDoctor.services.find(s => s.id === Number(value));
 
       if (selectedService) {
         setSelectedServicePrice(selectedService.price);
+        setSelectedServiceDescription(selectedService.description || '');
       } else {
         setSelectedServicePrice(0);
+        setSelectedServiceDescription('');
       }
     }
   };
@@ -289,6 +293,19 @@ const BookAppointment = () => {
                             </option>
                         ))}
                       </select>
+                      {/* Description Box */}
+                      {formData.serviceId && (
+                          <div className="mt-3 p-3 border border-blue-300 rounded bg-blue-50 text-sm text-gray-800">
+                            <p className="font-semibold mb-1">Mô tả dịch vụ:</p>
+                            <p>
+                              {
+                                  selectedDoctor.services.find(
+                                      (s) => s.id === Number(formData.serviceId)
+                                  )?.description || 'Không có mô tả'
+                              }
+                            </p>
+                          </div>
+                      )}
                       {selectedServicePrice > 0 && (
                           <p className="text-sm text-green-600 font-semibold mt-2">
                             Giá: <span className="font-bold">{formatCurrency(selectedServicePrice)}</span>
