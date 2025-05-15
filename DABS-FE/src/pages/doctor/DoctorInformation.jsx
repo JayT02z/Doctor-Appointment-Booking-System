@@ -12,17 +12,21 @@ const DoctorInformation = () => {
         experience: "",
         qualification: "",
         hospital: "",
-        imgPath: "",
     });
     const [userInfo, setUserInfo] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isEditingDoctor, setIsEditingDoctor] = useState(false);
     const [isEditingAccount, setIsEditingAccount] = useState(false);
+    const [imageFile, setImageFile] = useState(null);
+    const [doctorImage, setDoctorImage] = useState(null);
 
     useEffect(() => {
         fetchDoctorByUserId();
         fetchUser();
-    }, []);
+        if (doctorId) {
+            fetchDoctorImage(doctorId);
+        }
+    }, [doctorId]);
 
     const fetchDoctorByUserId = async () => {
         try {
@@ -60,6 +64,19 @@ const DoctorInformation = () => {
         }
     };
 
+    const fetchDoctorImage = async (doctorId) => {
+        try {
+            const res = await axios.get(`http://localhost:8080/api/doctor/getimage/${doctorId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (res.data.statusCode === 200 && res.data.data) {
+                setDoctorImage(res.data.data);
+            }
+        } catch (err) {
+            console.error("Failed to fetch doctor image:", err);
+        }
+    };
+
     const handleDoctorChange = (e) => {
         setDoctorInfo({ ...doctorInfo, [e.target.name]: e.target.value });
     };
@@ -82,21 +99,46 @@ const DoctorInformation = () => {
             });
 
             if (res.data.statusCode === 200) {
+                const createdDoctor = res.data.data;
                 const isNewDoctor = !doctorId;
+
                 toast.success(isNewDoctor ? "Doctor profile created" : "Doctor info updated");
                 setIsEditingDoctor(false);
-                setDoctorInfo(res.data.data);
-                localStorage.setItem("doctorId", res.data.data.id);
-                setDoctorId(res.data.data.id);
+                setDoctorInfo(createdDoctor);
+                setDoctorId(createdDoctor.id);
+                localStorage.setItem("doctorId", createdDoctor.id);
+
+                if (imageFile) {
+                    const formData = new FormData();
+                    formData.append("file", imageFile);
+                    try {
+                        await axios.post(
+                            `http://localhost:8080/api/doctor/image/${createdDoctor.id}`,
+                            formData,
+                            {
+                                headers: {
+                                    Authorization: `Bearer ${token}`,
+                                    "Content-Type": "multipart/form-data",
+                                },
+                            }
+                        );
+                        toast.success("Upload ảnh thành công");
+                        // Cập nhật lại ảnh từ server
+                        await fetchDoctorByUserId();
+                    } catch (uploadErr) {
+                        toast.error("Upload ảnh thất bại");
+                    }
+                }
 
                 if (isNewDoctor) {
-                    window.location.reload(); // Reload to ensure updated doctorId is reflected globally
+                    window.location.reload();
                 }
             }
         } catch (err) {
             toast.error("Failed to save doctor info");
         }
     };
+
 
     const handleUserSave = async () => {
         try {
@@ -164,28 +206,13 @@ const DoctorInformation = () => {
                             {isEditingDoctor ? "Cancel" : "Edit"}
                         </button>
                     </div>
-                    {!isEditingDoctor ? (
+                    {isEditingDoctor ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {doctorInfo?.imgPath && (
-                                <div className="col-span-2 flex justify-center">
-                                    <img src={doctorInfo.imgPath} alt="Doctor" className="max-w-full h-auto rounded-full" style={{maxHeight: '200px'}}/>
-                                </div>
-                            )}
-                            <p><strong>Full Name:</strong> {doctorInfo?.fullName}</p>
-                            <p><strong>Specialization:</strong> {doctorInfo?.specialization}</p>
-                            <p><strong>Experience:</strong> {doctorInfo?.experience} years</p>
-                            <p><strong>Qualification:</strong> {doctorInfo?.qualification}</p>
-                            <p><strong>Hospital:</strong> {doctorInfo?.hospital}</p>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {[
-                                ["fullName", "Full Name"],
+                            {[["fullName", "Full Name"],
                                 ["specialization", "Specialization"],
                                 ["experience", "Experience"],
                                 ["qualification", "Qualification"],
                                 ["hospital", "Hospital"],
-                                ["imgPath", "Image Path"],
                             ].map(([field, label]) => (
                                 <input
                                     key={field}
@@ -196,6 +223,17 @@ const DoctorInformation = () => {
                                     className="border rounded px-3 py-2 w-full"
                                 />
                             ))}
+
+                            <div className="md:col-span-2">
+                                <label className="block mb-1 font-semibold">Upload Ảnh</label>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => setImageFile(e.target.files[0])}
+                                    className="border rounded px-3 py-2 w-full"
+                                />
+                            </div>
+
                             <div className="col-span-2 text-right">
                                 <button
                                     onClick={handleDoctorSave}
@@ -204,6 +242,25 @@ const DoctorInformation = () => {
                                     Save
                                 </button>
                             </div>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {doctorImage && (
+                                <div className="md:col-span-2 flex justify-center">
+                                    <div className="relative w-48 h-48 rounded-full overflow-hidden shadow-lg border-4 border-white hover:scale-105 transition-transform duration-300 ease-in-out">
+                                        <img
+                                            src={`http://localhost:8080${doctorImage}`}
+                                            alt="Doctor"
+                                            className="object-cover w-full h-full"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                            <p><strong>Full Name:</strong> {doctorInfo?.fullName}</p>
+                            <p><strong>Specialization:</strong> {doctorInfo?.specialization}</p>
+                            <p><strong>Experience:</strong> {doctorInfo?.experience} years</p>
+                            <p><strong>Qualification:</strong> {doctorInfo?.qualification}</p>
+                            <p><strong>Hospital:</strong> {doctorInfo?.hospital}</p>
                         </div>
                     )}
                 </div>

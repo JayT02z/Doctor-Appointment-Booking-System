@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
-import { FaStar } from "react-icons/fa"; //  Install react-icons: npm install react-icons
+import { FaStar } from "react-icons/fa";
 
 const FeedbackModal = ({
                            isOpen,
@@ -36,19 +36,20 @@ const FeedbackModal = ({
 
 
     const [rating, setRating] = useState(existingFeedback ? stringToRating(existingFeedback.rating) : 5);
-    const [comment, setComment] = useState(existingFeedback?.comment || "");
+    const [comment, setComment] = useState(existingFeedback?.feedbackText || "");
     const [submitting, setSubmitting] = useState(false);
     const { patientId } = useAuth();
 
     if (!isOpen) return null;
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitting(true);
 
         const payload = {
+            appointmentId: appointment.id,
+            patientId: patientId,
             rating: ratingToString(rating),
-            comment,
+            comment: comment,
             ...(existingFeedback
                 ? {}
                 : {

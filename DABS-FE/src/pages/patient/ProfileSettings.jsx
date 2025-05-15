@@ -105,8 +105,6 @@ const ProfileSettings = () => {
           // Update patientId in AuthContext
           const newPatientId = response.data.data?.id; // adjust based on your API response structure
           if (newPatientId) setPatientId(newPatientId);
-
-          window.location.reload(); // optional, can be removed if state is updated correctly
         }
         else {
           toast.error("Failed to create profile.");

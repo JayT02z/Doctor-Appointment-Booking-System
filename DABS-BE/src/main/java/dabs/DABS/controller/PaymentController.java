@@ -55,9 +55,14 @@ public class PaymentController {
         return paymentService.getallPayment();
     }
 
+    @GetMapping("/appointment/{id}")
+    public ResponseEntity<ResponseData<List<PaymentDTO>>> getAppointmentById(@PathVariable Long id) {
+        return paymentService.getpaymentByAppId(id);
+    }
+
     @GetMapping("/patient/{id}")
     public ResponseEntity<ResponseData<List<PaymentDTO>>> getPatientById(@PathVariable Long id) {
-        return paymentService.getpaymentBypatient(id);
+        return paymentService.getPaymentbyPatientID(id);
     }
 
     @PostMapping("/create_payment")

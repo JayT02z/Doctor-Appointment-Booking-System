@@ -12,11 +12,17 @@ import dabs.DABS.model.request.UpdateDoctorForm;
 import dabs.DABS.repository.DoctorRepository;
 import dabs.DABS.repository.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.print.Doc;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,8 +36,8 @@ public class DoctorService {
     @Autowired
     private UsersRepository usersRepository;
 
-    @Autowired
-    private ServiceService serviceService;
+    @Value("${upload.dir}")
+    private String uploadDir;
 
     public ResponseEntity<ResponseData<List<DoctorDTO>>> getAllDoctors() {
    List<Doctor> listAllDoctor = doctorRepository.findAll();
@@ -84,26 +90,6 @@ public class DoctorService {
         ));
     }
 
-//    public ResponseEntity<ResponseData<Doctor>> addDoctor(RegisterDoctorForm doctor) {
-//        Doctor doctors = new Doctor();
-//        Users users = usersRepository.findById(doctor.getUserId()).orElse(null);
-//
-//        doctors.setFullName(doctor.getFullName());
-//        doctors.setUser(users);
-//        doctors.setSpecialization(doctor.getSpecialization());
-//        doctors.setExperience(doctor.getExperience());
-//        doctors.setQualification(doctor.getQualification());
-//        doctors.setHospital(doctor.getHospital());
-////        doctors.setRating(doctor.getRating());
-//
-//        Doctor responseData = doctorRepository.save(doctors);
-//        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
-//                StatusApplication.SUCCESS.getCode(),
-//                StatusApplication.SUCCESS.getMessage(),
-//                responseData
-//        ));
-//
-//    }
 public ResponseEntity<ResponseData<Doctor>> addDoctor(RegisterDoctorForm doctorForm) {
     Users user = usersRepository.findById(doctorForm.getUserId()).orElse(null);
 
@@ -184,4 +170,51 @@ public ResponseEntity<ResponseData<Doctor>> addDoctor(RegisterDoctorForm doctorF
                 dtoList
         ));
     }
+
+    public ResponseEntity<ResponseData<Void>> addImgDoctor(Long id, MultipartFile file) {
+        Doctor doctor = doctorRepository.findById(id).get(); // Giả sử ID luôn tồn tại trong DB
+
+        try {
+            // Tạo tên file ảnh: "1_filename.jpg"
+            String fileName = id + "_" + file.getOriginalFilename();
+            Path filePath = Paths.get(uploadDir, fileName);
+
+            // Tạo thư mục nếu chưa tồn tại
+            Files.createDirectories(filePath.getParent());
+
+            // Lưu ảnh vào thư mục
+            file.transferTo(filePath);
+
+            // Lưu đường dẫn tên file vào DB
+            doctor.setImgpath(fileName);
+            doctorRepository.save(doctor);
+
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
+                    StatusApplication.SUCCESS.getCode(),
+                    StatusApplication.SUCCESS.getMessage(),
+                    null
+            ));
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseData<>(
+                    StatusApplication.BAD_REQUEST.getCode(),
+                    "Failed to upload image",
+                    null
+            ));
+        }
+    }
+
+
+    public ResponseEntity<ResponseData<String>> getDoctorimg(Long id) {
+        Doctor doctor = doctorRepository.findById(id).get(); // Giả sử ID luôn tồn tại trong DB
+        String imgPath = doctor.getImgpath(); // Lấy tên file đã lưu trong DB
+
+        String publicUrl = "/uploads/images/" + imgPath;
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                publicUrl
+        ));
+    }
+
 }

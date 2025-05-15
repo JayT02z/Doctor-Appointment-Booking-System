@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -53,5 +54,16 @@ public class DoctorController {
     @GetMapping("/search")
     public ResponseEntity<ResponseData<List<DoctorDTO>>> searchDoctor(@RequestParam("keyword") String keyword) {
         return doctorService.SearchDoctorbyFullname(keyword);
+    }
+
+    @PostMapping("/image/{id}")
+    public ResponseEntity<ResponseData<Void>> uploadImage(@PathVariable Long id,
+                                                          @RequestParam("file") MultipartFile file) {
+        return doctorService.addImgDoctor(id, file);
+    }
+
+    @GetMapping("/getimage/{id}")
+    public ResponseEntity<ResponseData<String>> getImage(@PathVariable Long id) {
+        return doctorService.getDoctorimg(id);
     }
 }

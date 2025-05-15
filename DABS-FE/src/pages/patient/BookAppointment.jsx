@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
 import { Dialog } from '@headlessui/react';
@@ -8,6 +9,7 @@ const BookAppointment = () => {
   const { patientId } = useAuth();
 
   const [doctors, setDoctors] = useState([]);
+  const navigate = useNavigate();
   const [filteredDoctors, setFilteredDoctors] = useState([]);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [schedule, setSchedule] = useState([]);
@@ -16,8 +18,15 @@ const BookAppointment = () => {
   const [selectedServicePrice, setSelectedServicePrice] = useState(0);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentData, setPaymentData] = useState({
+    appointmentId: null,
     paymentMethod: 'CASH',
+    amount: 0,
   });
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [doctorImages, setDoctorImages] = useState(new Map());
+  const [selectedServiceDescription, setSelectedServiceDescription] = useState('');
+
 
   const [formData, setFormData] = useState({
     serviceId: '',
@@ -26,6 +35,17 @@ const BookAppointment = () => {
     timeSlot: '',
   });
 
+  const fetchDoctorImage = async (doctorId) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/doctor/getimage/${doctorId}`);
+      if (response.data && response.data.data) {
+        setDoctorImages(prevImages => new Map(prevImages).set(doctorId, response.data.data));
+      }
+    } catch (error) {
+      console.error(`Error fetching image for doctor ${doctorId}:`, error);
+    }
+  };
+
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
@@ -33,12 +53,23 @@ const BookAppointment = () => {
         const list = res.data.data || [];
         setDoctors(list);
         setFilteredDoctors(list);
+
+        // Fetch images for all doctors
+        list.forEach(doctor => fetchDoctorImage(doctor.id));
+
       } catch (err) {
         console.error('Failed to fetch doctors', err);
       }
     };
     fetchDoctors();
   }, []);
+
+  useEffect(() => {
+    if (paymentSuccess) {
+      toast.success('Thanh toán VNPAYQR thành công!');
+      setPaymentSuccess(false); // Reset state
+    }
+  }, [paymentSuccess]);
 
   const fetchSchedule = async (doctorId) => {
     try {
@@ -99,11 +130,15 @@ const BookAppointment = () => {
     };
 
     try {
-      const response= await axios.post('http://localhost:8080/api/appointment/create', payload);
+      const response = await axios.post('http://localhost:8080/api/appointment/create', payload);
       toast.success('Appointment booked!');
       setShowModal(false);
 
-      setPaymentData({ ...paymentData, appointmentId: response.data.data.id });
+      setPaymentData({
+        ...paymentData,
+        appointmentId: response.data.data.id,
+        amount: selectedServicePrice,
+      });
       setShowPaymentModal(true);
     } catch {
       toast.error('Booking failed.');
@@ -115,12 +150,14 @@ const BookAppointment = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
 
     if (name === 'serviceId' && selectedDoctor) {
-      const selectedService = selectedDoctor.services.find(s => s.id === Number(e.target.value));
+      const selectedService = selectedDoctor.services.find(s => s.id === Number(value));
 
       if (selectedService) {
         setSelectedServicePrice(selectedService.price);
+        setSelectedServiceDescription(selectedService.description || '');
       } else {
         setSelectedServicePrice(0);
+        setSelectedServiceDescription('');
       }
     }
   };
@@ -137,6 +174,23 @@ const BookAppointment = () => {
 
   const handlePayment = async () => {
     try {
+      if (paymentData.paymentMethod === 'VNPAYQR') {
+        const payload = {
+          appointmentId: paymentData.appointmentId,
+          paymentMethod: paymentData.paymentMethod,
+          amount: selectedServicePrice, // Use selectedServicePrice
+        };
+        const response = await axios.post('http://localhost:8080/api/payment/create_payment', payload);
+
+        if (response.data && response.data.url) {
+          window.location.href = response.data.url; // Redirect to VNPAYQR
+          return; // Stop further execution
+        } else {
+          toast.error('Không nhận được URL thanh toán từ VNPAY.');
+          return;
+        }
+      }
+
       const payload = {
         appointmentId: paymentData.appointmentId,
         amount: selectedServicePrice,
@@ -146,10 +200,15 @@ const BookAppointment = () => {
       await axios.post('http://localhost:8080/api/payment/add', payload);
       toast.success('Thanh toán thành công!');
       setShowPaymentModal(false);
+
     } catch (error) {
       console.error('Lỗi khi thanh toán:', error);
       toast.error('Thanh toán thất bại.');
     }
+  };
+
+  const handleCancelPayment = () => {
+    setShowCancelConfirm(true);
   };
 
   const formatCurrency = (amount) => {
@@ -179,9 +238,16 @@ const BookAppointment = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredDoctors.map((doc) => (
               <div key={doc.id} className="border rounded-xl p-4 shadow hover:shadow-md transition">
-                <h3 className="font-semibold text-lg">{doc.fullName}</h3>
-                <p className="text-sm text-gray-500">Specialization: {doc.specialization}</p>
-                <p className="text-sm mt-1">
+                {doctorImages.has(doc.id) && (
+                    <img
+                        src={`http://localhost:8080${doctorImages.get(doc.id)}`} // Assuming the API returns a relative path
+                        alt={doc.fullName}
+                        className="mb-4 rounded-full w-24 h-24 object-cover mx-auto"
+                    />
+                )}
+                <h3 className="font-semibold text-lg text-center">{doc.fullName}</h3>
+                <p className="text-sm text-gray-500 text-center">Specialization: {doc.specialization}</p>
+                <p className="text-sm mt-1 text-center">
                   Services: {doc.services.map((s) => s.name).join(', ')}
                 </p>
                 <button
@@ -227,6 +293,19 @@ const BookAppointment = () => {
                             </option>
                         ))}
                       </select>
+                      {/* Description Box */}
+                      {formData.serviceId && (
+                          <div className="mt-3 p-3 border border-blue-300 rounded bg-blue-50 text-sm text-gray-800">
+                            <p className="font-semibold mb-1">Mô tả dịch vụ:</p>
+                            <p>
+                              {
+                                  selectedDoctor.services.find(
+                                      (s) => s.id === Number(formData.serviceId)
+                                  )?.description || 'Không có mô tả'
+                              }
+                            </p>
+                          </div>
+                      )}
                       {selectedServicePrice > 0 && (
                           <p className="text-sm text-green-600 font-semibold mt-2">
                             Giá: <span className="font-bold">{formatCurrency(selectedServicePrice)}</span>
@@ -291,7 +370,7 @@ const BookAppointment = () => {
           </div>
         </Dialog>
 
-        <Dialog open={showPaymentModal} onClose={() => setShowPaymentModal(false)} className="fixed z-50 inset-0">
+        <Dialog open={showPaymentModal} onClose={() => {}} className="fixed z-50 inset-0">
           <div className="flex items-center justify-center min-h-screen p-4">
             <Dialog.Panel className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md">
               <Dialog.Title className="text-xl font-bold mb-4">
@@ -308,19 +387,18 @@ const BookAppointment = () => {
                 </label>
                 <select
                     value={paymentData.paymentMethod}
-                    onChange={(e) => setPaymentData({ ...paymentData, paymentMethod: e.target.value })}
+                    onChange={(e) => setPaymentData({...paymentData, paymentMethod: e.target.value})}
                     className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 >
                   <option value="CASH">Tiền mặt</option>
-                  <option value="CREDIT_CARD">Thẻ tín dụng</option>
-                  <option value="INSURANCE">Bảo hiểm</option>
+                  <option value="VNPAYQR">VNPAYQR</option>
                 </select>
               </div>
 
               <div className="flex justify-end gap-2 pt-4">
                 <button
                     type="button"
-                    onClick={() => setShowPaymentModal(false)}
+                    onClick={handleCancelPayment}
                     className="px-4 py-2 border rounded"
                 >
                   Hủy
@@ -333,6 +411,31 @@ const BookAppointment = () => {
                   Xác nhận thanh toán
                 </button>
               </div>
+
+              {showCancelConfirm && (
+                  <div className="absolute top-0 left-0 w-full h-full bg-gray-200 bg-opacity-75 flex items-center justify-center">
+                    <div className="bg-white p-4 rounded-md shadow-md">
+                      <p className="mb-4">Bạn có chắc chắn muốn hủy thanh toán?</p>
+                      <div className="flex justify-end gap-2">
+                        <button
+                            onClick={() => setShowCancelConfirm(false)}
+                            className="px-4 py-2 rounded border"
+                        >
+                          Không
+                        </button>
+                        <button
+                            onClick={() => {
+                              setShowPaymentModal(false);
+                              setShowCancelConfirm(false);
+                            }}
+                            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                        >
+                          Có, hủy
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+              )}
             </Dialog.Panel>
           </div>
         </Dialog>
