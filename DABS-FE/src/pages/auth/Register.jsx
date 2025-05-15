@@ -25,6 +25,9 @@ const Register = () => {
   const [isOtpLoading, setIsOtpLoading] = useState(false);
   const [otpExpired, setOtpExpired] = useState(false);
   const otpInputRef = useRef(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isResendingOtp, setIsResendingOtp] = useState(false);
 
   useEffect(() => {
     let timer;
@@ -80,7 +83,7 @@ const Register = () => {
 
   const handleSendOTP = async () => {
     if (!validateForm()) return;
-    setIsOtpLoading(true);
+    setIsSendingOtp(true);
     try {
       await axios.post("http://localhost:8080/api/v1/auth/sendOTP", {
         email: formData.email,
@@ -93,12 +96,12 @@ const Register = () => {
       toast.error("Failed to send OTP");
       console.error(err);
     } finally {
-      setIsOtpLoading(false);
+      setIsSendingOtp(false);
     }
   };
 
   const handleVerifyOTP = async () => {
-    setIsOtpLoading(true);
+    setIsVerifying(true);
     try {
       const res = await axios.post("http://localhost:8080/api/v1/auth/verifyOTP", {
         email: formData.email,
@@ -115,12 +118,12 @@ const Register = () => {
       toast.error("OTP verification failed");
       setErrors({ ...errors, otp: "OTP verification failed" });
     } finally {
-      setIsOtpLoading(false);
+      setIsVerifying(false);
     }
   };
 
   const handleResendOTP = async () => {
-    setIsOtpLoading(true);
+    setIsResendingOtp(true);
     try {
       await axios.post("http://localhost:8080/api/v1/auth/resendOTP", {
         email: formData.email,
@@ -131,7 +134,7 @@ const Register = () => {
     } catch (err) {
       toast.error("Failed to resend OTP");
     } finally {
-      setIsOtpLoading(false);
+      setIsResendingOtp(false);
     }
   };
 
@@ -337,7 +340,7 @@ const Register = () => {
                           : "bg-primary-600 hover:bg-primary-700 cursor-pointer"
                   } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500`}
               >
-                {isOtpLoading ? (
+                {isSendingOtp ? (
                     <>
                       <FaSpinner className="animate-spin mr-2 h-5 w-5 text-white"/>
                       Sending OTP...
@@ -347,11 +350,7 @@ const Register = () => {
                       <FaSpinner className="animate-spin mr-2 h-5 w-5 text-white"/>
                       Registering...
                     </>
-                ) : otpSent ? (
-                    "Next"
-                ) : (
-                    "Register"
-                )}
+                ) : otpSent ? "Next" : "Register"}
               </button>
             </div>
           </form>
@@ -388,13 +387,13 @@ const Register = () => {
                       type="button"
                       onClick={handleVerifyOTP}
                       className={`w-full py-2 rounded-md text-white ${
-                          isOtpLoading
+                          isVerifying
                               ? "bg-primary-400 cursor-wait"
                               : "bg-primary-600 hover:bg-primary-700 cursor-pointer"
                       } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500`}
-                      disabled={isOtpLoading}
+                      disabled={isVerifying}
                   >
-                    {isOtpLoading ? (
+                    {isVerifying ? (
                         <>
                           <FaSpinner className="animate-spin mr-2 h-5 w-5 text-white" />
                           Verifying...
@@ -407,9 +406,9 @@ const Register = () => {
                       type="button"
                       onClick={handleResendOTP}
                       className="w-full py-2 rounded-md text-black bg-gray-300 hover:bg-gray-400 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                      disabled={otpTimer > 0 || isOtpLoading}
+                      disabled={otpTimer > 0 || isResendingOtp}
                   >
-                    {isOtpLoading ? (
+                    {isResendingOtp ? (
                         <>
                           <FaSpinner className="animate-spin mr-2 h-5 w-5 text-gray-600" />
                           Resending...
