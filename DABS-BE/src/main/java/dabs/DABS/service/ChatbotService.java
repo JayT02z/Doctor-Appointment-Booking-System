@@ -5,12 +5,18 @@ import dabs.DABS.model.DTO.DoctorRecommendation;
 import dabs.DABS.model.Response.ChatMessageResponse;
 import dabs.DABS.model.Response.ResponseData;
 import dabs.DABS.model.request.ChatMessageRequest;
+import dabs.DABS.model.Entity.Schedule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ChatbotService {
@@ -19,7 +25,9 @@ public class ChatbotService {
         "da liễu", 1L,
         "nội thần kinh", 2L,
         "tim mạch", 3L,
-        "tai mũi họng", 4L
+            "trị đau đầu", 1L,
+            "thần kinh", 1L,
+            "tai mũi họng", 4L
     );
 
     @Autowired
@@ -30,6 +38,9 @@ public class ChatbotService {
 
     @Autowired
     private DoctorService DoctorService;
+
+    @Autowired
+    private ScheduleService scheduleService;
 
     public ChatMessageResponse handleMessage(ChatMessageRequest request) {
         String userMessage = request.getMessage();
@@ -47,22 +58,68 @@ public class ChatbotService {
                 } else {
                     String geminiResponse = geminiIntegrationService.analyzeSymptoms(userMessage);
                     response.setMessage("Phân tích từ AI:\n" + geminiResponse);
-                    geminiIntegrationService.extractSpecialty(geminiResponse).ifPresent(specialty -> {
-                        Long serviceId = specialtyToServiceIdMap.get(specialty);
-                        List<DoctorRecommendation> doctors = null;
+                    geminiIntegrationService.extractServiceFromAdvice(geminiResponse).ifPresent(rawServiceName -> {
+                        System.out.println(">> Trích dịch vụ từ Gemini: " + rawServiceName);
+                        // Sửa đoạn trích tên dịch vụ: chỉ lấy phần đầu tiên trước dấu chấm hoặc dấu phẩy để tránh lấy cả câu dài
+                        String truncatedRawServiceName = rawServiceName.split("[.,]")[0];
+                        String serviceName = normalizeServiceName(truncatedRawServiceName);
+                        System.out.println(">> Tên dịch vụ sau chuẩn hóa: " + serviceName);
+                        Long serviceId = specialtyToServiceIdMap.get(serviceName);
+                        System.out.println(">> serviceId tra được: " + serviceId);
                         if (serviceId != null) {
                             ResponseEntity<ResponseData<List<dabs.DABS.model.DTO.DoctorDTO>>> responseEntity = DoctorService.getDoctorByServiceId(serviceId);
+                            List<DoctorRecommendation> doctors = null;
                             if (responseEntity.getBody() != null && responseEntity.getBody().getData() != null) {
                                 doctors = responseEntity.getBody().getData().stream()
-                                    .map(dto -> new DoctorRecommendation(
-                                        dto.getFullName(),
-                                        dto.getSpecialization(),
-                                        null
-                                    ))
+                                    .map(dto -> {
+                                        List<String> availableTimes = List.of();
+                                        ResponseEntity<ResponseData<List<Schedule>>> scheduleResponse = scheduleService.getSchedulesDoctor(dto.getId());
+                                        List<Schedule> schedules = scheduleResponse.getBody() != null ? scheduleResponse.getBody().getData() : List.of();
+                                        availableTimes = schedules.stream()
+                                            .filter(Schedule::isAvailable)
+                                            .flatMap(schedule -> schedule.getTimeSlot().stream()
+                                                .map(slot -> schedule.getDate().toString() + " " + slot.toString()))
+                                            .collect(Collectors.toList());
+                                        if (availableTimes.isEmpty()) {
+                                            availableTimes = List.of("Chưa có lịch trống");
+                                        }
+                                        return new DoctorRecommendation(
+                                            dto.getFullName(),
+                                            dto.getSpecialization(),
+                                            availableTimes
+                                        );
+                                    })
                                     .toList();
                             }
+                            response.setRecommendations(doctors);
+                        } else {
+                            // Fallback: lấy toàn bộ danh sách bác sĩ nếu không tìm được serviceId
+                            ResponseEntity<ResponseData<List<dabs.DABS.model.DTO.DoctorDTO>>> responseEntity = DoctorService.getAllDoctors();
+                            List<DoctorRecommendation> doctors = null;
+                            if (responseEntity.getBody() != null && responseEntity.getBody().getData() != null) {
+                                doctors = responseEntity.getBody().getData().stream()
+                                        .map(dto -> {
+                                            List<String> availableTimes = List.of();
+                                            ResponseEntity<ResponseData<List<Schedule>>> scheduleResponse = scheduleService.getSchedulesDoctor(dto.getId());
+                                            List<Schedule> schedules = scheduleResponse.getBody() != null ? scheduleResponse.getBody().getData() : List.of();
+                                            availableTimes = schedules.stream()
+                                                    .filter(Schedule::isAvailable)
+                                                    .flatMap(schedule -> schedule.getTimeSlot().stream()
+                                                        .map(slot -> schedule.getDate().toString() + " " + slot.toString()))
+                                                    .collect(Collectors.toList());
+                                            if (availableTimes.isEmpty()) {
+                                                availableTimes = List.of("Chưa có lịch trống");
+                                            }
+                                            return new DoctorRecommendation(
+                                                    dto.getFullName(),
+                                                    dto.getSpecialization(),
+                                                    availableTimes
+                                            );
+                                        })
+                                        .toList();
+                            }
+                            response.setRecommendations(doctors);
                         }
-                        response.setRecommendations(doctors);
                     });
 
                 }
@@ -80,5 +137,12 @@ public class ChatbotService {
         }
 
         return response;
+    }
+
+    private String normalizeServiceName(String raw) {
+        if (raw == null) {
+            return null;
+        }
+        return raw.trim().toLowerCase();
     }
 }

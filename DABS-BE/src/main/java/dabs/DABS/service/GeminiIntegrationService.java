@@ -68,12 +68,14 @@ public class GeminiIntegrationService {
         }
 
     }
-    public Optional<String> extractSpecialty(String geminiResponse) {
-        // Ví dụ tìm cụm "chuyên khoa XXX"
-        Pattern pattern = Pattern.compile("chuyên khoa ([\\p{L}\\s]+)", Pattern.CASE_INSENSITIVE);
+    public Optional<String> extractServiceFromAdvice(String geminiResponse) {
+        // Tìm cụm "khoa XXX", ví dụ: "khoa Thần Kinh", "khoa Tai Mũi Họng"
+        Pattern pattern = Pattern.compile("(?i)khoa\\s+([\\p{L}\\s]{3,40}?)(?=[:\\n\\.,\\*])");
         Matcher matcher = pattern.matcher(geminiResponse);
         if (matcher.find()) {
-            return Optional.of(matcher.group(1).trim());
+            // Lấy tên dịch vụ, chuẩn hóa về chữ thường để dễ ánh xạ Map
+            String serviceName = matcher.group(1).trim().toLowerCase();
+            return Optional.of(serviceName);
         }
         return Optional.empty();
     }
