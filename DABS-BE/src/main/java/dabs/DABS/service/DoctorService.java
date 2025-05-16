@@ -4,6 +4,7 @@ import dabs.DABS.Enum.Role;
 import dabs.DABS.Enum.StatusApplication;
 import dabs.DABS.exception.ErrorCode;
 import dabs.DABS.model.DTO.DoctorDTO;
+import dabs.DABS.model.DTO.DoctorRecommendation;
 import dabs.DABS.model.Entity.Doctor;
 import dabs.DABS.model.Entity.Users;
 import dabs.DABS.model.Response.ResponseData;
@@ -168,6 +169,24 @@ public ResponseEntity<ResponseData<Doctor>> addDoctor(RegisterDoctorForm doctorF
                 StatusApplication.SUCCESS.getCode(),
                 StatusApplication.SUCCESS.getMessage(),
                 dtoList
+        ));
+    }
+    public ResponseEntity<ResponseData<List<DoctorRecommendation>>> SearchDoctorbySpecialty(String specialty) {
+        List<Doctor> doctors = doctorRepository.findBySpecializationIgnoreCase(specialty);
+
+        List<DoctorRecommendation> recommendations = doctors.stream()
+                .map(doctor -> new DoctorRecommendation(
+                        doctor.getFullName(),
+                        doctor.getSpecialization(),
+//                        doctor.getNextAvailableTime() // cần đảm bảo Doctor entity có trường này
+                        null
+                ))
+                .toList();
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                recommendations
         ));
     }
 
