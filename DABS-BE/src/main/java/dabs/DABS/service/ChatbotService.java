@@ -21,12 +21,15 @@ import java.util.stream.Collectors;
 @Service
 public class ChatbotService {
 
-    private static final Map<String, Long> specialtyToServiceIdMap = Map.of(
-            "trị đau đầu", 1L,
-            "thần kinh", 1L,
-            "trị đau tim", 2L,
-            "tim mạch", 2L,
-            "da liễu", 3L
+    private static final Map<String, Long> specialtyToServiceIdMap = Map.ofEntries(
+            Map.entry("trị đau đầu", 1L),
+            Map.entry("thần kinh", 1L),
+            Map.entry("đau đầu", 1L),
+
+            Map.entry("trị đau tim", 2L),
+            Map.entry("tim mạch", 2L),
+            Map.entry("tim mạch mạnh", 2L), // ✅ Thêm key AI trả ra
+            Map.entry("đau tim", 2L)
     );
 
     @Autowired
@@ -140,9 +143,11 @@ public class ChatbotService {
     }
 
     private String normalizeServiceName(String raw) {
-        if (raw == null) {
-            return null;
-        }
-        return raw.trim().toLowerCase();
+        if (raw == null) return null;
+        return raw.toLowerCase()
+                .replaceAll("[^a-zA-ZÀ-Ỹà-ỹ\\s]", "") // bỏ ký tự đặc biệt
+                .replaceAll("\\b(mạnh|chuyên khoa|khám|bác sĩ)\\b", "") // bỏ từ thừa
+                .replaceAll("\\s+", " ") // gộp khoảng trắng
+                .trim();
     }
 }
