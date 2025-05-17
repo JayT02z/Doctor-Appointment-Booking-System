@@ -22,12 +22,11 @@ import java.util.stream.Collectors;
 public class ChatbotService {
 
     private static final Map<String, Long> specialtyToServiceIdMap = Map.of(
-        "da liễu", 1L,
-        "nội thần kinh", 2L,
-        "tim mạch", 3L,
             "trị đau đầu", 1L,
             "thần kinh", 1L,
-            "tai mũi họng", 4L
+            "trị đau tim", 2L,
+            "tim mạch", 2L,
+            "da liễu", 3L
     );
 
     @Autowired
@@ -71,6 +70,7 @@ public class ChatbotService {
                             List<DoctorRecommendation> doctors = null;
                             if (responseEntity.getBody() != null && responseEntity.getBody().getData() != null) {
                                 doctors = responseEntity.getBody().getData().stream()
+                                    .filter(dto -> dto.getServices().stream().anyMatch(s -> s.getId().equals(serviceId)))
                                     .map(dto -> {
                                         List<String> availableTimes = List.of();
                                         ResponseEntity<ResponseData<List<Schedule>>> scheduleResponse = scheduleService.getSchedulesDoctor(dto.getId());
