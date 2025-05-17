@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -6,13 +6,16 @@ import axios from "axios";
 const AvatarDropdown = () => {
   const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const timeoutId = useRef(null);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
-      await axios.post("http://localhost:8080/api/v1/auth/logout", {}, {
-        withCredentials: true, // include cookies if needed
-      });
+      await axios.post(
+          "http://localhost:8080/api/v1/auth/logout",
+          {},
+          { withCredentials: true }
+      );
     } catch (error) {
       console.error("Logout API failed", error);
     } finally {
@@ -29,13 +32,31 @@ const AvatarDropdown = () => {
         .toUpperCase();
   };
 
+  const handleMouseEnter = () => {
+    if (timeoutId.current) {
+      clearTimeout(timeoutId.current);
+      timeoutId.current = null;
+    }
+    setIsOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    timeoutId.current = setTimeout(() => {
+      setIsOpen(false);
+    }, 200);
+  };
+
   return (
-      <div className="relative">
+      <div
+          className="relative inline-block"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+      >
         <button
-            onClick={() => setIsOpen(!isOpen)}
+            type="button"
             className="flex items-center space-x-2 focus:outline-none"
         >
-          <div className="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center text-white font-semibold">
+          <div className="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center text-white font-semibold cursor-pointer">
             {getInitials(user?.name || "User")}
           </div>
         </button>
@@ -49,26 +70,76 @@ const AvatarDropdown = () => {
 
               {user?.role === "PATIENT" && (
                   <>
-                    <Link to="/patient/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile Settings</Link>
-                    <Link to="/patient/appointments" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Appointments</Link>
-                    <Link to="/patient/book-appointment" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Book Appointment</Link>
-                    <Link to="/patient/payment" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Payment History</Link>
+                    <Link
+                        to="/patient/profile"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Profile Settings
+                    </Link>
+                    <Link
+                        to="/patient/appointments"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      My Appointments
+                    </Link>
+                    <Link
+                        to="/patient/book-appointment"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Book Appointment
+                    </Link>
+                    <Link
+                        to="/patient/payment"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Payment History
+                    </Link>
                   </>
               )}
 
               {user?.role === "DOCTOR" && (
                   <>
-                    <Link to="/doctor/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Doctor Dashboard</Link>
-                    <Link to="/doctor/information" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Information</Link>
-                    <Link to="/doctor/services" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Services</Link>
-                    <Link to="/doctor/schedule" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Schedule</Link>
+                    <Link
+                        to="/doctor/dashboard"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Doctor Dashboard
+                    </Link>
+                    <Link
+                        to="/doctor/information"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Information
+                    </Link>
+                    <Link
+                        to="/doctor/services"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Services
+                    </Link>
+                    <Link
+                        to="/doctor/schedule"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Schedule
+                    </Link>
                   </>
               )}
 
               {user?.role === "ADMIN" && (
                   <>
-                    <Link to="/admin/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Admin Dashboard</Link>
-                    <Link to="/admin/services" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Services</Link>
+                    <Link
+                        to="/admin/dashboard"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Admin Dashboard
+                    </Link>
+                    <Link
+                        to="/admin/services"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Services
+                    </Link>
                   </>
               )}
 
