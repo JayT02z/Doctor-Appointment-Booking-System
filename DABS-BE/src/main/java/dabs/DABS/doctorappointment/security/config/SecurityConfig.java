@@ -56,6 +56,7 @@ public class SecurityConfig {
                                         "/api/appointments/patient/**",
                                         "/api/doctor/user/**",
                                         "/api/services/inactive/**",
+                                "/api/chatbot/message",
                                 "/api/appointment/status/**",
                                 "/api/services/doctor/addservice",
                                 "/api/services/create",

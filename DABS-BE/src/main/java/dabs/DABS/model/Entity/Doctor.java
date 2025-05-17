@@ -54,4 +54,5 @@ public class Doctor {
     private List<ServiceEntity> services;
 
     private String imgpath;
+
 }
