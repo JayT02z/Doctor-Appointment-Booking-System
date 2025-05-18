@@ -30,14 +30,12 @@ public class Users {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @NotBlank(message = "Mật khẩu không được để trống")
     @Size(min = 8, message = "Mật khẩu phải có ít nhất 8 ký tự")
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String password;
 
-    @NotBlank(message = "Số điện thoại không được để trống")
     @Pattern(regexp = "^(0[0-9]{9})$", message = "Số điện thoại không hợp lệ (phải gồm 10 chữ số bắt đầu bằng 0)")
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = true)
     private String phone;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -52,4 +50,13 @@ public class Users {
 
     @Enumerated(EnumType.STRING)
     private Status status;
+
+    @Column(name = "google_id", unique = true)
+    private String googleId;
+
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+
+    @Column(name = "is_oauth2")
+    private Boolean isOauth2 = false;
 }

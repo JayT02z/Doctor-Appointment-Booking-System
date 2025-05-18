@@ -1,8 +1,18 @@
 package dabs.DABS.doctorappointment.security.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dabs.DABS.doctorappointment.security.jwt.JwtRequestFilter;
+import dabs.DABS.doctorappointment.security.jwt.JwtUtil;
+import dabs.DABS.doctorappointment.security.OAuth2SuccessHandler;
+import dabs.DABS.model.DTO.UserDTO;
+import dabs.DABS.model.Entity.Users;
+import dabs.DABS.service.UsersService;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -13,6 +23,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,8 +32,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Configuration
 @EnableMethodSecurity
@@ -30,10 +45,14 @@ public class SecurityConfig {
 
     private final JwtRequestFilter jwtRequestFilter;
     private final UserDetailsService customUserDetailService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
-    public SecurityConfig(JwtRequestFilter jwtRequestFilter, UserDetailsService customUserDetailService) {
+    public SecurityConfig(JwtRequestFilter jwtRequestFilter,
+                          UserDetailsService customUserDetailService,
+                          @Lazy OAuth2SuccessHandler oAuth2SuccessHandler) {
         this.jwtRequestFilter = jwtRequestFilter;
         this.customUserDetailService = customUserDetailService;
+        this.oAuth2SuccessHandler = oAuth2SuccessHandler;
     }
 
     @Bean
@@ -44,6 +63,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // --- Public Endpoints ---
                         .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/logout","/api/v1/auth/sendOTP","/api/v1/auth/verifyOTP","/api/v1/auth/resendOTP").permitAll()
+                        .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers("/api/schedules/**",
                                          "/api/appointment/**",
                                          "/api/medicine/**",
@@ -75,6 +95,7 @@ public class SecurityConfig {
                                 "/api/services/search",
                                 "/api/v1/auth/changerole",
                                 "/api/v1/auth/forgetpassword",
+                                "/api/v1/auth/oauth2/success",
                                 "/api/schedules/doctorschedules/**").permitAll()
 
                         // --- Private Endpoints: ADMIN only ---
@@ -91,7 +112,11 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
+                .oauth2Login(oauth2 -> oauth2
+                    .successHandler(oAuth2SuccessHandler)
+                    .failureUrl("/login?error")
+                );
 
         return http.build();
     }

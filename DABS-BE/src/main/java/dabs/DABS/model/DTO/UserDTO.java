@@ -20,6 +20,9 @@ public class UserDTO {
     private Role role;
     private LocalDateTime createdAt;
     private Status status;
+    private String googleId;
+    private String avatarUrl;
+    private Boolean isOauth2;
 
     public static UserDTO fromEntity(Users user) {
         if (user == null) {
@@ -37,6 +40,9 @@ public class UserDTO {
                 .role(role)
                 .createdAt(user.getCreatedAt())
                 .status(user.getStatus())
+                .googleId(user.getGoogleId())
+                .avatarUrl(user.getAvatarUrl())
+                .isOauth2(Boolean.TRUE.equals(user.getIsOauth2()))
                 .build();
     }
 
@@ -53,6 +59,9 @@ public class UserDTO {
         }
         user.setCreatedAt(userDTO.getCreatedAt());
         user.setStatus(userDTO.getStatus());
+        user.setGoogleId(userDTO.getGoogleId());
+        user.setAvatarUrl(userDTO.getAvatarUrl());
+        user.setIsOauth2(userDTO.getIsOauth2() != null ? userDTO.getIsOauth2() : false);
         return user;
     }
 }

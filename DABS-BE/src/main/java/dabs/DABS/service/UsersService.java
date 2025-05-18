@@ -263,4 +263,30 @@ public class UsersService {
 
     }
 
+    /**
+     * Handle Google OAuth2 login: if user exists, return it; else create new PATIENT user with OAuth2 info.
+     */
+    public Users processOAuthPostLogin(String email, String name, String googleId, String avatarUrl) {
+        Optional<Users> optionalUser = usersRepository.findByEmail(email);
+
+        if (optionalUser.isPresent()) {
+            return optionalUser.get();
+        }
+
+        Users newUser = new Users();
+        newUser.setEmail(email);
+        newUser.setUsername(email); // Or generate another username if needed
+        newUser.setGoogleId(googleId);
+        newUser.setAvatarUrl(avatarUrl);
+        newUser.setIsOauth2(true);
+        newUser.setCreatedAt(LocalDateTime.now());
+        newUser.setStatus(Status.ACTIVE);
+        newUser.setRoles(Collections.singleton(Role.PATIENT));
+        // Thêm password mặc định mã hóa
+        newUser.setPassword(passwordEncoder.encode("default_password"));
+        // Thêm dòng set phone để tránh lỗi null constraint
+        newUser.setPhone("0000000000");
+
+        return usersRepository.save(newUser);
+    }
 }
