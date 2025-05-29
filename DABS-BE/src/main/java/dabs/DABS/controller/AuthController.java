@@ -1,8 +1,11 @@
 package dabs.DABS.controller;
+
 import dabs.DABS.model.DTO.UserDTO;
 import dabs.DABS.model.Entity.Users;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+
 import java.util.Map;
 
 import dabs.DABS.doctorappointment.security.jwt.JwtUtil;
@@ -42,8 +45,8 @@ public class AuthController {
     private MailSenderService mailSenderService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
-        return usersService.loginUser(request);
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+        return usersService.loginUser(loginRequest, request);
     }
 
     @PostMapping("/logout")
@@ -84,9 +87,9 @@ public class AuthController {
         String token = jwtUtil.generateToken(userDetails);
 
         return ResponseEntity.ok().body(Map.of(
-            "message", "Login with Google successful",
-            "token", token,
-            "user", UserDTO.fromEntity(user)
+                "message", "Login with Google successful",
+                "token", token,
+                "user", UserDTO.fromEntity(user)
         ));
     }
 }

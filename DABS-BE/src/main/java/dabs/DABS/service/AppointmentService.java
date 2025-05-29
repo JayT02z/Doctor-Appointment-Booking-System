@@ -93,7 +93,7 @@ public class AppointmentService {
 
         appointment.setStatus(newStatus);
         appointmentRepository.save(appointment);
-
+        //tự động gửi email
         String email = appointment.getPatient().getUser().getEmail();
         if (AppointmentStatus.CONFIRMED.equals(appointment.getStatus())) {
             mailSenderService.sendAppointmentConfirmationEmail(email, appointment);

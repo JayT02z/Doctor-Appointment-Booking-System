@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 public enum ErrorCode {
-    BAD_REQUEST(400, "Invalid request",HttpStatus.BAD_REQUEST),
+    BAD_REQUEST(400, "Invalid request", HttpStatus.BAD_REQUEST),
     EMAIL_EXISTS(409, "Email already exists", HttpStatus.CONFLICT),
     PHONE_EXISTS(409, "Phone already exists", HttpStatus.CONFLICT),
     UNAUTHORIZED(401, "Unauthorized access", HttpStatus.UNAUTHORIZED),
@@ -27,6 +27,7 @@ public enum ErrorCode {
     INVALID_DATE_FORMAT(400, "Invalid date format", HttpStatus.BAD_REQUEST),
     FIELD_LENGTH_EXCEEDED(400, "Field length exceeded the allowed limit", HttpStatus.BAD_REQUEST),
     VALUE_OUT_OF_RANGE(400, "Value is out of the acceptable range", HttpStatus.BAD_REQUEST),
+    RECAPTCHA_FAILED(400, "Recaptcha verification failed", HttpStatus.BAD_REQUEST),
 
     UPDATE_ERROR(200, "Update fail", HttpStatus.BAD_REQUEST);
 
