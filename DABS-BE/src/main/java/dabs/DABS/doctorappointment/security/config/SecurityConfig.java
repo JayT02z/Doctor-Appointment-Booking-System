@@ -98,6 +98,12 @@ public class SecurityConfig {
                                 "/api/v1/auth/oauth2/success",
                                 "/api/schedules/doctorschedules/**").permitAll()
 
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**"
+                        ).permitAll()
+
                         // --- Private Endpoints: ADMIN only ---
                         .requestMatchers("/api/doctor/create").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
