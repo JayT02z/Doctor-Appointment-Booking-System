@@ -105,6 +105,7 @@ public class SecurityConfig {
                         .requestMatchers("/uploads/**").permitAll()
                         // --- Private Endpoints: PATIENT or ADMIN ---
                         .requestMatchers("/api/patient/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
 
                         // --- Private Endpoints: DOCTOR or ADMIN ---
 
