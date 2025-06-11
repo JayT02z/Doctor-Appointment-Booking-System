@@ -62,20 +62,20 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         // --- Public Endpoints ---
-                        .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/logout","/api/v1/auth/sendOTP","/api/v1/auth/verifyOTP","/api/v1/auth/resendOTP").permitAll()
+                        .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/logout", "/api/v1/auth/sendOTP", "/api/v1/auth/verifyOTP", "/api/v1/auth/resendOTP").permitAll()
                         .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers("/api/schedules/**",
-                                         "/api/appointment/**",
-                                         "/api/medicine/**",
-                                         "/api/prescription/**",
-                                         "/api/feedback/**",
-                                         "/api/payment/**",
-                                        "/api/patient/create",
-                                        "/api/patient/get/**",
-                                        "/api/appointments/doctor/**",
-                                        "/api/appointments/patient/**",
-                                        "/api/doctor/user/**",
-                                        "/api/services/inactive/**",
+                                "/api/appointment/**",
+                                "/api/medicine/**",
+                                "/api/prescription/**",
+                                "/api/feedback/**",
+                                "/api/payment/**",
+                                "/api/patient/create",
+                                "/api/patient/get/**",
+                                "/api/appointments/doctor/**",
+                                "/api/appointments/patient/**",
+                                "/api/doctor/user/**",
+                                "/api/services/inactive/**",
                                 "/api/chatbot/message",
                                 "/api/appointment/status/**",
                                 "/api/services/doctor/addservice",
@@ -98,6 +98,12 @@ public class SecurityConfig {
                                 "/api/v1/auth/oauth2/success",
                                 "/api/schedules/doctorschedules/**").permitAll()
 
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**"
+                        ).permitAll()
+
                         // --- Private Endpoints: ADMIN only ---
                         .requestMatchers("/api/doctor/create").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
@@ -115,8 +121,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
-                    .successHandler(oAuth2SuccessHandler)
-                    .failureUrl("/login?error")
+                        .successHandler(oAuth2SuccessHandler)
+                        .failureUrl("/login?error")
                 );
 
         return http.build();

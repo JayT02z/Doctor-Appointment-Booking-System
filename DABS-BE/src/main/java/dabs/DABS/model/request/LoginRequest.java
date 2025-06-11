@@ -13,7 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginRequest {
-//    @NotBlank(message = "Email is required")
+    //    @NotBlank(message = "Email is required")
 //    @Email(message = "Invalid email format")
     private String username;
 
@@ -21,4 +21,5 @@ public class LoginRequest {
     @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
 
+    private String recaptchaToken;
 }

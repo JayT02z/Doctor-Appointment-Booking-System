@@ -18,6 +18,7 @@ import dabs.DABS.model.request.RegistrationRequest;
 import dabs.DABS.repository.DoctorRepository;
 import dabs.DABS.repository.PatientRepository;
 import dabs.DABS.repository.UsersRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -44,11 +45,15 @@ public class UsersService {
 
     private final UsersRepository usersRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RecaptchaService recaptchaService;
+    private final LoginFailureService loginFailureService;
 
     @Autowired
-    public UsersService(UsersRepository usersRepository, PasswordEncoder passwordEncoder) {
+    public UsersService(UsersRepository usersRepository, PasswordEncoder passwordEncoder, RecaptchaService recaptchaService, LoginFailureService loginFailureService) {
         this.usersRepository = usersRepository;
         this.passwordEncoder = passwordEncoder;
+        this.recaptchaService = recaptchaService;
+        this.loginFailureService = loginFailureService;
     }
 
     @Autowired
@@ -68,9 +73,11 @@ public class UsersService {
     private PatientRepository patientRepository;
 
 
-    public ResponseEntity<ResponseData<AuthResponse>> loginUser(LoginRequest loginRequest) {
+    public ResponseEntity<ResponseData<AuthResponse>> loginUser(LoginRequest loginRequest, HttpServletRequest request) {
+        String ipAddress = request.getRemoteAddr();
         Optional<Users> optionalUser = usersRepository.findByUsername(loginRequest.getUsername());
         if (!optionalUser.isPresent()) {
+            loginFailureService.recordFailure(ipAddress);
             return ResponseEntity.status(404).body(new ResponseData<>(
                     ErrorCode.USER_NOT_FOUND.getCode(),
                     ErrorCode.USER_NOT_FOUND.getMessage(),
@@ -80,12 +87,25 @@ public class UsersService {
 
         Users foundUser = optionalUser.get();
         if (!passwordEncoder.matches(loginRequest.getPassword(), foundUser.getPassword())) {
+            loginFailureService.recordFailure(ipAddress);
             return ResponseEntity.status(401).body(new ResponseData<>(
                     ErrorCode.INVALID_CREDENTIAL.getCode(),
                     ErrorCode.INVALID_CREDENTIAL.getMessage(),
                     null
             ));
         }
+
+        if (loginFailureService.getFailCountByIp(ipAddress) > 3) {
+            if (loginRequest.getRecaptchaToken() == null || !recaptchaService.verifyToken(loginRequest.getRecaptchaToken())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseData<>(
+                        400,
+                        "reCAPTCHA verification failed.",
+                        null
+                ));
+            }
+        }
+
+        loginFailureService.resetFailures(ipAddress);
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
@@ -116,6 +136,14 @@ public class UsersService {
     //register user
     //check dup mail
     public ResponseEntity<ResponseData<UserDTO>> saveUser(RegistrationRequest regRequest) {
+        if (recaptchaService.verifyToken(regRequest.getRecaptchaToken())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseData<>(
+                    400,
+                    "reCAPTCHA verification failed.",
+                    null
+            ));
+        }
+
         if (usersRepository.findByEmail(regRequest.getEmail()).isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseData<>(
                     ErrorCode.EMAIL_EXISTS.getCode(),
@@ -234,7 +262,7 @@ public class UsersService {
         ));
     }
 
-    public ResponseEntity<ResponseData<UserDTO>> changeRole(ChangeRole role){
+    public ResponseEntity<ResponseData<UserDTO>> changeRole(ChangeRole role) {
         Users user = usersRepository.findById(role.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         user.setRoles(role.getRole());
