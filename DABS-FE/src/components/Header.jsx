@@ -27,7 +27,7 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-white dark:bg-gray-800 shadow-sm transition-colors duration-300">
+      <header className="fixed top-0 left-0 w-full z-50 bg-white dark:bg-gray-800 shadow-sm transition-colors duration-300">
       <nav className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           <Link to="/" className="text-2xl font-bold text-primary-600 dark:text-primary-400">
