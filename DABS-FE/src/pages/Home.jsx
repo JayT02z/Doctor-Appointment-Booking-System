@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import HeroBanner from "../components/HeroBanner";
-import StatsSection from "../components/StatsSection";
-import WhyChooseUs from "../components/WhyChooseUs";
-import FeaturedServices from "../components/FeaturedServices";
-import FeaturedDoctors from "../components/FeaturedDoctors";
-import PatientTestimonials from "../components/PatientTestimonials";
-import LatestArticles from "../components/LatestArticles";
-import CTASection from "../components/CTASection";
-import WelcomeBack from "../components/WelcomeBack";
+import HeroBanner from "../components/home/HeroBanner.jsx";
+import StatsSection from "../components/home/StatsSection.jsx";
+import WhyChooseUs from "../components/home/WhyChooseUs.jsx";
+import FeaturedServices from "../components/home/FeaturedServices.jsx";
+import FeaturedDoctors from "../components/home/FeaturedDoctors.jsx";
+import PatientTestimonials from "../components/home/PatientTestimonials.jsx";
+import LatestArticles from "../components/home/LatestArticles.jsx";
+import CTASection from "../components/home/CTASection.jsx";
+import WelcomeBack from "../components/home/WelcomeBack.jsx";
 import ChatWidget from "../components/ChatWidget.jsx";
 
 const Home = () => {

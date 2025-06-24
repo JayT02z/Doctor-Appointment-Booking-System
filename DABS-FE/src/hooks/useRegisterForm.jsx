@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import axios from "axios";
-import { useAuth } from "../../../context/AuthContext";
+import { useAuth } from "../context/AuthContext.jsx";
 
 export const useRegisterForm = () => {
     const [formData, setFormData] = useState({

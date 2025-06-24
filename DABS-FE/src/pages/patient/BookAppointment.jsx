@@ -1,9 +1,9 @@
 // Entry file - BookAppointment.jsx
 import React from 'react';
 import useBookAppointment from '../../hooks/useBookAppointment';
-import DoctorCard from '../../components/DoctorCard';
-import BookingModal from '../../components/BookingModal';
-import PaymentModal from '../../components/PaymentModal';
+import DoctorCard from '../../components/booking_appointment/DoctorCard.jsx';
+import BookingModal from '../../components/booking_appointment/BookingModal.jsx';
+import PaymentModal from '../../components/booking_appointment/PaymentModal.jsx';
 import { Search, Calendar, Stethoscope } from 'lucide-react';
 
 const BookAppointment = () => {

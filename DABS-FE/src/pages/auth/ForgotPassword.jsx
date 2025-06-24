@@ -2,37 +2,34 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 const ForgotPassword = () => {
-    const [stage, setStage] = useState(1); // 1: Email, 2: OTP, 3: New Password
+    const [stage, setStage] = useState(1);
     const [email, setEmail] = useState("");
     const [otp, setOtp] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    const [error, setError] = useState("");
-    const [otpTimer, setOtpTimer] = useState(300); // 5 minutes in seconds
-    const [sendingOtp, setSendingOtp] = useState(false); // New state for "Sending..."
+    const [otpTimer, setOtpTimer] = useState(300);
+    const [sendingOtp, setSendingOtp] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
         let timer;
         if (stage === 2 && otpTimer > 0) {
-            timer = setInterval(() => {
-                setOtpTimer((prevTimer) => prevTimer - 1);
-            }, 1000);
+            timer = setInterval(() => setOtpTimer(prev => prev - 1), 1000);
         }
         return () => clearInterval(timer);
     }, [stage, otpTimer]);
 
     const formatTime = (seconds) => {
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = seconds % 60;
-        return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m}:${s < 10 ? "0" : ""}${s}`;
     };
 
-
     const handleSendOtp = async () => {
-        setSendingOtp(true); //  Start "Sending..." effect
+        setSendingOtp(true);
         try {
             await axios.post("http://localhost:8080/api/v1/auth/sendOTP", { email });
             toast.success("OTP sent to your email!");
@@ -41,13 +38,13 @@ const ForgotPassword = () => {
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to send OTP");
         } finally {
-            setSendingOtp(false); // End "Sending..." effect regardless of result
+            setSendingOtp(false);
         }
     };
 
     const handleVerifyOtp = async () => {
         try {
-            await axios.post("http://localhost:8080/api/v1/auth/verifyOTP", { email, otp: otp });
+            await axios.post("http://localhost:8080/api/v1/auth/verifyOTP", { email, otp });
             toast.success("OTP verified successfully!");
             setStage(3);
         } catch (error) {
@@ -83,114 +80,108 @@ const ForgotPassword = () => {
         }
     };
 
+    const transitionProps = {
+        initial: { opacity: 0, y: 10 },
+        animate: { opacity: 1, y: 0 },
+        exit: { opacity: 0, y: -10 },
+        transition: { duration: 0.3 },
+    };
+
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8">
-                <div>
-                    <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                        Forgot Password
-                    </h2>
-                </div>
+        <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-white flex items-center justify-center px-4">
+            <motion.div
+                className="w-full max-w-md bg-white/80 backdrop-blur-md rounded-2xl shadow-xl p-8 space-y-6"
+                {...transitionProps}
+            >
+                <h2 className="text-center text-3xl font-bold text-gray-800">Forgot Password</h2>
 
-                {stage === 1 && (
-                    <div>
-                        <label htmlFor="email" className="sr-only">
-                            Email address
-                        </label>
-                        <input
-                            id="email"
-                            name="email"
-                            type="email"
-                            autoComplete="email"
-                            required
-                            className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
-                            placeholder="Email address"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                        />
-                        <button
-                            type="button"
-                            className="mt-4 w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-                            onClick={handleSendOtp}
-                            disabled={sendingOtp} // Disable button while sending
-                        >
-                            {sendingOtp ? "Sending..." : "Send OTP"}  {/* Show "Sending..." */}
-                        </button>
-                    </div>
-                )}
+                <AnimatePresence mode="wait">
+                    {stage === 1 && (
+                        <motion.div key="stage1" {...transitionProps}>
+                            <label className="block text-sm font-medium text-gray-700" htmlFor="email">Email</label>
+                            <input
+                                id="email"
+                                type="email"
+                                required
+                                autoComplete="email"
+                                className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                                placeholder="you@example.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
+                            <button
+                                type="button"
+                                disabled={sendingOtp}
+                                className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg transition-all duration-150"
+                                onClick={handleSendOtp}
+                            >
+                                {sendingOtp ? "Sending..." : "Send OTP"}
+                            </button>
+                        </motion.div>
+                    )}
 
-                {stage === 2 && (
-                    <div>
-                        <p className="text-sm text-gray-600">
-                            Enter the 6-digit verification code we sent to your email.
-                            {otpTimer > 0 && <span className="font-semibold">  OTP expires in: {formatTime(otpTimer)}</span>}
-                            {otpTimer === 0 && (
-                                <button
-                                    type="button"
-                                    className="ml-2 text-primary-600 hover:text-primary-500"
-                                    onClick={handleResendOtp}
-                                >
-                                    Resend OTP
-                                </button>
-                            )}
-                        </p>
-                        <input
-                            type="text"
-                            value={otp}
-                            onChange={(e) => setOtp(e.target.value)}
-                            placeholder="OTP (6 digits)"
-                            className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
-                        />
-                        <button
-                            type="button"
-                            className="mt-4 w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-                            onClick={handleVerifyOtp}
-                        >
-                            Verify OTP
-                        </button>
-                    </div>
-                )}
+                    {stage === 2 && (
+                        <motion.div key="stage2" {...transitionProps}>
+                            <p className="text-sm text-gray-600 mb-2">
+                                Enter the 6-digit code sent to your email.{" "}
+                                {otpTimer > 0 ? (
+                                    <span className="text-indigo-600 font-medium">OTP expires in {formatTime(otpTimer)}</span>
+                                ) : (
+                                    <button onClick={handleResendOtp} className="text-indigo-500 underline">Resend OTP</button>
+                                )}
+                            </p>
+                            <input
+                                type="text"
+                                value={otp}
+                                onChange={(e) => setOtp(e.target.value)}
+                                placeholder="Enter OTP"
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                            />
+                            <button
+                                type="button"
+                                onClick={handleVerifyOtp}
+                                className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg"
+                            >
+                                Verify OTP
+                            </button>
+                        </motion.div>
+                    )}
 
-                {stage === 3 && (
-                    <div>
-                        <label htmlFor="newPassword" className="sr-only">
-                            New Password
-                        </label>
-                        <input
-                            type="password"
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            placeholder="New Password"
-                            className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
-                        />
-                        <label htmlFor="confirmPassword" className="sr-only">
-                            Confirm New Password
-                        </label>
-                        <input
-                            type="password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            placeholder="Confirm New Password"
-                            className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm mt-4"
-                        />
-                        <button
-                            type="button"
-                            className="mt-4 w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
-                            onClick={handleResetPassword}
-                        >
-                            Reset Password
-                        </button>
-                    </div>
-                )}
+                    {stage === 3 && (
+                        <motion.div key="stage3" {...transitionProps}>
+                            <label className="block text-sm font-medium text-gray-700" htmlFor="newPassword">New Password</label>
+                            <input
+                                type="password"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                placeholder="New password"
+                                className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                            />
+                            <label className="block text-sm font-medium text-gray-700 mt-4" htmlFor="confirmPassword">Confirm Password</label>
+                            <input
+                                type="password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                placeholder="Confirm password"
+                                className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                            />
+                            <button
+                                type="button"
+                                onClick={handleResetPassword}
+                                className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg"
+                            >
+                                Reset Password
+                            </button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
 
-                {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
-
-                <div className="mt-6 text-center">
-                    <Link to="/login" className="text-primary-600 hover:text-primary-500">
-                        Back to Login
+                <div className="text-center pt-4">
+                    <Link to="/login" className="text-sm text-indigo-600 hover:underline">
+                        ← Back to Login
                     </Link>
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 };

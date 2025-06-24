@@ -1,7 +1,7 @@
 // BookingModal.jsx
 import React from 'react';
 import { Dialog } from '@headlessui/react';
-import { formatTimeSlot } from '../utils/format';
+import { formatTimeSlot } from '../../utils/format.js';
 import { X, Calendar, Clock, FileText, DollarSign, User, Stethoscope } from 'lucide-react';
 
 const BookingModal = ({

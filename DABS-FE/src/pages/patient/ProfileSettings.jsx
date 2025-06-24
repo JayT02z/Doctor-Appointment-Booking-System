@@ -81,7 +81,6 @@ const ProfileSettings = () => {
 
     try {
       if (isFirstTime) {
-        // First time: create patient profile
         const response = await axios.post(
             "http://localhost:8080/api/patient/create",
             {

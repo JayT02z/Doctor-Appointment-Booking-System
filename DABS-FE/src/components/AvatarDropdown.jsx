@@ -2,6 +2,17 @@ import React, { useState, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import {
+  UserCircleIcon,
+  CalendarIcon,
+  ClockIcon,
+  CreditCardIcon,
+  ChartBarIcon,
+  Cog6ToothIcon,
+  BuildingOfficeIcon,
+  ClipboardDocumentListIcon,
+  ArrowLeftOnRectangleIcon
+} from "@heroicons/react/24/outline";
 
 const AvatarDropdown = () => {
   const { user, logout } = useAuth();
@@ -46,112 +57,104 @@ const AvatarDropdown = () => {
     }, 200);
   };
 
+  const menuItems = {
+    PATIENT: [
+      { to: "/patient/profile", icon: UserCircleIcon, label: "Profile Settings" },
+      { to: "/patient/appointments", icon: CalendarIcon, label: "My Appointments" },
+      { to: "/patient/book-appointment", icon: ClockIcon, label: "Book Appointment" },
+      { to: "/patient/payment", icon: CreditCardIcon, label: "Payment History" }
+    ],
+    DOCTOR: [
+      { to: "/doctor/dashboard", icon: ChartBarIcon, label: "Doctor Dashboard" },
+      { to: "/doctor/information", icon: UserCircleIcon, label: "Information" },
+      { to: "/doctor/services", icon: ClipboardDocumentListIcon, label: "Services" },
+      { to: "/doctor/schedule", icon: CalendarIcon, label: "Schedule" }
+    ],
+    ADMIN: [
+      { to: "/admin/dashboard", icon: ChartBarIcon, label: "Admin Dashboard" },
+      { to: "/admin/services", icon: BuildingOfficeIcon, label: "Services" }
+    ]
+  };
+
   return (
-      <div
-          className="relative inline-block"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
+    <div
+      className="relative inline-block"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <button
+        type="button"
+        className="flex items-center space-x-2 focus:outline-none group"
       >
-        <button
-            type="button"
-            className="flex items-center space-x-2 focus:outline-none"
-        >
-          <div className="w-10 h-10 rounded-full bg-primary-600 flex items-center justify-center text-white font-semibold cursor-pointer">
-            {getInitials(user?.name || "User")}
+        <div className="
+          w-10 h-10 rounded-full
+          bg-gradient-to-br from-blue-500 to-blue-600
+          flex items-center justify-center
+          text-white font-medium
+          ring-2 ring-white
+          shadow-sm
+          transition-transform duration-200
+          group-hover:scale-105
+        ">
+          {getInitials(user?.name || "User")}
+        </div>
+      </button>
+
+      {isOpen && (
+        <div className="
+          absolute right-0 mt-2 w-56
+          bg-white rounded-xl
+          shadow-lg ring-1 ring-black ring-opacity-5
+          divide-y divide-gray-100
+          transform opacity-100 scale-100
+          transition duration-200 ease-out
+          z-50
+        ">
+          <div className="px-4 py-3">
+            <p className="text-sm font-semibold text-gray-900 truncate">
+              {user?.name}
+            </p>
+            <p className="text-xs text-gray-500 truncate mt-0.5">
+              {user?.email}
+            </p>
           </div>
-        </button>
 
-        {isOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-              <div className="px-4 py-2 border-b border-gray-100">
-                <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                <p className="text-xs text-gray-500">{user?.email}</p>
-              </div>
+          <div className="py-1">
+            {menuItems[user?.role]?.map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={index}
+                  to={item.to}
+                  className="
+                    flex items-center px-4 py-2 text-sm text-gray-700
+                    hover:bg-gray-50 transition-colors duration-150
+                    group
+                  "
+                >
+                  <Icon className="w-5 h-5 mr-3 text-gray-400 group-hover:text-blue-500" />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
 
-              {user?.role === "PATIENT" && (
-                  <>
-                    <Link
-                        to="/patient/profile"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Profile Settings
-                    </Link>
-                    <Link
-                        to="/patient/appointments"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      My Appointments
-                    </Link>
-                    <Link
-                        to="/patient/book-appointment"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Book Appointment
-                    </Link>
-                    <Link
-                        to="/patient/payment"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Payment History
-                    </Link>
-                  </>
-              )}
-
-              {user?.role === "DOCTOR" && (
-                  <>
-                    <Link
-                        to="/doctor/dashboard"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Doctor Dashboard
-                    </Link>
-                    <Link
-                        to="/doctor/information"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Information
-                    </Link>
-                    <Link
-                        to="/doctor/services"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Services
-                    </Link>
-                    <Link
-                        to="/doctor/schedule"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Schedule
-                    </Link>
-                  </>
-              )}
-
-              {user?.role === "ADMIN" && (
-                  <>
-                    <Link
-                        to="/admin/dashboard"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Admin Dashboard
-                    </Link>
-                    <Link
-                        to="/admin/services"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Services
-                    </Link>
-                  </>
-              )}
-
-              <button
-                  onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-              >
-                Logout
-              </button>
-            </div>
-        )}
-      </div>
+          <div className="py-1">
+            <button
+              onClick={handleLogout}
+              className="
+                flex items-center w-full px-4 py-2 text-sm text-red-600
+                hover:bg-red-50 transition-colors duration-150
+                group
+              "
+            >
+              <ArrowLeftOnRectangleIcon className="w-5 h-5 mr-3 text-red-400 group-hover:text-red-500" />
+              Logout
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
