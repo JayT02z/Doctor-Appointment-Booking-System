@@ -1,396 +1,154 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useAuth } from "../../context/AuthContext";
-import axios from "axios";
-import { toast } from "react-hot-toast";
 import { Link } from "react-router-dom";
-import dayjs from "dayjs";
-import FeedbackModal from "./Feedbacks.jsx";
+import { CalendarIcon, PlusIcon } from "@heroicons/react/24/outline";
 
-const Appointments = () => {
-  const { user, token, patientId } = useAuth();
-  const [appointments, setAppointments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("today");
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
-  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-  const [payments, setPayments] = useState({});
-  const [statusFilter, setStatusFilter] = useState("ALL");
-  const [prescription, setPrescription] = useState(null);
-  const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
-  const [existingFeedback, setExistingFeedback] = useState(null);
+import useAppointmentsData from "../../hooks/useAppointmentsData";
+import useFeedbackModal from "../../hooks/useFeedbackModal";
+import usePrescriptionModal from "../../hooks/usePrescriptionModal";
 
-  useEffect(() => {
-    fetchAppointments();
-  }, []);
+import FeedbackModal from "../../components/appointments/FeedbackModal.jsx";
+import PrescriptionModal from "../../components/appointments/PrescriptionModal.jsx";
+import AppointmentCard from "../../components/appointments/AppointmentCard.jsx";
+import AppointmentsTabs from "../../components/appointments/AppointmentsTabs.jsx";
+import StatusFilter from "../../components/appointments/StatusFilter.jsx";
+import LoadingSpinner from "../../components/appointments/LoadingSpinner.jsx";
 
-  const fetchPayments = async (appointments) => {
-    try {
-      const paymentsData = {};
-      await Promise.all(
-          appointments.map(async (appointment) => {
-                const paymentResponse = await axios.get(
-                    `http://localhost:8080/api/payment/appointment/${appointment.id}`,
-                    {
-                      headers: {
-                        Authorization: `Bearer ${token}`,
-                      },
-                    }
-                );
-                if (paymentResponse.data.statusCode === 200) {
-                  paymentsData[appointment.id] = paymentResponse.data.data[0];
-                } else {
-                  console.warn(
-                      `Failed to fetch payment for appointment ID ${appointment.id}`
-                  );
-                }
-              }
-          )
-      );
-      setPayments(paymentsData);
-    } catch (error) {
-      console.error("Error fetching payments:", error);
-      toast.error("Failed to fetch payment information");
-    }
-  };
+const AppointmentsPage = () => {
+  const { token, patientId } = useAuth();
 
-  const fetchAppointments = async () => {
-    try {
-      const response = await axios.get(
-          `http://localhost:8080/api/appointment/patient/${patientId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-      );
-      if (response.data.statusCode === 200) {
-        setAppointments(response.data.data);
-        fetchPayments(response.data.data);
-      }
-    } catch (error) {
-      console.error("Error fetching appointments:", error);
-      toast.error("Failed to fetch appointments");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    appointments,
+    payments,
+    loading,
+    activeTab,
+    setActiveTab,
+    statusFilter,
+    setStatusFilter,
+    filterAppointments,
+    refreshAppointments,
+  } = useAppointmentsData(token, patientId);
 
-  const fetchPrescription = async (appointmentId) => {
-    try {
-      const response = await axios.get(
-          `http://localhost:8080/api/prescription/appointment/${appointmentId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-      );
-      if (response.data.statusCode === 200) {
-        setPrescription(response.data.data);
-        setShowPrescriptionModal(true); // Show the modal
-      }
-    } catch (error) {
-      console.error("Error fetching prescription:", error);
-      toast.error("Failed to fetch prescription information");
-    }
-  };
+  const {
+    showFeedbackModal,
+    selectedAppointment,
+    existingFeedback,
+    openFeedbackModal,
+    closeFeedbackModal,
+  } = useFeedbackModal(token);
 
-  const filterAppointments = (tab) => {
-    const now = dayjs();
-    return appointments.filter((appointment) => {
-      const appointmentDate = dayjs(appointment.date);
-      const dateFilter =
-          tab === "today"
-              ? appointmentDate.isSame(now, "day")
-              : tab === "upcoming"
-                  ? appointmentDate.isAfter(now, "day")
-                  : appointmentDate.isBefore(now, "day");
+  const {
+    prescription,
+    showPrescriptionModal,
+    openPrescriptionModal,
+    closePrescriptionModal,
+  } = usePrescriptionModal(token);
 
-      const statusCondition =
-          statusFilter === "ALL" || appointment.status === statusFilter;
-
-      return dateFilter && statusCondition;
-    });
-  };
-
-  const openFeedbackModal = async (appointment) => {
-    setSelectedAppointment(appointment);
-    try {
-      const res = await axios.get(
-          `http://localhost:8080/api/feedback/get/appointment/${appointment.id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-      );
-      if (res.data?.statusCode === 200 && res.data.data) {
-        setExistingFeedback(res.data.data);
-      } else {
-        setExistingFeedback(null);
-      }
-    } catch (err) {
-        console.error("Error fetching feedback:", err);
-      setExistingFeedback(null); // Nếu lỗi, vẫn mở modal để tạo mới
-    } finally {
-      setShowFeedbackModal(true);
-    }
-  };
-
-  const closeFeedbackModal = () => {
-    setSelectedAppointment(null);
-    setShowFeedbackModal(false);
-  };
-
-  const formatTimeSlot = (slot) => {
-    if (!slot) return "";
-    const parts = slot.replace("SLOT_", "").split("_");
-    if (parts.length === 2) {
-      return `${parts[0]}:00 - ${parts[1]}:00`;
-    }
-    return slot;
-  };
-
-  const closePrescriptionModal = () => {
-    setShowPrescriptionModal(false);
-    setPrescription(null);
-  };
+  const filteredAppointments = filterAppointments();
 
   if (loading) {
     return (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
     );
   }
 
-  const filteredAppointments = filterAppointments(activeTab);
-
   return (
-      <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <div className="bg-white shadow rounded-lg p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">
-              My Appointments
-            </h2>
-            <Link
-                to="/patient/book-appointment"
-                className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
-            >
-              Book New Appointment
-            </Link>
+    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div className="mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center space-x-3 mb-4 sm:mb-0">
+            <div className="bg-blue-100 p-2 rounded-lg">
+              <CalendarIcon className="h-6 w-6 text-blue-600" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900">My Appointments</h1>
           </div>
+          <Link
+            to="/patient/book-appointment"
+            className="inline-flex items-center justify-center px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 group"
+          >
+            <PlusIcon className="h-5 w-5 mr-2" />
+            <span>Book New Appointment</span>
+          </Link>
+        </div>
+      </div>
 
-          {/* Tabs */}
-          <div className="border-b border-gray-200 mb-6">
-            <nav className="-mb-px flex space-x-8">
-              {["today", "upcoming", "past"].map((tab) => (
-                  <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={`${
-                          activeTab === tab
-                              ? "border-primary-500 text-primary-600"
-                              : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                      } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-                  >
-                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                  </button>
-              ))}
-            </nav>
-          </div>
-
-          {/* Status Filters */}
-          <div className="mb-4">
-            <label className="mr-2 font-semibold">Filter by Status:</label>
-            <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="p-2 border rounded"
-            >
-              <option value="ALL">All</option>
-              <option value="PENDING">Pending</option>
-              <option value="CONFIRMED">Confirmed</option>
-              <option value="COMPLETED">Completed</option>
-              <option value="CANCELLED">Cancelled</option>
-            </select>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+        <div className="p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+            <div className="flex-1">
+              <AppointmentsTabs
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                className="bg-gray-50 p-1 rounded-lg"
+              />
+            </div>
+            <StatusFilter
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
+              className="min-w-[200px]"
+            />
           </div>
 
           {filteredAppointments.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-500">
-                  No {activeTab} appointments found.
-                </p>
+            <div className="text-center py-16">
+              <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <CalendarIcon className="h-12 w-12 text-gray-400" />
               </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-1">
+                No appointments found
+              </h3>
+              <p className="text-gray-500">
+                {activeTab === "upcoming"
+                  ? "Book your first appointment to get started!"
+                  : `No ${activeTab.toLowerCase()} appointments to show.`}
+              </p>
+              {activeTab === "upcoming" && (
+                <Link
+                  to="/patient/book-appointment"
+                  className="inline-flex items-center justify-center px-4 py-2 mt-4 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors duration-200"
+                >
+                  Schedule Now
+                </Link>
+              )}
+            </div>
           ) : (
-              <div className="space-y-4">
-                {filteredAppointments.map((appointment) => {
-                  const payment = payments[appointment.id];
-                  return (
-                      <div
-                          key={appointment.id}
-                          className="border rounded-lg p-4 hover:bg-gray-50"
-                      >
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="text-lg font-semibold text-gray-900">
-                              Dr. {appointment.doctorName}
-                            </h3>
-                            <p className="text-sm text-gray-500">
-                              {dayjs(appointment.date).format("DD-MM-YYYY")}{" "}
-                              at {formatTimeSlot(appointment.timeSlot)}
-                            </p>
-                            <p className="text-sm text-gray-500 mt-1">
-                              specialization: {appointment.specialization}
-                            </p>
-                            <p className="text-sm text-gray-500 mt-1">
-                              Note of patient: {appointment.notes}
-                            </p>
-                            {payment && (
-                                <>
-                                  <p className="text-sm text-gray-700 mt-1">
-                                    Price: {payment.amount.toLocaleString("vi-VN", { style: "currency", currency: "VND" })}
-                                  </p>
-                                  <p
-                                      className={`text-sm font-medium mt-1 ${
-                                          payment.status === "PENDING"
-                                              ? "text-yellow-600"
-                                              : payment.status === "PAID"
-                                                  ? "text-green-600"
-                                                  : "text-red-600"
-                                      }`}
-                                  >
-                                    Payment Status: {payment.status}
-                                  </p>
-                                </>
-                            )}
-                          </div>
-                          <span
-                              className={`px-3 py-1 rounded-full text-sm ${
-                                  appointment.status === "PENDING"
-                                      ? "bg-blue-100 text-blue-800"
-                                      : appointment.status === "COMPLETED"
-                                          ? "bg-green-100 text-green-800"
-                                          : appointment.status === "CANCELLED"
-                                              ? "bg-red-100 text-red-800"
-                                              : "bg-gray-100 text-gray-800"
-                              }`}
-                          >
-                                             {appointment.status}
-                                         </span>
-                        </div>
-
-                        <div className="mt-4 flex justify-end space-x-2">
-                          {appointment.status === "SCHEDULED" && (
-                              <button
-                                  onClick={() =>
-                                      toast(
-                                          "Cancel functionality not yet implemented."
-                                      )
-                                  }
-                                  className="px-4 py-2 text-red-600 border border-red-600 rounded-md hover:bg-red-50"
-                              >
-                                Cancel
-                              </button>
-                          )}
-                          {appointment.meetingLink && (
-                              <button
-                                  onClick={() =>
-                                      window.open(appointment.meetingLink, "_blank")
-                                  }
-                                  className="px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700"
-                              >
-                                Join Meeting
-                              </button>
-                          )}
-                          {appointment.status === "COMPLETED" && (
-                              <>
-                                <button
-                                    onClick={() => openFeedbackModal(appointment)}
-                                    className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
-                                >
-                                  View Feedback
-                                </button>
-                                <button
-                                    onClick={() =>
-                                        fetchPrescription(appointment.id)
-                                    }
-                                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                                >
-                                  View Prescription
-                                </button>
-                              </>
-                          )}
-                        </div>
-                      </div>
-                  );
-                })}
-              </div>
+            <div className="space-y-4">
+              {filteredAppointments.map((appointment) => (
+                <AppointmentCard
+                  key={appointment.id}
+                  appointment={appointment}
+                  payment={payments[appointment.id]}
+                  onFeedbackClick={() => openFeedbackModal(appointment)}
+                  onPrescriptionClick={() => openPrescriptionModal(appointment.id)}
+                />
+              ))}
+            </div>
           )}
         </div>
-
-        {showFeedbackModal && selectedAppointment && (
-            <FeedbackModal
-                isOpen={showFeedbackModal}
-                onClose={closeFeedbackModal}
-                appointment={selectedAppointment}
-                existingFeedback={existingFeedback}
-                token={token}
-                refreshAppointments={fetchAppointments}
-            />
-
-        )}
-
-        {/* Prescription Modal */}
-        {showPrescriptionModal && prescription && (
-            <div className="fixed z-10 inset-0 overflow-y-auto">
-              <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-                  <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
-                </div>
-                <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                  <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">
-                      Prescription Details
-                    </h3>
-                    <div className="mt-2">
-                      <p className="text-sm text-gray-500">
-                        Doctor: {prescription.doctorName}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Patient: {prescription.patientName}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Dosage: {prescription.dosage}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Duration: {prescription.duration}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Frequency: {prescription.frequency}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Description: {prescription.description}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Medicine Names:{" "}
-                        {prescription.medicineNames.join(", ")}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button
-                        type="button"
-                        className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                        onClick={closePrescriptionModal}
-                    >
-                      Close
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-        )}
       </div>
+
+      {showFeedbackModal && selectedAppointment && (
+        <FeedbackModal
+          isOpen={showFeedbackModal}
+          onClose={closeFeedbackModal}
+          appointment={selectedAppointment}
+          existingFeedback={existingFeedback}
+          token={token}
+          refreshAppointments={refreshAppointments}
+        />
+      )}
+
+      {showPrescriptionModal && prescription && (
+        <PrescriptionModal
+          isOpen={showPrescriptionModal}
+          prescription={prescription}
+          onClose={closePrescriptionModal}
+        />
+      )}
+    </div>
   );
 };
 
-export default Appointments;
+export default AppointmentsPage;

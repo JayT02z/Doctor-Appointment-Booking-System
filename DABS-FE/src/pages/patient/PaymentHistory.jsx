@@ -1,130 +1,174 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "../../context/AuthContext";
 import axios from "axios";
-import { FaMoneyBillAlt, FaUniversity, FaQrcode, FaMoneyCheckAlt } from "react-icons/fa";
+import { useAuth } from "../../context/AuthContext";
+import { BanknotesIcon, ExclamationCircleIcon } from "@heroicons/react/24/outline";
 
-const PaymentHistory = () => {
+import SearchBar from "../../components/payment_history/SearchBar";
+import PaymentFilters from "../../components/payment_history/PaymentFilters.jsx";
+import Pagination from "../../components/payment_history/Pagination";
+import PaymentTable from "../../components/payment_history/PaymentTable.jsx";
+import PaymentDetailsModal from "../../components/payment_history/PaymentDetailsModal";
+
+const PaymentHistoryPage = () => {
     const { patientId } = useAuth();
-    const [paymentHistory, setPaymentHistory] = useState([]);
+    const [allPayments, setAllPayments] = useState([]);
+    const [filteredPayments, setFilteredPayments] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // Filters
+    const [keyword, setKeyword] = useState("");
+    const [statusFilter, setStatusFilter] = useState("ALL");
+    const [methodFilter, setMethodFilter] = useState("ALL");
+
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 8;
+
+    // Details modal
+    const [selectedPayment, setSelectedPayment] = useState(null);
+
     useEffect(() => {
-        const fetchPaymentHistory = async () => {
-            setLoading(true);
-            setError(null);
+        const fetchPayments = async () => {
             try {
-                const response = await axios.get(
+                setLoading(true);
+                const res = await axios.get(
                     `http://localhost:8080/api/payment/patient/${patientId}`
                 );
-                setPaymentHistory(response.data.data || []);
+                setAllPayments(res.data.data || []);
+                setError(null);
             } catch (err) {
-                console.error("Error fetching payment history:", err);
-                setError(err.message || "Could not fetch payment history");
+                console.error("Lỗi fetch dữ liệu:", err);
+                setError("Không thể tải lịch sử thanh toán.");
             } finally {
                 setLoading(false);
             }
         };
 
-        if (patientId) {
-            fetchPaymentHistory();
-        }
+        if (patientId) fetchPayments();
     }, [patientId]);
 
-    const formatCurrency = (amount) =>
-        amount.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
+    // Filter + Search logic
+    useEffect(() => {
+        let data = [...allPayments];
 
-    const formatDate = (dateArr) => {
-        if (!dateArr || dateArr.length < 3) return "N/A";
-        const [year, month, day] = dateArr;
-        return `${day.toString().padStart(2, "0")}/${month.toString().padStart(2, "0")}/${year}`;
-    };
-
-    const formatTimeSlot = (slot) => {
-        const timeParts = slot.replace('SLOT_', '').split('_');
-        if (timeParts.length === 2) {
-            return `${timeParts[0]}:00 - ${timeParts[1]}:00`;
+        if (statusFilter !== "ALL") {
+            data = data.filter((p) => p.status === statusFilter);
         }
-        return slot;
-    };
 
-    const renderPaymentMethod = (method) => {
-        const baseClass = "inline-flex items-center gap-1 font-medium px-2 py-1 rounded-full text-sm";
-        switch (method) {
-            case "VNPAYQR":
-                return <span className={`${baseClass} text-blue-600 bg-blue-100`}><FaQrcode /> VNPAY</span>;
-            case "CASH":
-                return <span className={`${baseClass} text-green-600 bg-green-100`}><FaMoneyBillAlt /> Tiền mặt</span>;
-            case "BANKING":
-                return <span className={`${baseClass} text-purple-600 bg-purple-100`}><FaUniversity /> Chuyển khoản</span>;
-            case "MOMO":
-                return <span className={`${baseClass} text-pink-600 bg-pink-100`}><FaMoneyCheckAlt /> MOMO</span>;
-            default:
-                return <span className={`${baseClass} text-gray-600 bg-gray-100`}>{method}</span>;
+        if (methodFilter !== "ALL") {
+            data = data.filter((p) => p.paymentMethod === methodFilter);
         }
-    };
 
-    const renderStatus = (status) => {
-        const baseClass = "px-2 py-1 rounded-full text-xs font-semibold";
-        switch (status) {
-            case "PAID":
-                return <span className={`${baseClass} bg-green-100 text-green-700`}>Đã thanh toán</span>;
-            case "PENDING":
-                return <span className={`${baseClass} bg-yellow-100 text-yellow-700`}>Đang xử lý</span>;
-            default:
-                return <span className={`${baseClass} bg-gray-100 text-gray-700`}>{status}</span>;
+        if (keyword.trim() !== "") {
+            const lower = keyword.toLowerCase();
+            data = data.filter((p) => {
+                const doctor = p.appointment?.doctorName?.toLowerCase() || "";
+                const patient = p.appointment?.patientName?.username?.toLowerCase() || "";
+                return (
+                    p.id.toString().includes(lower) ||
+                    doctor.includes(lower) ||
+                    patient.includes(lower)
+                );
+            });
         }
-    };
 
-    if (loading) return <div className="text-center py-10">Đang tải lịch sử thanh toán...</div>;
-    if (error) return <div className="text-center py-10 text-red-500">Lỗi: {error}</div>;
+        setFilteredPayments(data);
+        setCurrentPage(1); // reset về trang đầu khi filter
+    }, [allPayments, statusFilter, methodFilter, keyword]);
+
+    // Pagination slice
+    const totalPages = Math.ceil(filteredPayments.length / pageSize);
+    const paginatedPayments = filteredPayments.slice(
+        (currentPage - 1) * pageSize,
+        currentPage * pageSize
+    );
 
     return (
-        <div className="p-6 max-w-6xl mx-auto">
-            <h1 className="text-3xl font-bold mb-6 text-center">Payment History</h1>
-            {paymentHistory.length === 0 ? (
-                <p className="text-center text-gray-500">Không có lịch sử thanh toán.</p>
-            ) : (
-                <div className="overflow-x-auto rounded-xl shadow">
-                    <table className="table-auto w-full bg-white text-sm text-left text-gray-700 border-collapse">
-                        <thead>
-                        <tr className="bg-gray-100 text-gray-800 uppercase text-xs">
-                            <th className="py-3 px-4 border">Mã</th>
-                            <th className="py-3 px-4 border">Bệnh Nhân</th>
-                            <th className="py-3 px-4 border">Bác Sĩ</th>
-                            <th className="py-3 px-4 border">Dịch Vụ</th>
-                            <th className="py-3 px-4 border">Ngày</th>
-                            <th className="py-3 px-4 border">Giờ</th>
-                            <th className="py-3 px-4 border">Phương Thức</th>
-                            <th className="py-3 px-4 border">Số Tiền</th>
-                            <th className="py-3 px-4 border">Trạng Thái</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {paymentHistory.map((payment) => {
-                            const appointment = payment.appointment || {};
-                            const patient = appointment.patientName || {};
-
-                            return (
-                                <tr key={payment.id} className="hover:bg-gray-50">
-                                    <td className="py-3 px-4 border">{payment.id}</td>
-                                    <td className="py-3 px-4 border">{patient.username}</td>
-                                    <td className="py-3 px-4 border">{appointment.doctorName}</td>
-                                    <td className="py-3 px-4 border">{appointment.serviceName}</td>
-                                    <td className="py-3 px-4 border">{formatDate(appointment.date)}</td>
-                                    <td className="py-3 px-4 border">{formatTimeSlot(appointment.timeSlot)}</td>
-                                    <td className="py-3 px-4 border">{renderPaymentMethod(payment.paymentMethod)}</td>
-                                    <td className="py-3 px-4 border">{formatCurrency(payment.amount)}</td>
-                                    <td className="py-3 px-4 border">{renderStatus(payment.status)}</td>
-                                </tr>
-                            );
-                        })}
-                        </tbody>
-                    </table>
+        <div className="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            <div className="mb-8">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center space-x-3 mb-4 sm:mb-0">
+                        <div className="bg-blue-100 p-2 rounded-lg">
+                            <BanknotesIcon className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <h1 className="text-2xl font-bold text-gray-900">Payment History</h1>
+                    </div>
                 </div>
-            )}
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
+                <div className="p-6 space-y-4">
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="flex-1">
+                            <SearchBar keyword={keyword} setKeyword={setKeyword} />
+                        </div>
+                        <PaymentFilters
+                            statusFilter={statusFilter}
+                            setStatusFilter={setStatusFilter}
+                            methodFilter={methodFilter}
+                            setMethodFilter={setMethodFilter}
+                        />
+                    </div>
+
+                    {loading ? (
+                        <div className="py-32 flex items-center justify-center">
+                            <div className="flex flex-col items-center">
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+                                <p className="text-gray-500 text-sm">Loading payment history...</p>
+                            </div>
+                        </div>
+                    ) : error ? (
+                        <div className="py-32 flex items-center justify-center">
+                            <div className="flex flex-col items-center text-center">
+                                <div className="rounded-full bg-red-100 p-3 mb-4">
+                                    <ExclamationCircleIcon className="h-6 w-6 text-red-600" />
+                                </div>
+                                <p className="text-gray-900 font-medium mb-1">Failed to load payments</p>
+                                <p className="text-gray-500 text-sm">{error}</p>
+                            </div>
+                        </div>
+                    ) : filteredPayments.length === 0 ? (
+                        <div className="py-32 flex items-center justify-center">
+                            <div className="flex flex-col items-center text-center">
+                                <div className="rounded-full bg-gray-100 p-3 mb-4">
+                                    <BanknotesIcon className="h-6 w-6 text-gray-400" />
+                                </div>
+                                <p className="text-gray-900 font-medium mb-1">No payments found</p>
+                                <p className="text-gray-500 text-sm">
+                                    {keyword
+                                        ? "Try adjusting your search or filters"
+                                        : "Your payment history will appear here"
+                                    }
+                                </p>
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            <PaymentTable
+                                payments={paginatedPayments}
+                                onViewDetails={(payment) => setSelectedPayment(payment)}
+                            />
+                            <div className="mt-6 border-t border-gray-100 pt-6">
+                                <Pagination
+                                    currentPage={currentPage}
+                                    totalPages={totalPages}
+                                    onPageChange={setCurrentPage}
+                                />
+                            </div>
+                        </>
+                    )}
+                </div>
+            </div>
+
+            <PaymentDetailsModal
+                isOpen={!!selectedPayment}
+                payment={selectedPayment}
+                onClose={() => setSelectedPayment(null)}
+            />
         </div>
     );
 };
 
-export default PaymentHistory;
+export default PaymentHistoryPage;
+
