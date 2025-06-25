@@ -27,6 +27,11 @@ import DoctorInformation from "./pages/doctor/DoctorInformation";
 import DoctorServices from "./pages/doctor/DoctorServices";
 import DoctorSchedule from "./pages/doctor/DoctorSchedule";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import ManageDoctors from "./pages/admin/ManageDoctors";
+import ManagePatients from "./pages/admin/ManagePatients";
+import ManageAppointments from "./pages/admin/ManageAppointments";
+import ManageUsers from "./pages/admin/ManageUsers";
+import ManagePayments from "./pages/admin/ManagePayments";
 import AdminServices from "./pages/admin/AdminServices";
 import DiabetesArticle from "./pages/articles/DiabetesArticle.jsx";
 import HealthCheckupArticle from "./pages/articles/HealthCheckupArticle.jsx";
@@ -97,6 +102,11 @@ function App() {
                                     }
                                 >
                                     <Route path="dashboard" element={<AdminDashboard />} />
+                                    <Route path="manage-doctors" element={<ManageDoctors />} />
+                                    <Route path="manage-patients" element={<ManagePatients />} />
+                                    <Route path="manage-appointments" element={<ManageAppointments />} />
+                                    <Route path="manage-users" element={<ManageUsers />} />
+                                    <Route path="manage-payments" element={<ManagePayments />} />
                                     <Route path="services" element={<AdminServices />} />
                                 </Route>
                             </Route>

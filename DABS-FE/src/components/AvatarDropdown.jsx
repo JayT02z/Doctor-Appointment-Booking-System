@@ -11,7 +11,7 @@ import {
   Cog6ToothIcon,
   BuildingOfficeIcon,
   ClipboardDocumentListIcon,
-  ArrowLeftOnRectangleIcon
+  ArrowLeftOnRectangleIcon,
 } from "@heroicons/react/24/outline";
 
 const AvatarDropdown = () => {
@@ -57,24 +57,29 @@ const AvatarDropdown = () => {
     }, 200);
   };
 
-  const menuItems = {
-    PATIENT: [
-      { to: "/patient/profile", icon: UserCircleIcon, label: "Profile Settings" },
-      { to: "/patient/appointments", icon: CalendarIcon, label: "My Appointments" },
-      { to: "/patient/book-appointment", icon: ClockIcon, label: "Book Appointment" },
-      { to: "/patient/payment", icon: CreditCardIcon, label: "Payment History" }
-    ],
-    DOCTOR: [
-      { to: "/doctor/dashboard", icon: ChartBarIcon, label: "Doctor Dashboard" },
-      { to: "/doctor/information", icon: UserCircleIcon, label: "Information" },
-      { to: "/doctor/services", icon: ClipboardDocumentListIcon, label: "Services" },
-      { to: "/doctor/schedule", icon: CalendarIcon, label: "Schedule" }
-    ],
-    ADMIN: [
-      { to: "/admin/dashboard", icon: ChartBarIcon, label: "Admin Dashboard" },
-      { to: "/admin/services", icon: BuildingOfficeIcon, label: "Services" }
-    ]
-  };
+    const menuItems = {
+        PATIENT: [
+            { to: "/patient/profile", icon: UserCircleIcon, label: "Profile Settings" },
+            { to: "/patient/appointments", icon: CalendarIcon, label: "My Appointments" },
+            { to: "/patient/book-appointment", icon: ClockIcon, label: "Book Appointment" },
+            { to: "/patient/payment", icon: CreditCardIcon, label: "Payment History" }
+        ],
+        DOCTOR: [
+            { to: "/doctor/dashboard", icon: ChartBarIcon, label: "Doctor Dashboard" },
+            { to: "/doctor/information", icon: UserCircleIcon, label: "Information" },
+            { to: "/doctor/services", icon: ClipboardDocumentListIcon, label: "Services" },
+            { to: "/doctor/schedule", icon: CalendarIcon, label: "Schedule" }
+        ],
+        ADMIN: [
+            { to: "/admin/dashboard", icon: ChartBarIcon, label: "Admin Dashboard" },
+            { to: "/admin/manage-users", icon: UserCircleIcon, label: "User Management" },
+            { to: "/admin/manage-appointments", icon: CalendarIcon, label: "Appointments Management" },
+            { to : "/admin/manage-patients", icon: UserCircleIcon, label: "Patients Management" },
+            { to: "/admin/manage-doctors", icon: UserCircleIcon, label: "Doctors Management" },
+            { to: "/admin/manage-payments", icon: CreditCardIcon, label: "Payment Management" },
+            { to: "/admin/services", icon: BuildingOfficeIcon, label: "Services" }
+        ]
+    };
 
   return (
     <div

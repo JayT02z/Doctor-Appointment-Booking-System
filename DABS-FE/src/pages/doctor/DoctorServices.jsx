@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { toast } from "react-hot-toast";
-import consele from "react-modal/lib/helpers/bodyTrap.js";
-import * as res from "autoprefixer";
+import { motion } from 'framer-motion';
+import { Plus, Check, Package, ListChecks, Save } from 'lucide-react';
 
 const DoctorServices = () => {
     const { doctorId } = useAuth();
@@ -82,43 +82,97 @@ const DoctorServices = () => {
     const availableServices = allServices.filter(service => !existingDoctorServices.some(existingService => existingService.id === service.id));
 
     return (
-        <div className="max-w-4xl mx-auto p-6">
-            <h2 className="text-2xl font-bold mb-6">Chọn Dịch Vụ Cung Cấp</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {availableServices.map(service => (
-                    <div
-                        key={service.id}
-                        className={`p-4 rounded border shadow hover:shadow-md transition cursor-pointer ${tempSelectedServices.includes(service.id) ? 'border-blue-500 bg-blue-50' : 'bg-white'}`}
-                        onClick={() => toggleService(service.id)}
-                    >
-                        <h4 className="font-semibold text-lg mb-1">{service.name}</h4>
-                        <p className="text-sm text-gray-600">{service.description}</p>
-                        <p className="text-sm text-gray-700">
-                            Giá: {service.price.toLocaleString("vi-VN")}₫
-                        </p>
-                    </div>
-                ))}
+        <div className="max-w-6xl mx-auto p-6 space-y-8">
+            {/* Header Section */}
+            <div className="flex items-center gap-3 mb-8">
+                <div className="p-2 bg-[#00B5F1]/10 rounded-xl">
+                    <Package className="h-6 w-6 text-[#00B5F1]" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900">Quản Lý Dịch Vụ</h2>
             </div>
 
-            <h2 className="text-2xl font-bold mt-8 mb-6">Dịch Vụ Đã Chọn</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {existingDoctorServices.map(service => (
-                    <div key={service.id} className="p-4 rounded border shadow bg-gray-50">
-                        <h4 className="font-semibold text-lg mb-1">{service.name}</h4>
-                        <p className="text-sm text-gray-600">{service.description}</p>
-                        <p className="text-sm text-gray-700">
-                            Giá: {service.price.toLocaleString("vi-VN")}₫
-                        </p>
-                    </div>
-                ))}
+            {/* Available Services Section */}
+            <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-6">
+                    <Plus className="h-5 w-5 text-[#00B5F1]" />
+                    <h3 className="text-lg font-semibold text-gray-700">Chọn Dịch Vụ Cung Cấp</h3>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {availableServices.map(service => (
+                        <motion.div
+                            key={service.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            whileHover={{ scale: 1.02 }}
+                            onClick={() => toggleService(service.id)}
+                            className={`group relative p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer
+                                ${tempSelectedServices.includes(service.id)
+                                    ? 'border-[#00B5F1] bg-[#00B5F1]/5 shadow-lg shadow-[#00B5F1]/10'
+                                    : 'border-gray-100 bg-white hover:border-[#00B5F1]/30 hover:shadow-md'
+                                }`}
+                        >
+                            {tempSelectedServices.includes(service.id) && (
+                                <div className="absolute top-3 right-3">
+                                    <Check className="h-5 w-5 text-[#00B5F1]" />
+                                </div>
+                            )}
+
+                            <div className="space-y-2">
+                                <h4 className="font-semibold text-lg text-gray-900 pr-8">{service.name}</h4>
+                                <p className="text-sm text-gray-600 line-clamp-2">{service.description}</p>
+                                <div className="pt-2">
+                                    <span className="inline-block px-3 py-1 bg-[#00B5F1]/10 text-[#00B5F1] rounded-lg text-sm font-medium">
+                                        {service.price.toLocaleString("vi-VN")}₫
+                                    </span>
+                                </div>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
             </div>
 
-            <div className="mt-6 text-right">
-            <button
+            {/* Selected Services Section */}
+            <div className="space-y-4 mt-12">
+                <div className="flex items-center gap-2 mb-6">
+                    <ListChecks className="h-5 w-5 text-green-600" />
+                    <h3 className="text-lg font-semibold text-gray-700">Dịch Vụ Đã Chọn</h3>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {existingDoctorServices.map(service => (
+                        <motion.div
+                            key={service.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="p-4 rounded-xl border-2 border-gray-100 bg-gray-50/50"
+                        >
+                            <div className="space-y-2">
+                                <h4 className="font-semibold text-lg text-gray-900">{service.name}</h4>
+                                <p className="text-sm text-gray-600 line-clamp-2">{service.description}</p>
+                                <div className="pt-2">
+                                    <span className="inline-block px-3 py-1 bg-green-50 text-green-700 rounded-lg text-sm font-medium">
+                                        {service.price.toLocaleString("vi-VN")}₫
+                                    </span>
+                                </div>
+                            </div>
+                        </motion.div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Save Button */}
+            <div className="mt-10 flex justify-end">
+                <button
                     onClick={handleSave}
-                    className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded"
+                    className="group relative inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#00B5F1] to-[#0099cc]
+                             text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-[#00B5F1]/20
+                             active:scale-[0.98] transition-all duration-200"
                 >
+                    <Save className="h-5 w-5" />
                     Lưu Dịch Vụ
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0
+                                  translate-x-[-100%] animate-shimmer rounded-xl" />
                 </button>
             </div>
         </div>

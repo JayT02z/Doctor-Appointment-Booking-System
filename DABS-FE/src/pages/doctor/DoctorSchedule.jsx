@@ -3,7 +3,8 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { motion, AnimatePresence } from "framer-motion";
-import consele from "react-modal/lib/helpers/bodyTrap.js";
+import { Calendar, Clock, Check, Lock, CheckSquare } from "lucide-react";
+import { Copy, Trash2 } from "lucide-react";
 
 const DoctorSchedule = () => {
     const { doctorId } = useAuth();
@@ -185,16 +186,18 @@ const DoctorSchedule = () => {
                                         <p className="text-sm text-gray-500">{formatDate(date)}</p>
                                     </div>
                                     {!isPast && (
-                                        <div className="space-x-1">
+                                        <div className="flex items-center gap-2">
                                             <button
                                                 onClick={() => handleSelectAll(day)}
-                                                className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
+                                                className="text-xs px-2.5 py-1.5 bg-[#00B5F1]/10 text-[#00B5F1] rounded-lg
+                                                         hover:bg-[#00B5F1]/20 transition-colors duration-200 font-medium"
                                             >
                                                 Select All
                                             </button>
                                             <button
                                                 onClick={() => handleClearAll(day)}
-                                                className="text-xs px-2 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200"
+                                                className="text-xs px-2.5 py-1.5 bg-red-50 text-red-600 rounded-lg
+                                                         hover:bg-red-100 transition-colors duration-200 font-medium"
                                             >
                                                 Clear
                                             </button>
@@ -212,17 +215,41 @@ const DoctorSchedule = () => {
                                             <div
                                                 key={slot}
                                                 onClick={() => !isPast && handleToggle(day, slot)}
-                                                className={`text-center py-2 rounded-md text-sm font-medium border transition-all cursor-pointer
+                                                className={`group relative flex items-center justify-center py-3 rounded-xl text-sm font-medium 
+                                                    transition-all duration-200 cursor-pointer select-none
                                                     ${isPast
-                                                    ? 'bg-gray-200 text-gray-500 border-gray-300 cursor-not-allowed'
-                                                    : isHighlighted
-                                                        ? 'bg-blue-600 text-white border-blue-700 hover:bg-blue-700' // Nổi bật
-                                                        : isLocallySelected
-                                                            ? 'bg-blue-200 text-gray-700 border-blue-300 hover:bg-blue-300' // Đã chọn cục bộ (chưa save)
-                                                            : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-100'
-                                                }`}
+                                                        ? 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-75'
+                                                        : isHighlighted
+                                                            ? 'bg-gradient-to-r from-[#00B5F1] to-[#0099cc] text-white shadow-lg shadow-[#00B5F1]/20 hover:shadow-xl hover:shadow-[#00B5F1]/30 hover:-translate-y-0.5'
+                                                            : isLocallySelected
+                                                                ? 'bg-[#00B5F1]/10 text-[#00B5F1] border-2 border-[#00B5F1] hover:bg-[#00B5F1]/20'
+                                                                : 'bg-white border-2 border-gray-100 hover:border-[#00B5F1]/30 hover:bg-gray-50/80'
+                                                    }
+                                                    ${!isPast && !isHighlighted && !isLocallySelected && 'hover:scale-[1.02]'}
+                                                `}
                                             >
-                                                {formatSlot(slot)}
+                                                {/* Time Display */}
+                                                <span className="relative z-10">{formatSlot(slot)}</span>
+
+                                                {/* Background Decorative Elements */}
+                                                {!isPast && (isHighlighted || isLocallySelected) && (
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover:opacity-20 rounded-xl transition-opacity duration-200" />
+                                                )}
+
+                                                {/* Status Indicator */}
+                                                {isPast ? (
+                                                    <span className="absolute right-3 flex items-center text-gray-400">
+                                                        <Lock className="w-3 h-3" />
+                                                    </span>
+                                                ) : isHighlighted ? (
+                                                    <span className="absolute right-3 flex items-center text-white/90">
+                                                        <Check className="w-3 h-3" />
+                                                    </span>
+                                                ) : isLocallySelected && (
+                                                    <span className="absolute right-3 flex items-center text-[#00B5F1]">
+                                                        <Clock className="w-3 h-3" />
+                                                    </span>
+                                                )}
                                             </div>
                                         );
                                     })}
@@ -233,15 +260,76 @@ const DoctorSchedule = () => {
                 </motion.div>
             </AnimatePresence>
 
-            <div className="mt-10 text-center">
+            <div className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
                 <button
                     onClick={handleSubmit}
-                    className="px-8 py-3 bg-blue-600 text-white font-semibold text-lg rounded-md hover:bg-blue-700 shadow-md transition"
+                    className="group relative w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-[#00B5F1] to-[#0099cc] text-white
+                             font-semibold text-lg rounded-xl hover:shadow-lg hover:shadow-[#00B5F1]/20
+                             active:scale-[0.98] transition-all duration-200"
                 >
-                    Save Schedule
+                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0
+                                  translate-x-[-100%] animate-shimmer rounded-xl" />
+                    <span className="flex items-center justify-center gap-2">
+                        <Calendar className="w-5 h-5" />
+                        Save Schedule
+                    </span>
                 </button>
+
+                <button
+                    onClick={() => {
+                        const copied = {};
+                        for (const [day, slots] of Object.entries(scheduleData)) {
+                            copied[day] = [...slots];
+                        }
+                        setWeekOffset((prev) => {
+                            const next = prev + 1;
+                            setTimeout(() => setScheduleData(copied), 0);
+                            return next;
+                        });
+                        toast.success("Schedule copied to next week!");
+                    }}
+                    className="group w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3
+                             bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200
+                             text-gray-700 rounded-xl font-medium text-sm transition-all duration-200
+                             border border-gray-200 hover:border-gray-300 hover:shadow-sm"
+                >
+                    <Copy className="w-4 h-4 text-gray-500 group-hover:text-gray-700 transition-colors duration-200" />
+                    Copy to Next Week
+                </button>
+
+                <div className="fixed bottom-6 right-6 flex flex-col gap-2">
+                    <button
+                        onClick={() => {
+                            const allDays = {};
+                            daysOfWeek.forEach(day => {
+                                allDays[day] = [...timeSlots];
+                            });
+                            setScheduleData(allDays);
+                            toast.success("Selected all time slots for all days!");
+                        }}
+                        className="px-4 py-2 bg-[#00B5F1] text-white rounded-lg hover:bg-[#009cd3]
+                                 transition-colors duration-200 shadow-lg hover:shadow-xl
+                                 flex items-center gap-2 text-sm font-medium"
+                    >
+                        <CheckSquare className="w-4 h-4" />
+                        Select All Days
+                    </button>
+                    <button
+                        onClick={() => {
+                            setScheduleData({});
+                            toast.success("Cleared all selections!");
+                        }}
+                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600
+                                 transition-colors duration-200 shadow-lg hover:shadow-xl
+                                 flex items-center gap-2 text-sm font-medium"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                        Clear All Days
+                    </button>
+                </div>
             </div>
         </div>
     );
 }
+
 export default DoctorSchedule;

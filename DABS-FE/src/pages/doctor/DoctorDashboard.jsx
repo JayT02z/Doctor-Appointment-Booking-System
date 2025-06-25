@@ -1,317 +1,114 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { toast } from "react-hot-toast";
-import { useAuth } from "../../context/AuthContext.jsx";
-import { useNavigate } from "react-router-dom";
+// doctor-dashboard/DoctorDashboard.jsx
+import React, { useState, useEffect } from 'react';
+import { useDoctorAuth } from '../../hooks/useDoctorAuth';
+import { useAppointments } from '../../hooks/useAppointments';
+import { usePrescriptions } from '../../hooks/usePrescriptions';
+import { useFeedbacks } from '../../hooks/useFeedbacks';
+import AppointmentCard from '../../components/doctor_dashboard/AppointmentCard';
+import StatusFilter from '../../components/doctor_dashboard/StatusFilter';
+import PatientDetailModal from '../../components/doctor_dashboard/PatientDetailModal';
+import PrescriptionModal from '../../components/doctor_dashboard/PrescriptionModal';
+import ViewPrescriptionModal from '../../components/doctor_dashboard/ViewPrescriptionModal';
+import FeedbackPanel from '../../components/doctor_dashboard/FeedbackPanel';
+import SearchBar from '../../components/doctor_dashboard/SearchBar';
+import Pagination from '../../components/doctor_dashboard/Pagination';
+import axios from 'axios'
 import Modal from 'react-modal';
-import app from "../../App.jsx";
-
-Modal.setAppElement('#root');
+import { MessageCircle, X } from 'lucide-react';
+import { Stethoscope, Calendar } from 'lucide-react';
 
 const DoctorDashboard = () => {
-  const [appointments, setAppointments] = useState([]);
-  const [feedbacks, setFeedbacks] = useState({});
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("today");
   const [statusFilter, setStatusFilter] = useState("ALL");
-  const [isPatientDetailModalOpen, setIsPatientDetailModalOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
+  const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
   const [isPrescriptionModalOpen, setIsPrescriptionModalOpen] = useState(false);
-  const [prescriptionData, setPrescriptionData] = useState({
-    dosage: 1,
-    duration: 7,
-    frequency: "ONCE",
-    description: "",
-    appointmentId: null,
-    doctorId: null,
-    patientId: null,
-    medicineIds: [""],
-  });
-  const [createdPrescriptionId, setCreatedPrescriptionId] = useState(null);
-  const [isSending, setIsSending] = useState(false);
-  const [updatingStatus, setUpdatingStatus] = useState({
-    accept: false,
-    reject: false,
-  })
   const [isViewPrescriptionModalOpen, setIsViewPrescriptionModalOpen] = useState(false);
   const [viewPrescriptionData, setViewPrescriptionData] = useState(null);
+  const [selectedFeedback, setSelectedFeedback] = useState(null);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const appointmentsPerPage = 5;
 
-  const { doctorId, user } = useAuth();
-  const navigate = useNavigate();
+  const { doctorId } = useDoctorAuth();
+  const {
+    appointments,
+    fetchAppointments,
+    loading,
+    handleUpdateStatus
+  } = useAppointments(doctorId, activeTab, statusFilter);
 
-  useEffect(() => {
-    if (user?.role === "DOCTOR" && doctorId === null) {
-      toast(
-          (t) => (
-              <div className="text-yellow-900">
-                ⚠️ Please{" "}
-                <button
-                    onClick={() => {
-                      toast.dismiss(t.id);
-                      navigate("/doctor/information");
-                    }}
-                    className="underline text-yellow-800 font-semibold"
-                >
-                  update your doctor information
-                </button>{" "}
-                to access all features.
-              </div>
-          ),
-          {
-            icon: "⚠️",
-            duration: 10000,
-            style: {
-              background: "#FEF9C3",
-              border: "1px solid #FCD34D",
-              color: "#92400E",
-            },
-          }
-      );
-    }
-  }, [doctorId, user, navigate]);
+  const {
+    prescriptionData,
+    setPrescriptionData,
+    handleCreatePrescription,
+    handleSendPrescription,
+    createdPrescriptionId,
+    resetPrescriptionData,
+    isSending
+  } = usePrescriptions(doctorId);
+
+  const { feedbacks, fetchFeedbackForAppointments } = useFeedbacks();
 
   useEffect(() => {
     if (doctorId) fetchAppointments();
-  }, [activeTab, doctorId, statusFilter]);
+  }, [doctorId, activeTab, statusFilter]);
 
   useEffect(() => {
-    appointments.forEach((appt) => {
-      if (appt.status === "COMPLETED" && !feedbacks[appt.id]) {
-        fetchFeedback(appt.id);
-      }
-    });
+    fetchFeedbackForAppointments(appointments);
   }, [appointments]);
 
-  const fetchAppointments = async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get(`http://localhost:8080/api/appointment/doctor/${doctorId}`);
-      const allAppointments = res.data.data || [];
-
-      const todayDate = new Date();
-      todayDate.setHours(0, 0, 0, 0);
-
-      const filtered = allAppointments.filter((appt) => {
-        const apptDate = new Date(appt.date[0], appt.date[1] - 1, appt.date[2]);
-        apptDate.setHours(0, 0, 0, 0);
-
-        const matchTab =
-            (activeTab === "today" && apptDate.getTime() === todayDate.getTime()) ||
-            (activeTab === "upcoming" && apptDate.getTime() > todayDate.getTime()) ||
-            (activeTab === "past" && apptDate.getTime() < todayDate.getTime()) ||
-            (activeTab === "completed" && appt.status === "COMPLETED") ||
-            (activeTab === "cancelled" && appt.status === "CANCELLED");
-
-        const matchStatus =
-            activeTab === "today" || activeTab === "upcoming"
-                ? statusFilter === "ALL" || appt.status === statusFilter
-                : true;
-
-        return matchTab && matchStatus;
-      });
-
-      setAppointments(filtered);
-    } catch (err) {
-      console.error("Failed to fetch appointments", err);
-      toast.error("Failed to load appointments");
-      setAppointments([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchPrescriptionDetails = async (appointmentId) => {
-    try {
-      const res = await axios.get(`http://localhost:8080/api/prescription/appointment/${appointmentId}`);
-      if (res.data.statusCode === 200) {
-        setViewPrescriptionData(res.data.data);
-        setIsViewPrescriptionModalOpen(true);
-      } else {
-        toast.error("Failed to fetch prescription details.");
-      }
-    } catch (error) {
-      console.error("Error fetching prescription details:", error);
-      toast.error("Error fetching prescription details.");
-    }
-  };
-
-  const closeViewPrescriptionModal = () => {
-    setIsViewPrescriptionModalOpen(false);
-    setViewPrescriptionData(null);
-  };
-
-  const fetchFeedback = async (appointmentId) => {
-    try {
-      const res = await axios.get(`http://localhost:8080/api/feedback/get/appointment/${appointmentId}`);
-      if (res.data.statusCode === 200) {
-        setFeedbacks((prev) => ({
-          ...prev,
-          [appointmentId]: res.data.data,
-        }));
-      }
-    } catch (err) {
-      console.error("Failed to fetch feedback", err);
-    }
-  };
-
-  const handleUpdateStatus = async (appointmentId, status) => {
-    setUpdatingStatus((prev) => ({ ...prev, [status === "CONFIRMED" ? "accept" : "reject"]: true })); // Bắt đầu cập nhật
-    try {
-      const res = await axios.put(
-          `http://localhost:8080/api/appointment/status/${appointmentId}`,
-          { status }
-      );
-      if (res.data.statusCode === 200) {
-        toast.success("Appointment status updated");
-
-        // Automatically switch to correct tab after update
-        if (status === "COMPLETED") {
-          setActiveTab("completed");
-        } else if (status === "CANCELLED") {
-          setActiveTab("cancelled");
-        } else {
-          fetchAppointments(); // fallback for other statuses
-        }
-      }
-    } catch (err) {
-      console.error("Failed to update status", err);
-      toast.error("Update failed");
-    } finally {
-      setUpdatingStatus((prev) => ({ ...prev, [status === "CONFIRMED" ? "accept" : "reject"]: false })); // Kết thúc cập nhật
-    }
-  };
-
-  const formatTimeSlot = (slot) => {
-    const match = slot.match(/SLOT_(\d+)_*(\d*)/);
-    if (!match) return slot;
-    const from = match[1];
-    const to = match[2];
-    return to ? `${from}:00 - ${to}:00` : `${from}:00`;
-  };
-
-  const openPatientDetailModal = (patient) => {
+  const openPatientModal = (patient) => {
     setSelectedPatient(patient);
-    setIsPatientDetailModalOpen(true);
-  };
-
-  const closePatientDetailModal = () => {
-    setIsPatientDetailModalOpen(false);
-    setSelectedPatient(null);
+    setIsPatientModalOpen(true);
   };
 
   const openPrescriptionModal = (appointment) => {
     setSelectedPatient(appointment);
     setIsPrescriptionModalOpen(true);
-    setPrescriptionData({
-      ...prescriptionData,
+    setPrescriptionData((prev) => ({
+      ...prev,
       appointmentId: appointment.id,
       doctorId: doctorId,
-      patientId: appointment.patientName.id,
-    });
+      patientId: appointment.patientName.id
+    }));
   };
 
-  const closePrescriptionModal = () => {
-    setIsPrescriptionModalOpen(false);
-    setSelectedPatient(null);
-    setPrescriptionData({
-      dosage: 1,
-      duration: 7,
-      frequency: "ONCE",
-      description: "",
-      appointmentId: null,
-      doctorId: null,
-      patientId: null,
-      medicineIds: [""],
-    });
-    setCreatedPrescriptionId(null);
-  };
-
-  const formatDOB = (dobArray) => {
-    return dobArray
-        ? `${dobArray[0]}-${String(dobArray[1]).padStart(2, '0')}-${String(dobArray[2]).padStart(2, '0')}`
-        : "";
-  };
-
-  const handleCreatePrescription = async () => {
+  const openViewPrescription = async (appointmentId) => {
     try {
-      const payload = {
-        ...prescriptionData,
-      };
-
-      console.log("Prescription data being sent:", payload); // Log the payload
-
-      const res = await axios.post(
-          "http://localhost:8080/api/prescription/create",
-          payload
-      );
+      const res = await axios.get(`http://localhost:8080/api/prescription/appointment/${appointmentId}`);
       if (res.data.statusCode === 200) {
-        toast.success("Prescription created successfully!");
-        setCreatedPrescriptionId(res.data.data.id);
-      } else {
-        toast.error("Failed to create prescription.");
+        setViewPrescriptionData(res.data.data);
+        setIsViewPrescriptionModalOpen(true);
       }
-    } catch (error) {
-      console.error("Error creating prescription:", error);
-      toast.error("Error creating prescription.");
+    } catch (err) {
+      console.error("Failed to fetch prescription", err);
     }
   };
 
-  const handleSendPrescription = async () => {
-    console.log("handleSendPrescription called with:", { createdPrescriptionId });
-    console.log("Type of prescriptionId:", typeof createdPrescriptionId);
-    console.log("Selected patient email:", selectedPatient.patientName.email);
-
-    setIsSending(true); // Bắt đầu gửi
-
-    try {
-      const email = selectedPatient.patientName.email;
-      console.log("Prescription sent to:", email, createdPrescriptionId);
-
-      const sendRes = await axios.post(
-          "http://localhost:8080/api/prescription/mail",
-          { email: email, prescriptionId: createdPrescriptionId }
-      );
-      if (sendRes.data.statusCode === 200) {
-        toast.success("Prescription sent to patient's email!");
-        closePrescriptionModal();
-        // Gọi API để cập nhật trạng thái cuộc hẹn
-        try {
-          const appointmentId = selectedPatient.id; // Lấy appointmentId từ selectedPatient
-          const updateRes = await axios.put(
-              `http://localhost:8080/api/appointment/status/${appointmentId}`,
-              { status: "COMPLETED" }
-          );
-          if (updateRes.data.statusCode === 200) {
-            toast.success("Appointment status updated to COMPLETED!");
-            fetchAppointments(); // Cập nhật lại danh sách cuộc hẹn
-          } else {
-            toast.error("Failed to update appointment status.");
-          }
-        } catch (updateError) {
-          console.error("Error updating appointment status:", updateError);
-          toast.error("Error updating appointment status.");
-        }
-      } else {
-        toast.error("Failed to send prescription.");
-      }
-    } catch (error) {
-      console.error("Error sending prescription:", error);
-      toast.error("Error sending prescription.");
-    } finally {
-      setIsSending(false); // Kết thúc gửi (dù thành công hay thất bại)
-    }
+  const openFeedbackModal = (appointmentId) => {
+    setSelectedFeedback(feedbacks[appointmentId] || null);
+    setIsFeedbackModalOpen(true);
   };
 
-  const ratingStringToNumber = (ratingString) => {
-    switch (ratingString) {
-      case "ONE_STAR": return 1;
-      case "TWO_STAR": return 2;
-      case "THREE_STAR": return 3;
-      case "FOUR_STAR": return 4;
-      case "FIVE_STAR": return 5;
-      default: return 0;
-    }
-  };
+  // Filter appointments based on search
+  const filteredAppointments = appointments.filter(appt =>
+      appt.patientName.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      appt.serviceName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      appt.specialization.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredAppointments.length / appointmentsPerPage);
+  const startIndex = (currentPage - 1) * appointmentsPerPage;
+  const endIndex = startIndex + appointmentsPerPage;
+  const currentAppointments = filteredAppointments.slice(startIndex, endIndex);
+
+  // Reset to first page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   if (loading) {
     return (
@@ -323,365 +120,176 @@ const DoctorDashboard = () => {
 
   return (
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <div className="bg-white shadow rounded-lg p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Doctor Dashboard</h2>
+        <div className="bg-white shadow-lg rounded-2xl p-6 border border-gray-100">
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex items-center gap-3">
+              <Stethoscope className="h-8 w-8 text-[#00B5F1]" />
+              <h2 className="text-2xl font-bold text-gray-900">Doctor Dashboard</h2>
+            </div>
           </div>
 
-          {["today", "upcoming"].includes(activeTab) && (
-              <div className="mb-4">
-                <label className="text-sm font-medium mr-2">Filter status:</label>
-                <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="border rounded px-3 py-1 text-sm"
-                >
-                  <option value="ALL">All</option>
-                  <option value="PENDING">Pending</option>
-                  <option value="CONFIRMED">Confirmed</option>
-                </select>
-              </div>
-          )}
+          {/* Search and Filter Section */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <div className="flex-1">
+              <SearchBar
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder="Search by patient name, service, or specialization..."
+              />
+            </div>
+            {["today", "upcoming"].includes(activeTab) && (
+                <div className="sm:w-48">
+                  <StatusFilter value={statusFilter} onChange={setStatusFilter} />
+                </div>
+            )}
+          </div>
+
+          {/* Tabs Navigation */}
           <div className="border-b border-gray-200 mb-6">
             <nav className="-mb-px flex space-x-8">
-              {[
-                ["today", "Today's Appointments"],
-                ["upcoming", "Upcoming"],
-                ["past", "Past Appointments"],
-                ["completed", "Completed"],
-                ["cancelled", "Cancelled"],
-              ].map(([key, label]) => (
+              {["today", "upcoming", "past", "completed", "cancelled"].map((key) => (
                   <button
                       key={key}
                       onClick={() => setActiveTab(key)}
-                      className={`${
-                          activeTab === key
-                              ? "border-primary-500 text-primary-600"
-                              : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                      } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                      className={`$ {
+                  activeTab === key
+                    ? "border-primary-500 text-primary-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
                   >
-                    {label}
+                    {key.charAt(0).toUpperCase() + key.slice(1)}
                   </button>
               ))}
             </nav>
           </div>
 
-          {appointments.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-500">No {activeTab} appointments found.</p>
+          {/* Appointments List */}
+          {currentAppointments.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+                <Calendar className="h-12 w-12 text-gray-300 mb-4" />
+                <p className="text-lg font-medium text-gray-900 mb-1">No appointments found</p>
+                <p className="text-gray-500">
+                  {searchQuery
+                      ? "No appointments match your search criteria"
+                      : `No ${activeTab} appointments are currently available`
+                  }
+                </p>
               </div>
           ) : (
-              <div className="space-y-4">
-                {appointments.map((appointment) => (
-                    <div key={appointment.id} className="border rounded-lg p-4 hover:bg-gray-50">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            <button
-                                onClick={() => openPatientDetailModal(appointment.patientName)}
-                                className="hover:underline text-blue-600 focus:outline-none" // Thêm focus:outline-none
-                            >
-                              Patient: {appointment.patientName.username}
-                            </button>
-                          </h3>
-                          <p className="text-sm text-gray-500">
-                            {appointment.date?.join("-")} at {formatTimeSlot(appointment.timeSlot)}
-                          </p>
-                          <p className="text-sm text-gray-500 mt-1">
-                            <strong>Service:</strong> {appointment.serviceName}
-                          </p>
-                          <p className="text-sm text-gray-500 mt-1">
-                            <strong>Specialization:</strong> {appointment.specialization}
-                          </p>
-                          <p className="text-sm text-gray-500 mt-1">
-                            <strong>Notes:</strong> {appointment.notes}
-                          </p>
-                        </div>
-                        <span
-                            className={`px-3 py-1 rounded-full text-sm ${
-                                appointment.status === "PENDING"
-                                    ? "bg-blue-100 text-blue-800"
-                                    : appointment.status === "CONFIRMED"
-                                        ? "bg-indigo-100 text-indigo-800"
-                                        : appointment.status === "COMPLETED"
-                                            ? "bg-green-100 text-green-800"
-                                            : appointment.status === "CANCELLED"
-                                                ? "bg-red-100 text-red-800"
-                                                : "bg-gray-200 text-gray-800"
-                            }`}
-                        >
-                    {appointment.status}
-                  </span>
-                      </div>
+              <>
+                <div className="space-y-4">
+                  {currentAppointments.map((appt) => (
+                      <AppointmentCard
+                          key={appt.id}
+                          appointment={appt}
+                          activeTab={activeTab}
+                          onUpdateStatus={handleUpdateStatus}
+                          onOpenPatientDetail={() => openPatientModal(appt.patientName)}
+                          onOpenPrescription={() => openPrescriptionModal(appt)}
+                          onViewPrescription={() => openViewPrescription(appt.id)}
+                          onViewFeedback={() => openFeedbackModal(appt.id)}
+                      />
+                  ))}
+                </div>
 
-                      {appointment.status === "CONFIRMED" && (
-                          <div className="mt-4 flex justify-end">
-                            <button
-                                onClick={() => openPrescriptionModal(appointment)}
-                                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none"
-                            >
-                              Send Prescription
-                            </button>
-                          </div>
-                      )}
-
-                      {["today", "upcoming"].includes(activeTab) &&
-                          appointment.status === "PENDING" && (
-                              <div className="mt-4 flex justify-end space-x-2">
-                                {!updatingStatus.reject && ( // Chỉ hiển thị khi !updatingStatus.reject
-                                    <button
-                                        onClick={() => handleUpdateStatus(appointment.id, "CONFIRMED")}
-                                        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-                                        disabled={updatingStatus.accept}
-                                    >
-                                      {updatingStatus.accept ? "Updating..." : "Accept"}
-                                    </button>
-                                )}
-                                {!updatingStatus.accept && (  // Chỉ hiển thị khi !updatingStatus.accept
-                                    <button
-                                        onClick={() => handleUpdateStatus(appointment.id, "CANCELLED")}
-                                        className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-                                        disabled={updatingStatus.reject}
-                                    >
-                                      {updatingStatus.reject ? "Updating..." : "Reject"}
-                                    </button>
-                                )}
-                              </div>
-                          )}
-
-                      {appointment.status === "COMPLETED" && (
-                          <>
-                            <div className="mt-4 flex justify-end">
-                              <button
-                                  onClick={() => fetchPrescriptionDetails(appointment.id)}
-                                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-700 focus:outline-none mr-2"
-                              >
-                                View Prescription
-                              </button>
-                            </div>
-                            <div className="mt-4 p-3 border rounded bg-gray-50">
-
-                              {feedbacks[appointment.id] ? (
-                                  <>
-                                    <p className="text-sm font-semibold text-gray-700">
-                                      Patient Feedback
-                                    </p>
-                                    <p className="text-sm text-gray-600 mt-1">
-                                      <strong>Comment:</strong>{" "}
-                                      {feedbacks[appointment.id].feedbackText || "No comment provided."}
-                                    </p>
-                                    {feedbacks[appointment.id].rating && (
-                                        <p className="text-sm text-yellow-600 mt-1">
-                                          <strong>Rating:</strong> {ratingStringToNumber(feedbacks[appointment.id].rating)} /
-                                          5
-                                        </p>
-                                    )}
-                                  </>
-                              ) : (
-                                  <p className="text-sm italic text-gray-400">No feedback available.</p>
-                              )}
-                            </div>
-                          </>
-                      )}
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <div className="mt-6">
+                      <Pagination
+                          currentPage={currentPage}
+                          totalPages={totalPages}
+                          onPageChange={setCurrentPage}
+                      />
                     </div>
-                ))}
-              </div>
+                )}
+              </>
           )}
         </div>
-        {/* Pop-up chi tiết người bệnh (sử dụng react-modal) */}
-        <Modal
-            isOpen={isPatientDetailModalOpen}
-            onRequestClose={closePatientDetailModal}
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl p-6 w-full max-w-md outline-none"
-            overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
-        >
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-gray-900">Patient Details</h2>
-            <button onClick={closePatientDetailModal} className="text-gray-500 hover:text-gray-700 focus:outline-none">
-              <svg className="h-6 w-6 fill-current" role="button" xmlns="http://www.w3.org/2000/svg"
-                   viewBox="0 0 20 20"><title>Close</title>
-                <path
-                    d="M6.293 6.293a1 1 0 011.414 0L10 8.586l2.293-2.293a1 1 0 111.414 1.414L11.414 10l2.293 2.293a1 1 0 01-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 01-1.414-1.414L8.586 10 6.293 7.707a1 1 0 010-1.414z"/>
-              </svg>
-            </button>
-          </div>
-          {selectedPatient && (
-              <div className="mb-4">
-                <p className="mb-2"><strong className="font-semibold">Name:</strong> {selectedPatient.username}</p>
-                <p className="mb-2"><strong className="font-semibold">Date of Birth:</strong> {formatDOB(selectedPatient.dob)}</p>
-                <p className="mb-2"><strong className="font-semibold">Gender:</strong> {selectedPatient.gender}</p>
-                <p className="mb-2"><strong className="font-semibold">Medical History:</strong> {selectedPatient.medicalHistory}</p>
-                <p className="mb-2"><strong className="font-semibold">Address:</strong> {selectedPatient.address}</p>
-                <p className="mb-2"><strong className="font-semibold">Gmail:</strong> {selectedPatient.email}</p>
-              </div>
-          )}
-          <div className="flex justify-end">
-            <button onClick={closePatientDetailModal} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 focus:outline-none">
-              Close
-            </button>
-          </div>
-        </Modal>
 
-        {/* Pop-up gửi đơn thuốc */}
-        <Modal
+        <PatientDetailModal
+            isOpen={isPatientModalOpen}
+            onClose={() => setIsPatientModalOpen(false)}
+            patient={selectedPatient}
+        />
+
+        <PrescriptionModal
             isOpen={isPrescriptionModalOpen}
-            onRequestClose={closePrescriptionModal}
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl p-6 w-full max-w-md outline-none"
-            overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
-        >
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-gray-900">Send Prescription</h2>
-            <button onClick={closePrescriptionModal} className="text-gray-500 hover:text-gray-700 focus:outline-none">
-              <svg className="h-6 w-6 fill-current" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M6.293 6.293a1 1 0 011.414 0L10 8.586l2.293-2.293a1 1 0 111.414 1.414L10 11.414l2.293 2.293a1 1 0 01-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 01-1.414-1.414L8.586 10 6.293 7.707a1 1 0 010-1.414z"/></svg>
-            </button>
-          </div>
+            onClose={() => {
+              setIsPrescriptionModalOpen(false);
+              resetPrescriptionData();
+            }}
+            prescriptionData={prescriptionData}
+            setPrescriptionData={setPrescriptionData}
+            onCreate={handleCreatePrescription}
+            onSend={() => handleSendPrescription(selectedPatient.patientName.email, selectedPatient.id, fetchAppointments)}
+            createdId={createdPrescriptionId}
+            isSending={isSending}
+        />
 
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="dosage">
-              Dosage
-            </label>
-            <input
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                id="dosage"
-                type="number"
-                value={prescriptionData.dosage}
-                onChange={(e) => setPrescriptionData({ ...prescriptionData, dosage: parseInt(e.target.value) })}
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="duration">
-              Duration (days)
-            </label>
-            <input
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                id="duration"
-                type="number"
-                value={prescriptionData.duration}
-                onChange={(e) => setPrescriptionData({ ...prescriptionData, duration: parseInt(e.target.value) })}
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="frequency">
-              Frequency
-            </label>
-            <select
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                id="frequency"
-                value={prescriptionData.frequency}
-                onChange={(e) => setPrescriptionData({ ...prescriptionData, frequency: e.target.value })}
-            >
-              <option value="ONCE">Once a day</option>
-              <option value="TWICE">Twice a day</option>
-              <option value="THREE_TIMES">Three times a day</option>
-                <option value="FOUR_TIMES">Four times a day</option>
-            </select>
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="description">
-              Description
-            </label>
-            <textarea
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                id="description"
-                value={prescriptionData.description}
-                onChange={(e) => setPrescriptionData({ ...prescriptionData, description: e.target.value })}
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="medicineIds">
-              Medicine Name
-            </label>
-            {prescriptionData.medicineIds.map((medicine, index) => (
-                <div key={index} className="flex items-center mb-2">
-                  <input
-                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                      type="text"
-                      value={medicine}
-                      onChange={(e) => {
-                        const newMedicineIds = [...prescriptionData.medicineIds];
-                        newMedicineIds[index] = e.target.value;
-                        setPrescriptionData({ ...prescriptionData, medicineIds: newMedicineIds });
-                      }}
-                  />
-                  <button
-                      type="button"
-                      onClick={() => {
-                        const newMedicineIds = [...prescriptionData.medicineIds];
-                        newMedicineIds.splice(index, 1);
-                        setPrescriptionData({ ...prescriptionData, medicineIds: newMedicineIds });
-                      }}
-                      className="ml-2 px-2 py-1 bg-red-500 text-white rounded hover:bg-red-700 focus:outline-none"
-                  >
-                    Remove
-                  </button>
-                </div>
-            ))}
-            <button
-                type="button"
-                onClick={() => setPrescriptionData({ ...prescriptionData, medicineIds: [...prescriptionData.medicineIds, ""] })}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 focus:outline-none"
-            >
-              Add Medicine
-            </button>
-          </div>
-
-          <div className="flex justify-end mt-4">
-            <button
-                onClick={handleCreatePrescription}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none mr-2"
-            >
-              Create Prescription
-            </button>
-            {createdPrescriptionId && (
-                <button
-                    onClick={() => handleSendPrescription()}
-                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none"
-                    disabled={isSending}
-                >
-                  {isSending ? "Sending..." : "Send Prescription"}
-                </button>
-            )}
-          </div>
-        </Modal>
-
-        {/* View Prescription Modal */}
-        <Modal
+        <ViewPrescriptionModal
             isOpen={isViewPrescriptionModalOpen}
-            onRequestClose={closeViewPrescriptionModal}
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl p-6 w-full max-w-md outline-none"
-            overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
+            onClose={() => setIsViewPrescriptionModalOpen(false)}
+            prescription={viewPrescriptionData}
+        />
+
+        <Modal
+            isOpen={isFeedbackModalOpen}
+            onRequestClose={() => setIsFeedbackModalOpen(false)}
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.2)] p-8 w-full max-w-xl outline-none animate-modalFadeIn"
+            overlayClassName="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center animate-overlayShow"
         >
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-gray-900">Prescription Details</h2>
-            <button onClick={closeViewPrescriptionModal} className="text-gray-500 hover:text-gray-700 focus:outline-none">
-              {/* ... (close icon) */}
-              <svg className="h-6 w-6 fill-current" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><title>Close</title><path d="M6.293 6.293a1 1 0 011.414 0L10 8.586l2.293-2.293a1 1 0 111.414 1.414L10 11.414l2.293 2.293a1 1 0 01-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 01-1.414-1.414L8.586 10 6.293 7.707a1 1 0 010-1.414z"/></svg>
-            </button>
-          </div>
-          {viewPrescriptionData && (
-              <div>
-                <p><strong>Dosage:</strong> {viewPrescriptionData.dosage}</p>
-                <p><strong>Duration:</strong> {viewPrescriptionData.duration} days</p>
-                <p><strong>Frequency:</strong> {viewPrescriptionData.frequency}</p>
-                <p><strong>Description:</strong> {viewPrescriptionData.description}</p>
-                <p><strong>Doctor:</strong> {viewPrescriptionData.doctorName}</p>
-                <p><strong>Patient:</strong> {viewPrescriptionData.patientName}</p>
-                <p><strong>Medicine Names:</strong> {viewPrescriptionData.medicineNames.join(", ")}</p>
-                {/* ... (add other details as needed) */}
-              </div>
-          )}
-          <div className="flex justify-end">
-            <button onClick={closeViewPrescriptionModal} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 focus:outline-none">
-              Close
-            </button>
-          </div>
+            <div className="relative">
+                {/* Decorative Elements */}
+                <div className="absolute -top-11 left-1/2 transform -translate-x-1/2 w-20 h-20 bg-[#00B5F1] rounded-2xl rotate-45 opacity-10"></div>
+                <div className="absolute -top-14 left-1/2 transform -translate-x-1/2 w-28 h-28 bg-[#00B5F1] rounded-2xl rotate-45 opacity-5"></div>
+
+                {/* Modal Header */}
+                <div className="flex justify-between items-start mb-8 relative">
+                    <div className="flex items-center gap-4">
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-[#00B5F1] rounded-xl opacity-10 blur-md"></div>
+                            <div className="relative p-3 bg-gradient-to-br from-[#00B5F1] to-[#0099cc] rounded-xl shadow-lg">
+                                <MessageCircle className="h-6 w-6 text-white" />
+                            </div>
+                        </div>
+                        <div>
+                            <h2 className="text-2xl font-bold text-gray-900 mb-1">Patient Feedback</h2>
+                            <p className="text-sm text-gray-500">Review patient's experience and rating</p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => setIsFeedbackModalOpen(false)}
+                        className="text-gray-400 hover:text-[#00B5F1] transition-all duration-200 focus:outline-none rounded-full p-2 hover:bg-gray-50 hover:shadow-md active:scale-95"
+                    >
+                        <X className="h-5 w-5" />
+                    </button>
+                </div>
+
+                {/* Feedback Content */}
+                <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-b from-gray-50 to-white opacity-50 rounded-xl"></div>
+                    <div className="relative bg-white rounded-xl p-6 shadow-[0_4px_20px_-8px_rgba(0,181,241,0.15)] border border-gray-100">
+                        <FeedbackPanel feedback={selectedFeedback} />
+                    </div>
+                </div>
+
+                {/* Modal Footer */}
+                <div className="flex justify-end mt-8 pt-4 border-t border-gray-100">
+                    <button
+                        onClick={() => setIsFeedbackModalOpen(false)}
+                        className="group flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#00B5F1] to-[#0099cc] text-white rounded-lg hover:shadow-lg hover:shadow-[#00B5F1]/20 active:scale-[0.98] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#00B5F1] focus:ring-opacity-50 font-medium"
+                    >
+                        Close
+                        <X
+                            className="h-4 w-4 transform transition-transform duration-200 ease-out group-hover:rotate-90"
+                        />
+                    </button>
+                </div>
+            </div>
         </Modal>
       </div>
   );
 };
 
 export default DoctorDashboard;
+

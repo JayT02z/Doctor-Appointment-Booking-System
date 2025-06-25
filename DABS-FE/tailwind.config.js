@@ -56,7 +56,25 @@ export default {
   				'3': 'hsl(var(--chart-3))',
   				'4': 'hsl(var(--chart-4))',
   				'5': 'hsl(var(--chart-5))'
-  			}
+  			},
+  			keyframes: {
+  				modalFadeIn: {
+  					'0%': { opacity: '0', transform: 'translate(-50%, -48%) scale(.96)' },
+  					'100%': { opacity: '1', transform: 'translate(-50%, -50%) scale(1)' }
+  				},
+  				overlayShow: {
+  					'0%': { opacity: '0' },
+  					'100%': { opacity: '1' }
+  				},
+  				shimmer: {
+  					'100%': { transform: 'translateX(100%)' }
+  				}
+  			},
+  			animation: {
+  				modalFadeIn: 'modalFadeIn 0.3s ease-out',
+  				overlayShow: 'overlayShow 0.3s ease-out',
+  				shimmer: 'shimmer 1.5s infinite'
+  			},
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
