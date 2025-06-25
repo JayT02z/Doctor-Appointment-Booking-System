@@ -79,7 +79,7 @@ public class PatientService {
         ));
     }
 
-    public ResponseEntity<ResponseData<Patient>> updatePatient(Long id, UpdatePatientrForm patientForm) {
+    public ResponseEntity<ResponseData<PatientDTO>> updatePatient(Long id, UpdatePatientrForm patientForm) {
 
         Patient patients = patientRepository.findById(id).orElseThrow();
         Users users = usersRepository.findById(patientForm.getUserId()).orElseThrow();
@@ -102,7 +102,8 @@ public class PatientService {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
                 StatusApplication.SUCCESS.getMessage(),
-                patients));
+                new PatientDTO(patients)
+        ));
     }
 
     public ResponseEntity<ResponseData<Patient>> deletePatient(Long id) {
