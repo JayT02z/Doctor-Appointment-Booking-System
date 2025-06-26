@@ -1,6 +1,8 @@
 package dabs.DABS.repository;
 
+import aj.org.objectweb.asm.commons.Remapper;
 import dabs.DABS.model.Entity.Doctor;
+import dabs.DABS.model.Entity.Users;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -23,4 +25,5 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
     List<Doctor> findByFullNameContainingIgnoreCase(String keyword);
 
     List<Doctor> findBySpecializationIgnoreCase(String specialization);
+
 }

@@ -23,6 +23,8 @@ public class UserDTO {
     private String googleId;
     private String avatarUrl;
     private Boolean isOauth2;
+    private Long doctorId;
+    private Long patientId;
 
     public static UserDTO fromEntity(Users user) {
         if (user == null) {
@@ -32,6 +34,10 @@ public class UserDTO {
         if (user.getRoles() != null && !user.getRoles().isEmpty()) {
             role = user.getRoles().iterator().next();
         }
+        // Doctor/Patient mapping
+        Long doctorId = (user.getDoctor() != null) ? user.getDoctor().getId() : null;
+        Long patientId = (user.getPatient() != null) ? user.getPatient().getId() : null;
+
         return UserDTO.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -43,6 +49,8 @@ public class UserDTO {
                 .googleId(user.getGoogleId())
                 .avatarUrl(user.getAvatarUrl())
                 .isOauth2(Boolean.TRUE.equals(user.getIsOauth2()))
+                .doctorId(doctorId)
+                .patientId(patientId)
                 .build();
     }
 

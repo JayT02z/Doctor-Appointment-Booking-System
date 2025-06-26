@@ -59,4 +59,11 @@ public class Users {
 
     @Column(name = "is_oauth2")
     private Boolean isOauth2 = false;
+
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    private Doctor doctor;
+
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    private Patient patient;
+
 }

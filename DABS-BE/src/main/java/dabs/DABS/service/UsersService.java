@@ -192,20 +192,25 @@ public class UsersService {
     public ResponseEntity<ResponseData<UserDTO>> getUserById(Long id) {
         Optional<Users> optionalUser = usersRepository.findById(id);
         if (!optionalUser.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseData<>(
-                    ErrorCode.USER_NOT_FOUND.getCode(),
-                    ErrorCode.USER_NOT_FOUND.getMessage(),
-                    null
-            ));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseData<>(ErrorCode.USER_NOT_FOUND.getCode(), ErrorCode.USER_NOT_FOUND.getMessage(), null));
         }
 
-        UserDTO userDTO = UserDTO.fromEntity(optionalUser.get());
+        Users user = optionalUser.get();
+        Long doctorId = doctorRepository.findByUserId(user.getId()).map(Doctor::getId).orElse(null);
+        Long patientId = patientRepository.findByUserId(user.getId()).map(Patient::getId).orElse(null);
+
+        UserDTO userDTO = UserDTO.fromEntity(user);
+        userDTO.setDoctorId(doctorId);
+        userDTO.setPatientId(patientId);
+
         return ResponseEntity.ok(new ResponseData<>(
                 StatusApplication.SUCCESS.getCode(),
                 StatusApplication.SUCCESS.getMessage(),
                 userDTO
         ));
     }
+
 
     //update status acc
     public ResponseEntity<ResponseData<UserDTO>> updateUser(Long id) {
