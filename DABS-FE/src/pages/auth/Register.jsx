@@ -8,6 +8,7 @@ import OtpVerification from "../../components/register/OtpVerification.jsx";
 import { useRegisterForm } from "../../hooks/useRegisterForm.jsx";
 import Tippy from '@tippyjs/react';
 import 'tippy.js/dist/tippy.css';
+import { UserPlus, ArrowLeft } from "lucide-react";
 
 const Register = () => {
     const {
@@ -50,26 +51,35 @@ const Register = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.5 }}
-            className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sky-50 to-white px-4 py-10"
+            className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#00B5F1]/10 to-white px-4 py-10"
         >
             <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
-                className="w-full max-w-lg space-y-8"
+                className="w-full max-w-lg bg-white rounded-2xl shadow-[0_0_40px_rgba(0,181,241,0.12)] p-8 space-y-8 backdrop-blur-sm"
             >
-                <div className="text-center">
-                    <div className="mx-auto mb-4 w-14 h-14 bg-[#0369A1] rounded-xl flex items-center justify-center shadow-lg">
-                        <div className="w-7 h-7">🏥</div>
-                    </div>
+                <div className="text-center space-y-4">
+                    <motion.div
+                        initial={{ y: -10, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.1, duration: 0.5 }}
+                        className="w-16 h-16 mx-auto bg-[#00B5F1]/10 text-[#00B5F1] rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-[#00B5F1]/20"
+                    >
+                        <UserPlus className="w-8 h-8" />
+                    </motion.div>
                     <h2 className="text-3xl font-bold text-gray-900">Create your account</h2>
-                    <p className="text-sm text-gray-600">Join our healthcare platform today</p>
-                    <p className="mt-1 text-sm">
-                        Already have an account?{' '}
-                        <Link to="/login" className="text-[#0369A1] hover:underline font-medium">
+                    <p className="text-gray-500">Join our healthcare platform today</p>
+                    <div className="flex items-center justify-center gap-2 text-sm">
+                        <span className="text-gray-500">Already have an account?</span>
+                        <Link
+                            to="/login"
+                            className="text-[#00B5F1] hover:text-[#0090c1] font-medium transition-colors inline-flex items-center gap-1"
+                        >
+                            <ArrowLeft className="w-4 h-4" />
                             Sign in here
                         </Link>
-                    </p>
+                    </div>
                 </div>
 
                 <form className="space-y-6" onSubmit={handleFormSubmit}>
@@ -79,13 +89,6 @@ const Register = () => {
                         transition={{ duration: 0.5 }}
                         className="bg-white p-6 rounded-3xl shadow-lg border border-gray-100"
                     >
-                        <div className="flex flex-col items-center mb-4">
-                            <div className="w-12 h-12 bg-[#0369A1] rounded-xl flex items-center justify-center shadow">
-                                <span className="text-white text-lg">✨</span>
-                            </div>
-                            <h3 className="mt-2 text-lg font-semibold text-gray-800">Personal Information</h3>
-                            <p className="text-sm text-gray-500">Fill in your details to get started</p>
-                        </div>
 
                         <RegisterForm
                             formData={formData}
@@ -119,7 +122,7 @@ const Register = () => {
                                 </>
                             ) : (
                                 <span className="inline-flex items-center gap-2 justify-center">
-                                    ✨ Get Started
+                                    Sign Up
                                 </span>
                             )}
                         </motion.button>

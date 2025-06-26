@@ -52,16 +52,44 @@ export const useRegisterForm = () => {
 
     const validateForm = () => {
         const newErrors = {};
-        if (!formData.username) newErrors.username = "Username is required";
-        if (!formData.password) newErrors.password = "Password is required";
-        else if (formData.password.length < 8)
-            newErrors.password = "Password must be at least 8 characters";
-        if (formData.password !== formData.confirmPassword)
+
+        // Username: required, 4-50 characters
+        if (!formData.username.trim()) {
+            newErrors.username = "Username is required";
+        } else if (formData.username.length < 4 || formData.username.length > 50) {
+            newErrors.username = "Username must be between 4 and 50 characters";
+        }
+
+        // Password: required, strong
+        if (!formData.password) {
+            newErrors.password = "Password is required";
+        } else if (
+            !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(formData.password)
+        ) {
+            newErrors.password = "Password must be at least 8 characters and include uppercase, lowercase, number, and special character";
+        }
+
+        // Confirm password: required, must match
+        if (!formData.confirmPassword) {
+            newErrors.confirmPassword = "Please confirm your password";
+        } else if (formData.password !== formData.confirmPassword) {
             newErrors.confirmPassword = "Passwords do not match";
-        if (!formData.email) newErrors.email = "Email is required";
-        else if (!/\S+@\S+\.\S+/.test(formData.email))
+        }
+
+        // Email: required, format
+        if (!formData.email) {
+            newErrors.email = "Email is required";
+        } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(formData.email)) {
             newErrors.email = "Email is invalid";
-        if (!formData.phone) newErrors.phone = "Phone number is required";
+        }
+
+        // Phone: required, numeric and length 10-11
+        if (!formData.phone) {
+            newErrors.phone = "Phone number is required";
+        } else if (!/^\d{10,11}$/.test(formData.phone)) {
+            newErrors.phone = "Phone number must be 10 to 11 digits";
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };

@@ -15,7 +15,7 @@ import MainLayout from "./components/MainLayout";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
-import Login from "./pages/auth/LoginPage";
+import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register.jsx";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ProfileSettings from "./pages/patient/ProfileSettings";

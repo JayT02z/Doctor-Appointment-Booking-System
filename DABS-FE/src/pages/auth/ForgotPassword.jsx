@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import { ArrowLeft, Mail, Lock, KeyRound, Timer } from "lucide-react";
 
 const ForgotPassword = () => {
     const [stage, setStage] = useState(1);
@@ -88,87 +89,133 @@ const ForgotPassword = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-white flex items-center justify-center px-4">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#00B5F1]/10 to-white p-4">
             <motion.div
-                className="w-full max-w-md bg-white/80 backdrop-blur-md rounded-2xl shadow-xl p-8 space-y-6"
-                {...transitionProps}
+                className="w-full max-w-md bg-white rounded-2xl shadow-[0_0_40px_rgba(0,181,241,0.12)] p-8 space-y-6 backdrop-blur-sm"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4 }}
             >
-                <h2 className="text-center text-3xl font-bold text-gray-800">Forgot Password</h2>
+                <motion.div
+                    initial={{ y: -10, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.1, duration: 0.5 }}
+                    className="w-16 h-16 mx-auto bg-[#00B5F1]/10 text-[#00B5F1] rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-[#00B5F1]/20"
+                >
+                    <KeyRound className="w-8 h-8" />
+                </motion.div>
+
+                <h2 className="text-center text-3xl font-bold text-gray-900 mb-2">Reset Password</h2>
+                <p className="text-center text-gray-500 mb-8">
+                    {stage === 1 && "Enter your email to receive a reset code"}
+                    {stage === 2 && "Enter the verification code sent to your email"}
+                    {stage === 3 && "Create your new password"}
+                </p>
 
                 <AnimatePresence mode="wait">
                     {stage === 1 && (
-                        <motion.div key="stage1" {...transitionProps}>
-                            <label className="block text-sm font-medium text-gray-700" htmlFor="email">Email</label>
-                            <input
-                                id="email"
-                                type="email"
-                                required
-                                autoComplete="email"
-                                className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                                placeholder="you@example.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
+                        <motion.div key="stage1" {...transitionProps} className="space-y-4">
+                            <div className="relative group">
+                                <span className="absolute inset-y-0 left-3 flex items-center text-gray-400 group-focus-within:text-[#00B5F1] transition-colors">
+                                    <Mail className="w-5 h-5" />
+                                </span>
+                                <input
+                                    id="email"
+                                    type="email"
+                                    required
+                                    autoComplete="email"
+                                    className="w-full pl-11 pr-4 py-3 border-2 border-gray-100 rounded-xl text-sm
+                                           focus:outline-none focus:border-[#00B5F1] transition-all bg-gray-50 focus:bg-white"
+                                    placeholder="Enter your email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                />
+                            </div>
                             <button
                                 type="button"
                                 disabled={sendingOtp}
-                                className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg transition-all duration-150"
                                 onClick={handleSendOtp}
+                                className="w-full bg-[#00B5F1] text-white rounded-xl py-3 font-medium
+                                         hover:bg-[#0090c1] transition-all shadow-lg shadow-[#00B5F1]/25
+                                         disabled:opacity-70 disabled:cursor-not-allowed"
                             >
-                                {sendingOtp ? "Sending..." : "Send OTP"}
+                                {sendingOtp ? "Sending..." : "Send Reset Code"}
                             </button>
                         </motion.div>
                     )}
 
                     {stage === 2 && (
-                        <motion.div key="stage2" {...transitionProps}>
-                            <p className="text-sm text-gray-600 mb-2">
-                                Enter the 6-digit code sent to your email.{" "}
-                                {otpTimer > 0 ? (
-                                    <span className="text-indigo-600 font-medium">OTP expires in {formatTime(otpTimer)}</span>
-                                ) : (
-                                    <button onClick={handleResendOtp} className="text-indigo-500 underline">Resend OTP</button>
-                                )}
-                            </p>
-                            <input
-                                type="text"
-                                value={otp}
-                                onChange={(e) => setOtp(e.target.value)}
-                                placeholder="Enter OTP"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                            />
+                        <motion.div key="stage2" {...transitionProps} className="space-y-4">
+                            <div className="bg-[#00B5F1]/5 rounded-xl p-4 flex items-center gap-3">
+                                <Timer className="w-5 h-5 text-[#00B5F1]" />
+                                <div className="flex-1">
+                                    <p className="text-sm text-gray-600">
+                                        {otpTimer > 0 ? (
+                                            <span>Code expires in <span className="text-[#00B5F1] font-medium">{formatTime(otpTimer)}</span></span>
+                                        ) : (
+                                            <span>Code expired. <button onClick={handleResendOtp} className="text-[#00B5F1] font-medium hover:underline">Resend code</button></span>
+                                        )}
+                                    </p>
+                                </div>
+                            </div>
+                            <div className="relative group">
+                                <span className="absolute inset-y-0 left-3 flex items-center text-gray-400 group-focus-within:text-[#00B5F1] transition-colors">
+                                    <KeyRound className="w-5 h-5" />
+                                </span>
+                                <input
+                                    type="text"
+                                    value={otp}
+                                    onChange={(e) => setOtp(e.target.value)}
+                                    placeholder="Enter verification code"
+                                    className="w-full pl-11 pr-4 py-3 border-2 border-gray-100 rounded-xl text-sm
+                                           focus:outline-none focus:border-[#00B5F1] transition-all bg-gray-50 focus:bg-white"
+                                    maxLength={6}
+                                />
+                            </div>
                             <button
                                 type="button"
                                 onClick={handleVerifyOtp}
-                                className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg"
+                                className="w-full bg-[#00B5F1] text-white rounded-xl py-3 font-medium
+                                         hover:bg-[#0090c1] transition-all shadow-lg shadow-[#00B5F1]/25"
                             >
-                                Verify OTP
+                                Verify Code
                             </button>
                         </motion.div>
                     )}
 
                     {stage === 3 && (
-                        <motion.div key="stage3" {...transitionProps}>
-                            <label className="block text-sm font-medium text-gray-700" htmlFor="newPassword">New Password</label>
-                            <input
-                                type="password"
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
-                                placeholder="New password"
-                                className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                            />
-                            <label className="block text-sm font-medium text-gray-700 mt-4" htmlFor="confirmPassword">Confirm Password</label>
-                            <input
-                                type="password"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                placeholder="Confirm password"
-                                className="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                            />
+                        <motion.div key="stage3" {...transitionProps} className="space-y-4">
+                            <div className="relative group">
+                                <span className="absolute inset-y-0 left-3 flex items-center text-gray-400 group-focus-within:text-[#00B5F1] transition-colors">
+                                    <Lock className="w-5 h-5" />
+                                </span>
+                                <input
+                                    type="password"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    placeholder="Enter new password"
+                                    className="w-full pl-11 pr-4 py-3 border-2 border-gray-100 rounded-xl text-sm
+                                           focus:outline-none focus:border-[#00B5F1] transition-all bg-gray-50 focus:bg-white"
+                                />
+                            </div>
+                            <div className="relative group">
+                                <span className="absolute inset-y-0 left-3 flex items-center text-gray-400 group-focus-within:text-[#00B5F1] transition-colors">
+                                    <Lock className="w-5 h-5" />
+                                </span>
+                                <input
+                                    type="password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    placeholder="Confirm new password"
+                                    className="w-full pl-11 pr-4 py-3 border-2 border-gray-100 rounded-xl text-sm
+                                           focus:outline-none focus:border-[#00B5F1] transition-all bg-gray-50 focus:bg-white"
+                                />
+                            </div>
                             <button
                                 type="button"
                                 onClick={handleResetPassword}
-                                className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg"
+                                className="w-full bg-[#00B5F1] text-white rounded-xl py-3 font-medium
+                                         hover:bg-[#0090c1] transition-all shadow-lg shadow-[#00B5F1]/25"
                             >
                                 Reset Password
                             </button>
@@ -176,9 +223,13 @@ const ForgotPassword = () => {
                     )}
                 </AnimatePresence>
 
-                <div className="text-center pt-4">
-                    <Link to="/login" className="text-sm text-indigo-600 hover:underline">
-                        ← Back to Login
+                <div className="pt-6 text-center">
+                    <Link
+                        to="/login"
+                        className="inline-flex items-center gap-2 text-[#00B5F1] hover:text-[#0090c1] font-medium transition-colors"
+                    >
+                        <ArrowLeft className="w-4 h-4" />
+                        Back to Login
                     </Link>
                 </div>
             </motion.div>
