@@ -16,7 +16,8 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Login from "./pages/auth/Login";
-import Register from "./pages/auth/Register";
+import OAuth2RedirectHandler from "./hooks/OAuth2RedirectHandler.jsx";
+import Register from "./pages/auth/Register.jsx";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ProfileSettings from "./pages/patient/ProfileSettings";
 import Appointments from "./pages/patient/Appointments";
@@ -33,6 +34,11 @@ import ManageAppointments from "./pages/admin/ManageAppointments";
 import ManageUsers from "./pages/admin/ManageUsers";
 import ManagePayments from "./pages/admin/ManagePayments";
 import AdminServices from "./pages/admin/AdminServices";
+import DiabetesArticle from "./pages/articles/DiabetesArticle.jsx";
+import HealthCheckupArticle from "./pages/articles/HealthCheckupArticle.jsx";
+import ImmunityArticle from "./pages/articles/ImmunityArticle.jsx";
+import Privacy from "./pages/legal/Privacy.jsx";
+import Terms from "./pages/legal/Terms.jsx";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +53,7 @@ function App() {
                                 {/* Public Routes */}
                                 <Route path="/" element={<Home />} />
                                 <Route path="/login" element={<Login />} />
+                                <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
                                 <Route path="/register" element={<Register />} />
                                 <Route path="/forgot-password" element={<ForgotPassword />} />
                                 <Route path="/about" element={<About />} />
