@@ -53,9 +53,27 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
         String token = jwtUtil.generateToken(userDetails);
 
-        String encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8);
-        String redirectUri = "http://localhost:5173/oauth2/redirect?token=" + encodedToken + "&userId=" + user.getId();
+        // 👇 Lấy doctorId và patientId
+        Long doctorId = usersService.getDoctorIdByUserId(user.getId());
+        Long patientId = usersService.getPatientIdByUserId(user.getId());
 
-        response.sendRedirect(redirectUri);
+        Map<String, Object> body = new HashMap<>();
+        body.put("message", "Login with Google thành nhân");
+        body.put("token", token);
+        body.put("user", UserDTO.fromEntity(user));
+        body.put("doctorId", doctorId);
+        body.put("patientId", patientId);
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write(objectMapper.writeValueAsString(body));
     }
+
+
+
+    //    String encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8);
+//        String redirectUri = "http://localhost:5173/oauth2/redirect?token=" + encodedToken + "&userId=" + user.getId();
+//
+//        response.sendRedirect(redirectUri);
+
 }

@@ -17,6 +17,8 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register.jsx";
+import Login from "./pages/auth/LoginPage";
+import Register from "./pages/auth/Register";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ProfileSettings from "./pages/patient/ProfileSettings";
 import Appointments from "./pages/patient/Appointments";
@@ -33,11 +35,6 @@ import ManageAppointments from "./pages/admin/ManageAppointments";
 import ManageUsers from "./pages/admin/ManageUsers";
 import ManagePayments from "./pages/admin/ManagePayments";
 import AdminServices from "./pages/admin/AdminServices";
-import DiabetesArticle from "./pages/articles/DiabetesArticle.jsx";
-import HealthCheckupArticle from "./pages/articles/HealthCheckupArticle.jsx";
-import ImmunityArticle from "./pages/articles/ImmunityArticle.jsx";
-import Privacy from "./pages/legal/Privacy.jsx";
-import Terms from "./pages/legal/Terms.jsx";
 
 const queryClient = new QueryClient();
 

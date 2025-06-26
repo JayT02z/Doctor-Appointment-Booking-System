@@ -310,11 +310,18 @@ public class UsersService {
         newUser.setCreatedAt(LocalDateTime.now());
         newUser.setStatus(Status.ACTIVE);
         newUser.setRoles(Collections.singleton(Role.PATIENT));
-        // Thêm password mặc định mã hóa
         newUser.setPassword(passwordEncoder.encode("default_password"));
-        // Thêm dòng set phone để tránh lỗi null constraint
         newUser.setPhone("0000000000");
 
         return usersRepository.save(newUser);
     }
+
+    public Long getDoctorIdByUserId(Long userId) {
+        return doctorRepository.findByUserId(userId).map(Doctor::getId).orElse(null);
+    }
+
+    public Long getPatientIdByUserId(Long userId) {
+        return patientRepository.findByUserId(userId).map(Patient::getId).orElse(null);
+    }
+
 }
