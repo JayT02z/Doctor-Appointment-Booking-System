@@ -27,7 +27,7 @@ public class AppointmentDTO {
     public AppointmentDTO(Appointment appointment) {
         this.id = appointment.getId();
         this.patientName = new PatientDTO(appointment.getPatient());
-        this.doctorName = appointment.getDoctor() != null && appointment.getDoctor().getUser() != null ? appointment.getDoctor().getUser().getUsername() : "N/A";
+        this.doctorName = appointment.getDoctor() != null ? appointment.getDoctor().getFullName() : "N/A";
         this.specialization = appointment.getDoctor() != null ? appointment.getDoctor().getSpecialization() : "N/A";
         this.serviceName = appointment.getService() != null ? appointment.getService().getName() : "N/A";
         this.date = appointment.getDate();
