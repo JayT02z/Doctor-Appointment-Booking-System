@@ -64,16 +64,10 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         body.put("doctorId", doctorId);
         body.put("patientId", patientId);
 
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(objectMapper.writeValueAsString(body));
+        String encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8);
+        String redirectUri = "http://localhost:5173/oauth2/redirect?token=" + encodedToken + "&userId=" + user.getId();
+
+        response.sendRedirect(redirectUri);
     }
-
-
-
-    //    String encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8);
-//        String redirectUri = "http://localhost:5173/oauth2/redirect?token=" + encodedToken + "&userId=" + user.getId();
-//
-//        response.sendRedirect(redirectUri);
 
 }
