@@ -60,11 +60,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         // --- Public Endpoints ---
                         .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/logout", "/api/v1/auth/sendOTP", "/api/v1/auth/verifyOTP", "/api/v1/auth/resendOTP").permitAll()
-                        .requestMatchers("/oauth2/**").permitAll()
+                        .requestMatchers("/login/oauth2/**", "/oauth2/**").permitAll()
                         .requestMatchers("/api/schedules/**",
                                 "/api/appointment/**",
                                 "/api/medicine/**",

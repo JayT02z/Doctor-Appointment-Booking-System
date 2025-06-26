@@ -1,11 +1,19 @@
 package dabs.DABS.controller;
 
+import dabs.DABS.Enum.Role;
 import dabs.DABS.model.DTO.UserDTO;
+import dabs.DABS.model.Entity.Doctor;
+import dabs.DABS.model.Entity.Patient;
 import dabs.DABS.model.Entity.Users;
+import dabs.DABS.model.Response.AuthResponse;
+import dabs.DABS.model.Response.OAuth2LoginResponse;
+import dabs.DABS.repository.DoctorRepository;
+import dabs.DABS.repository.PatientRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import dabs.DABS.doctorappointment.security.jwt.JwtUtil;
@@ -43,6 +51,12 @@ public class AuthController {
 
     @Autowired
     private MailSenderService mailSenderService;
+
+    @Autowired
+    private PatientRepository patientRepository;
+
+    @Autowired
+    private DoctorRepository doctorRepository;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletRequest request) {
@@ -85,11 +99,32 @@ public class AuthController {
         Users user = usersService.processOAuthPostLogin(email, name, googleId, avatarUrl);
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
         String token = jwtUtil.generateToken(userDetails);
+        Long userId = user.getId();
+        Long doctorId = usersService.getDoctorIdByUserId(userId);
+        Long patientId = usersService.getPatientIdByUserId(userId);
 
-        return ResponseEntity.ok().body(Map.of(
-                "message", "Login with Google successful",
-                "token", token,
-                "user", UserDTO.fromEntity(user)
-        ));
+        if (patientId == null && user.getRoles().contains(Role.PATIENT)) {
+            Patient newPatient = new Patient();
+            newPatient.setUser(user);
+            patientRepository.save(newPatient);
+            patientId = newPatient.getId();
+        }
+
+        if (doctorId == null && user.getRoles().contains(Role.DOCTOR)) {
+            Doctor newDoctor = new Doctor();
+            newDoctor.setUser(user);
+            doctorRepository.save(newDoctor);
+            doctorId = newDoctor.getId();
+        }
+        Map<String, Object> body = new HashMap<>();
+        body.put("message", "Login with Google thành công");
+        body.put("user", UserDTO.fromEntity(user));
+        body.put("token", token);
+        body.put("doctorId", doctorId);
+        body.put("patientId", patientId);
+
+        return ResponseEntity.ok(body);
     }
+
+
 }

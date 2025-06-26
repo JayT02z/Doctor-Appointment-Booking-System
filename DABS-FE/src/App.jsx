@@ -16,7 +16,7 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Login from "./pages/auth/LoginPage";
-import Register from "./pages/auth/Register.jsx";
+import Register from "./pages/auth/Register";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ProfileSettings from "./pages/patient/ProfileSettings";
 import Appointments from "./pages/patient/Appointments";
@@ -33,11 +33,6 @@ import ManageAppointments from "./pages/admin/ManageAppointments";
 import ManageUsers from "./pages/admin/ManageUsers";
 import ManagePayments from "./pages/admin/ManagePayments";
 import AdminServices from "./pages/admin/AdminServices";
-import DiabetesArticle from "./pages/articles/DiabetesArticle.jsx";
-import HealthCheckupArticle from "./pages/articles/HealthCheckupArticle.jsx";
-import ImmunityArticle from "./pages/articles/ImmunityArticle.jsx";
-import Privacy from "./pages/legal/Privacy.jsx";
-import Terms from "./pages/legal/Terms.jsx";
 
 const queryClient = new QueryClient();
 
@@ -56,11 +51,6 @@ function App() {
                                 <Route path="/forgot-password" element={<ForgotPassword />} />
                                 <Route path="/about" element={<About />} />
                                 <Route path="/contact" element={<Contact />} />
-                                <Route path="/privacy" element={<Privacy />} />
-                                <Route path="/terms" element={<Terms />} />
-                                <Route path="/articles/diabetes" element={<DiabetesArticle />} />
-                                <Route path="/articles/health-checkup" element={<HealthCheckupArticle />} />
-                                <Route path="/articles/immunity" element={<ImmunityArticle />} />
 
                                 {/* Protected Patient Routes */}
                                 <Route
