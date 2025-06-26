@@ -38,14 +38,6 @@ const ManageDoctors = () => {
                                     placeholder="Search doctors by name, specialization, or hospital..."
                                 />
                             </div>
-                            <button
-                                onClick={() => {/* Add new doctor logic */}}
-                                className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#00B5F1] text-white
-                                         rounded-lg hover:bg-[#009cd3] transition-colors duration-200"
-                            >
-                                <UserPlus className="h-4 w-4" />
-                                Add Doctor
-                            </button>
                         </div>
                     </div>
 

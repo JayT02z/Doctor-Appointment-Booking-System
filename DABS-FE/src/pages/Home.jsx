@@ -9,6 +9,7 @@ import PatientTestimonials from "../components/home/PatientTestimonials.jsx";
 import LatestArticles from "../components/home/LatestArticles.jsx";
 import CTASection from "../components/home/CTASection.jsx";
 import WelcomeBack from "../components/home/WelcomeBack.jsx";
+import SupportSection from "../components/home/SupportSection.jsx";
 import ChatWidget from "../components/ChatWidget.jsx";
 
 const Home = () => {
@@ -32,14 +33,7 @@ const Home = () => {
             <FeaturedDoctors />
             <PatientTestimonials />
             <LatestArticles />
-            <CTASection />
-            {user && (
-                <WelcomeBack
-                    username={user.username}
-                    showProfileAlert={showProfileAlert}
-                    onCloseAlert={() => setShowProfileAlert(false)}
-                />
-            )}
+            <SupportSection/>
             <ChatWidget />
         </div>
     );

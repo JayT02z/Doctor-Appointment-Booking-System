@@ -1,7 +1,7 @@
 // BookingModal.jsx
 import React from 'react';
 import { Dialog } from '@headlessui/react';
-import { formatTimeSlot } from '../../utils/format.js';
+import { formatTimeSlot, formatDate_appointment } from '../../utils/format.js';
 import { X, Calendar, Clock, FileText, DollarSign, User, Stethoscope } from 'lucide-react';
 
 const BookingModal = ({
@@ -15,6 +15,21 @@ const BookingModal = ({
                           selectedServicePrice,
                           formatCurrency,
                       }) => {
+    // Sort schedule by date (nearest to farthest)
+    const sortedSchedule = [...schedule].sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return dateA - dateB;
+    }).map(scheduleItem => ({
+        ...scheduleItem,
+        // Sort time slots
+        timeSlots: [...scheduleItem.timeSlots].sort((a, b) => {
+            const timeA = parseInt(a.replace('SLOT_', '').split('_')[0]);
+            const timeB = parseInt(b.replace('SLOT_', '').split('_')[0]);
+            return timeA - timeB;
+        })
+    }));
+
     return (
         <Dialog open={isOpen} onClose={onClose} className="fixed z-50 inset-0">
             {/* Backdrop */}
@@ -124,25 +139,56 @@ const BookingModal = ({
                             )}
 
                             {/* Date Selection */}
-                            <div className="space-y-2">
+                            <div className="space-y-3">
                                 <label className="flex items-center gap-2 text-sm font-semibold text-gray-700">
                                     <Calendar className="w-4 h-4" />
-                                    Select Date
+                                    Select Appointment Date
                                 </label>
-                                <select
-                                    name="date"
-                                    value={formData.date}
-                                    onChange={onInputChange}
-                                    required
-                                    className="w-full p-4 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-[#00B5F1]/20 focus:border-[#00B5F1] transition-all bg-white"
-                                >
-                                    <option value="">Choose a date...</option>
-                                    {schedule.map((s) => (
-                                        <option key={s.date} value={s.date}>
-                                            {s.date}
-                                        </option>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {sortedSchedule.map((s) => (
+                                        <button
+                                            key={s.date}
+                                            type="button"
+                                            onClick={() => onInputChange({
+                                                target: { name: 'date', value: s.date }
+                                            })}
+                                            className={`
+                                                p-4 rounded-2xl border-2 text-left transition-all
+                                                hover:shadow-md hover:border-[#00B5F1]/30
+                                                ${formData.date === s.date
+                                                    ? 'bg-gradient-to-r from-[#00B5F1]/10 to-[#E1F5FE] border-[#00B5F1] shadow-lg'
+                                                    : 'bg-white hover:bg-gray-50 border-gray-200'
+                                                }
+                                            `}
+                                        >
+                                            <div className="flex items-start gap-3">
+                                                <div className={`
+                                                    p-2 rounded-xl
+                                                    ${formData.date === s.date
+                                                        ? 'bg-[#00B5F1] text-white'
+                                                        : 'bg-gray-100 text-gray-500'
+                                                    }
+                                                `}>
+                                                    <Calendar className="w-4 h-4" />
+                                                </div>
+                                                <div>
+                                                    <p className={`
+                                                        font-semibold mb-0.5
+                                                        ${formData.date === s.date
+                                                            ? 'text-[#00B5F1]'
+                                                            : 'text-gray-700'
+                                                        }
+                                                    `}>
+                                                        {formatDate_appointment(s.date)}
+                                                    </p>
+                                                    <p className="text-sm text-gray-500">
+                                                        {s.timeSlots.length} available slots
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </button>
                                     ))}
-                                </select>
+                                </div>
                             </div>
 
                             {/* Time Slot Selection */}
@@ -153,7 +199,7 @@ const BookingModal = ({
                                         Available Time Slots
                                     </label>
                                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                        {schedule.find((s) => s.date === formData.date)?.timeSlots.map((slot) => (
+                                        {sortedSchedule.find((s) => s.date === formData.date)?.timeSlots.map((slot) => (
                                             <button
                                                 key={slot}
                                                 type="button"

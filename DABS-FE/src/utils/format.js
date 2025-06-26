@@ -17,6 +17,30 @@ export const formatDate = (arr) => {
     return `${arr[2].toString().padStart(2, "0")}/${arr[1].toString().padStart(2, "0")}/${arr[0]}`;
 };
 
+export const formatDate_appointment = (dateString) => {
+    const date = new Date(dateString);
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+    const dayName = days[date.getDay()];
+    const dayOfMonth = date.getDate();
+    const month = months[date.getMonth()];
+    const year = date.getFullYear();
+
+    // Add ordinal suffix to day number (1st, 2nd, 3rd, etc.)
+    const getOrdinalSuffix = (day) => {
+        if (day > 3 && day < 21) return 'th';
+        switch (day % 10) {
+            case 1: return 'st';
+            case 2: return 'nd';
+            case 3: return 'rd';
+            default: return 'th';
+        }
+    };
+
+    return `${dayName}, ${month} ${dayOfMonth}${getOrdinalSuffix(dayOfMonth)}, ${year}`;
+};
+
 export const ratingStringToNumber = (rating) => {
     switch (rating) {
         case "ONE_STAR":

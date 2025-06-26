@@ -63,10 +63,8 @@ const PaymentFilters = ({
                     "
                 >
                     <option value="ALL">Tất cả</option>
-                    <option value="MOMO">MOMO</option>
                     <option value="VNPAYQR">VNPAY QR</option>
                     <option value="CASH">Tiền mặt</option>
-                    <option value="BANKING">Chuyển khoản ngân hàng</option>
                 </select>
                 <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                     <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

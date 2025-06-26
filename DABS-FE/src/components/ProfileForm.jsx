@@ -30,14 +30,6 @@ const ProfileForm = ({ formData, handleChange, handleSubmit, isFirstTime }) => (
                     {!isFirstTime && (
                         <>
                             <FormField
-                                label="Username"
-                                name="username"
-                                value={formData.username}
-                                onChange={handleChange}
-                                className="rounded-xl border-gray-200 focus:border-[#00B5F1] focus:ring-4 focus:ring-[#00B5F1]/10
-                                         transition-all duration-200"
-                            />
-                            <FormField
                                 label="Email"
                                 name="email"
                                 type="email"
