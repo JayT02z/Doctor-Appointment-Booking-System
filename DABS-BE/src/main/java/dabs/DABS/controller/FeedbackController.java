@@ -41,4 +41,9 @@ public class FeedbackController {
     public ResponseEntity<ResponseData<FeedbackDTO>> getFeedbackByAppointment(@PathVariable Long id) {
         return feedbackService.getfeedbackByApmId(id);
     }
+
+    @GetMapping("/rating/{doctorId}")
+    public ResponseEntity<ResponseData<Double>> getFeedbackByDoctorId(@PathVariable Long doctorId) {
+        return feedbackService.getAverageRating(doctorId);
+    }
 }

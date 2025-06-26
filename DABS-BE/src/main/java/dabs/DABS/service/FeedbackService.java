@@ -129,4 +129,24 @@ public class FeedbackService {
         ));
 
     }
+
+    public ResponseEntity<ResponseData<Double>> getAverageRating(Long doctorId) {
+        List<Feedback> feedbacks = feedbackRepository.findByAppointment_Doctor_Id(doctorId);
+
+        if (feedbacks.isEmpty()) {
+            throw new RuntimeException("Không có đánh giá nào cho bác sĩ này");
+        }
+
+        double average = feedbacks.stream()
+                .mapToInt(fb -> fb.getRating().getValue())
+                .average()
+                .orElse(0.0);
+
+        return ResponseEntity.ok(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                "Trung bình đánh giá được tính thành công",
+                average
+        ));
+    }
+
 }
