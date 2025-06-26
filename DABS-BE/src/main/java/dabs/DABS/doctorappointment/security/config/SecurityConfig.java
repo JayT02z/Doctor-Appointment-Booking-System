@@ -10,6 +10,7 @@ import dabs.DABS.service.UsersService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -49,7 +50,7 @@ public class SecurityConfig {
 
     public SecurityConfig(JwtRequestFilter jwtRequestFilter,
                           UserDetailsService customUserDetailService,
-                          @Lazy OAuth2SuccessHandler oAuth2SuccessHandler) {
+                          @Lazy @Autowired OAuth2SuccessHandler oAuth2SuccessHandler) {
         this.jwtRequestFilter = jwtRequestFilter;
         this.customUserDetailService = customUserDetailService;
         this.oAuth2SuccessHandler = oAuth2SuccessHandler;
@@ -131,6 +132,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
         configuration.setAllowedOriginPatterns(List.of("*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));

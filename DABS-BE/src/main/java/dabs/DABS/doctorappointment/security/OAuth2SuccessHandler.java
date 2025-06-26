@@ -19,6 +19,8 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,13 +53,9 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
         String token = jwtUtil.generateToken(userDetails);
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("message", "Login with Google successful");
-        body.put("token", token);
-        body.put("user", UserDTO.fromEntity(user));
+        String encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8);
+        String redirectUri = "http://localhost:5173/oauth2/redirect?token=" + encodedToken + "&userId=" + user.getId();
 
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(objectMapper.writeValueAsString(body));
+        response.sendRedirect(redirectUri);
     }
 }
