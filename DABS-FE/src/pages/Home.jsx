@@ -11,6 +11,7 @@ import CTASection from "../components/home/CTASection.jsx";
 import WelcomeBack from "../components/home/WelcomeBack.jsx";
 import SupportSection from "../components/home/SupportSection.jsx";
 import ChatWidget from "../components/ChatWidget.jsx";
+import ChatWithAdmin from "../components/ChatWithAdmin.jsx";
 
 const Home = () => {
     const { user, patientId } = useAuth();
@@ -34,6 +35,7 @@ const Home = () => {
             <PatientTestimonials />
             <LatestArticles />
             <SupportSection/>
+            <ChatWithAdmin/>
             <ChatWidget />
         </div>
     );

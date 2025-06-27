@@ -12,6 +12,7 @@ import {
   BuildingOfficeIcon,
   ClipboardDocumentListIcon,
   ArrowLeftOnRectangleIcon,
+  ChatBubbleLeftRightIcon
 } from "@heroicons/react/24/outline";
 
 const AvatarDropdown = () => {
@@ -77,7 +78,8 @@ const AvatarDropdown = () => {
             { to : "/admin/manage-patients", icon: UserCircleIcon, label: "Patients Management" },
             { to: "/admin/manage-doctors", icon: UserCircleIcon, label: "Doctors Management" },
             { to: "/admin/manage-payments", icon: CreditCardIcon, label: "Payment Management" },
-            { to: "/admin/services", icon: BuildingOfficeIcon, label: "Services" }
+            { to: "/admin/services", icon: BuildingOfficeIcon, label: "Services" },
+            { to: "/admin/chat", icon: ChatBubbleLeftRightIcon, label: "Chat Management" }
         ]
     };
 

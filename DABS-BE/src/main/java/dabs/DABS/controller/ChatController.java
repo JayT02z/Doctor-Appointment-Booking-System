@@ -36,7 +36,7 @@ public class ChatController {
         ));
     }
 
-    @GetMapping("/conversations")
+    @GetMapping("/conversations1")
     public ResponseEntity<ResponseData<List<ConversationDTO>>> getUserConversations(@RequestParam Long userId) {
         List<Conversation> conversations = conversationService.getConversationsOfUser(userId);
         List<ConversationDTO> dtos = conversations.stream().map(conversation -> {
@@ -80,7 +80,7 @@ public class ChatController {
         ));
     }
 
-    @GetMapping("/messages")
+    @GetMapping("/messages1")
     public ResponseEntity<ResponseData<List<ChatMessageDTO>>> getMessages(@RequestParam Long conversationId) {
         List<ChatMessage> messages = chatMessageService.getMessages(conversationId);
         List<ChatMessageDTO> dtos = messages.stream().map(message -> {

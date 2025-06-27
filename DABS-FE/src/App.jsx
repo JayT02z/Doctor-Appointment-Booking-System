@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./context/AuthContext";
+import { ChatProvider } from "./context/ChatContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import MainLayout from "./components/MainLayout";
 import VnpReturnUrl from "./components/VnpReturnUrl";
@@ -40,6 +41,7 @@ import HealthCheckupArticle from "./pages/articles/HealthCheckupArticle.jsx";
 import ImmunityArticle from "./pages/articles/ImmunityArticle.jsx";
 import Privacy from "./pages/legal/Privacy.jsx";
 import Terms from "./pages/legal/Terms.jsx";
+import AdminChatDashboard from "./pages/admin/AdminChatDashboard.jsx";
 
 const queryClient = new QueryClient();
 
@@ -49,75 +51,78 @@ function App() {
             <QueryClientProvider client={queryClient}>
                 <Router>
                     <AuthProvider>
-                        <Routes>
-                            {/* VNPay Return URL route phải đặt trước các route khác */}
-                            <Route path="/payment/vnpay-return" element={<VnpReturnUrl />} />
+                        <ChatProvider>
+                            <Routes>
+                                {/* VNPay Return URL route phải đặt trước các route khác */}
+                                <Route path="/payment/vnpay-return" element={<VnpReturnUrl />} />
 
-                            <Route element={<MainLayout />}>
-                                {/* Public Routes */}
-                                <Route path="/" element={<Home />} />
-                                <Route path="/login" element={<Login />} />
-                                <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
-                                <Route path="/register" element={<Register />} />
-                                <Route path="/forgot-password" element={<ForgotPassword />} />
-                                <Route path="/about" element={<About />} />
-                                <Route path="/contact" element={<Contact />} />
-                                <Route path="/privacy" element={<Privacy />} />
-                                <Route path="/terms" element={<Terms />} />
-                                <Route path="/articles/diabetes" element={<DiabetesArticle />} />
-                                <Route path="/articles/health-checkup" element={<HealthCheckupArticle />} />
-                                <Route path="/articles/immunity" element={<ImmunityArticle />} />
+                                <Route element={<MainLayout />}>
+                                    {/* Public Routes */}
+                                    <Route path="/" element={<Home />} />
+                                    <Route path="/login" element={<Login />} />
+                                    <Route path="/oauth2/redirect" element={<OAuth2RedirectHandler />} />
+                                    <Route path="/register" element={<Register />} />
+                                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                                    <Route path="/about" element={<About />} />
+                                    <Route path="/contact" element={<Contact />} />
+                                    <Route path="/privacy" element={<Privacy />} />
+                                    <Route path="/terms" element={<Terms />} />
+                                    <Route path="/articles/diabetes" element={<DiabetesArticle />} />
+                                    <Route path="/articles/health-checkup" element={<HealthCheckupArticle />} />
+                                    <Route path="/articles/immunity" element={<ImmunityArticle />} />
 
-                                {/* Protected Patient Routes */}
-                                <Route
-                                    path="/patient"
-                                    element={
-                                        <ProtectedRoute allowedRoles={["PATIENT"]}>
-                                            <Outlet />
-                                        </ProtectedRoute>
-                                    }
-                                >
-                                    <Route path="profile" element={<ProfileSettings />} />
-                                    <Route path="appointments" element={<Appointments />} />
-                                    <Route path="book-appointment" element={<BookAppointment />} />
-                                    <Route path="payment" element={<Payment />} />
+                                    {/* Protected Patient Routes */}
+                                    <Route
+                                        path="/patient"
+                                        element={
+                                            <ProtectedRoute allowedRoles={["PATIENT"]}>
+                                                <Outlet />
+                                            </ProtectedRoute>
+                                        }
+                                    >
+                                        <Route path="profile" element={<ProfileSettings />} />
+                                        <Route path="appointments" element={<Appointments />} />
+                                        <Route path="book-appointment" element={<BookAppointment />} />
+                                        <Route path="payment" element={<Payment />} />
+                                    </Route>
+
+                                    {/* Protected Doctor Routes */}
+                                    <Route
+                                        path="/doctor"
+                                        element={
+                                            <ProtectedRoute allowedRoles={["DOCTOR"]}>
+                                                <Outlet />
+                                            </ProtectedRoute>
+                                        }
+                                    >
+                                        <Route path="dashboard" element={<DoctorDashboard />} />
+                                        <Route path="information" element={<DoctorInformation />} />
+                                        <Route path="services" element={<DoctorServices />} />
+                                        <Route path="schedule" element={<DoctorSchedule />} />
+                                    </Route>
+
+                                    {/* Protected Admin Routes */}
+                                    <Route
+                                        path="/admin"
+                                        element={
+                                            <ProtectedRoute allowedRoles={["ADMIN"]}>
+                                                <Outlet />
+                                            </ProtectedRoute>
+                                        }
+                                    >
+                                        <Route path="dashboard" element={<AdminDashboard />} />
+                                        <Route path="manage-doctors" element={<ManageDoctors />} />
+                                        <Route path="manage-patients" element={<ManagePatients />} />
+                                        <Route path="manage-appointments" element={<ManageAppointments />} />
+                                        <Route path="manage-users" element={<ManageUsers />} />
+                                        <Route path="manage-payments" element={<ManagePayments />} />
+                                        <Route path="services" element={<AdminServices />} />
+                                        <Route path="chat" element={<AdminChatDashboard />} />
+                                    </Route>
                                 </Route>
-
-                                {/* Protected Doctor Routes */}
-                                <Route
-                                    path="/doctor"
-                                    element={
-                                        <ProtectedRoute allowedRoles={["DOCTOR"]}>
-                                            <Outlet />
-                                        </ProtectedRoute>
-                                    }
-                                >
-                                    <Route path="dashboard" element={<DoctorDashboard />} />
-                                    <Route path="information" element={<DoctorInformation />} />
-                                    <Route path="services" element={<DoctorServices />} />
-                                    <Route path="schedule" element={<DoctorSchedule />} />
-                                </Route>
-
-                                {/* Protected Admin Routes */}
-                                <Route
-                                    path="/admin"
-                                    element={
-                                        <ProtectedRoute allowedRoles={["ADMIN"]}>
-                                            <Outlet />
-                                        </ProtectedRoute>
-                                    }
-                                >
-                                    <Route path="dashboard" element={<AdminDashboard />} />
-                                    <Route path="manage-doctors" element={<ManageDoctors />} />
-                                    <Route path="manage-patients" element={<ManagePatients />} />
-                                    <Route path="manage-appointments" element={<ManageAppointments />} />
-                                    <Route path="manage-users" element={<ManageUsers />} />
-                                    <Route path="manage-payments" element={<ManagePayments />} />
-                                    <Route path="services" element={<AdminServices />} />
-                                </Route>
-                            </Route>
-                        </Routes>
-                        <Toaster position="top-right" />
+                            </Routes>
+                            <Toaster position="top-right" />
+                        </ChatProvider>
                     </AuthProvider>
                 </Router>
             </QueryClientProvider>

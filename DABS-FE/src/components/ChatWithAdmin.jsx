@@ -1,19 +1,19 @@
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { XMarkIcon, CpuChipIcon } from "@heroicons/react/24/solid";
-import ChatWindow from "./ChatWindow";
-import useBotChat from "../hooks/useBotChat";
+import React from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useAuth } from "../context/AuthContext";
 import { useChat } from "../context/ChatContext";
+import AdminChatWindow from "./AdminChatWindow";
+import { MessageCircle, X } from "lucide-react";
 
-export default function ChatWidget() {
-    const [mode, setMode] = useState("bot");
+export default function ChatWithAdmin() {
+    const { user } = useAuth();
     const { activeChatWindow, openChat, closeChat } = useChat();
-    const isOpen = activeChatWindow === 'assistant';
+    const isOpen = activeChatWindow === 'admin';
 
-    const bot = useBotChat();
+    if (!user || user.role !== "PATIENT") return null;
 
     return (
-        <div className="fixed bottom-24 right-6 z-40">
+        <div className="fixed bottom-6 right-6 z-50">
             <AnimatePresence>
                 {isOpen ? (
                     <motion.div
@@ -24,63 +24,48 @@ export default function ChatWidget() {
                         className="w-[380px] bg-white shadow-2xl rounded-2xl overflow-hidden flex flex-col border border-gray-100"
                         style={{ height: "calc(100vh - 120px)", maxHeight: "600px" }}
                     >
-                        {/* Chat Header */}
+                        {/* Header */}
                         <div className="bg-[#00B5F1] px-4 py-4">
-                            <div className="flex justify-between items-center mb-3">
+                            <div className="flex justify-between items-center">
                                 <div className="flex items-center gap-3">
                                     <div className="p-2 bg-white/10 rounded-lg">
-                                        <CpuChipIcon className="w-5 h-5 text-white" />
+                                        <MessageCircle className="w-5 h-5 text-white" />
                                     </div>
-                                    <h3 className="text-white font-semibold">DABS Assistant</h3>
+                                    <div>
+                                        <h3 className="text-white font-semibold">Chat với Admin</h3>
+                                        <p className="text-sky-100 text-sm">Chúng tôi sẽ phản hồi sớm nhất</p>
+                                    </div>
                                 </div>
                                 <button
                                     onClick={() => closeChat()}
                                     className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                                    aria-label="Close chat"
                                 >
-                                    <XMarkIcon className="w-5 h-5 text-white" />
-                                </button>
-                            </div>
-
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => setMode("bot")}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200
-                                        ${mode === "bot" 
-                                            ? "bg-white text-[#00B5F1]" 
-                                            : "text-white/80 hover:bg-white/10"}`}
-                                >
-                                    <CpuChipIcon className="w-5 h-5" />
-                                    Chatbot
+                                    <X className="w-5 h-5 text-white" />
                                 </button>
                             </div>
                         </div>
 
-                        {/* Chat Content */}
+                        {/* Chat Window */}
                         <div className="flex-1 overflow-hidden bg-gray-50">
-                            <div className="h-full overflow-y-auto">
-                                {mode === "bot" ? (
-                                    <ChatWindow messages={bot.messages} onSend={bot.sendMessage} />
-                                ) : (
-                                    <ChatWindow messages={doctor.messages} onSend={doctor.sendMessage} />
-                                )}
-                            </div>
+                            <AdminChatWindow />
                         </div>
                     </motion.div>
                 ) : (
                     <motion.button
-                        onClick={() => openChat('assistant')}
+                        onClick={() => openChat('admin')}
                         className="group relative w-14 h-14 flex items-center justify-center rounded-full bg-[#00B5F1] text-white shadow-lg hover:shadow-[#00B5F1]/25 transition-all duration-300"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                     >
-                        <CpuChipIcon className="w-6 h-6" />
-                        <span className="sr-only">Chat với DABS Assistant</span>
+                        <MessageCircle className="w-6 h-6" />
+                        <span className="sr-only">Chat với Admin</span>
 
                         {/* Tooltip */}
                         <div className="absolute right-full mr-4 px-3 py-1.5 rounded-lg bg-gray-800 text-white text-sm whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                            Chat với DABS Assistant
+                            Chat với Admin
                             {/* Arrow */}
                             <div className="absolute top-1/2 right-0 -mt-1.5 -mr-1.5 border-4 border-transparent border-l-gray-800"></div>
                         </div>
