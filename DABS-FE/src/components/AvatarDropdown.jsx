@@ -73,13 +73,13 @@ const AvatarDropdown = () => {
         ],
         ADMIN: [
             { to: "/admin/dashboard", icon: ChartBarIcon, label: "Admin Dashboard" },
-            { to: "/admin/manage-users", icon: UserCircleIcon, label: "User Management" },
-            { to: "/admin/manage-appointments", icon: CalendarIcon, label: "Appointments Management" },
-            { to : "/admin/manage-patients", icon: UserCircleIcon, label: "Patients Management" },
-            { to: "/admin/manage-doctors", icon: UserCircleIcon, label: "Doctors Management" },
-            { to: "/admin/manage-payments", icon: CreditCardIcon, label: "Payment Management" },
+            { to: "/admin/manage-users", icon: UserCircleIcon, label: "User" },
+            { to: "/admin/manage-appointments", icon: CalendarIcon, label: "Appointments" },
+            { to : "/admin/manage-patients", icon: UserCircleIcon, label: "Patients" },
+            { to: "/admin/manage-doctors", icon: UserCircleIcon, label: "Doctors" },
+            { to: "/admin/manage-payments", icon: CreditCardIcon, label: "Payment" },
             { to: "/admin/services", icon: BuildingOfficeIcon, label: "Services" },
-            { to: "/admin/chat", icon: ChatBubbleLeftRightIcon, label: "Chat Management" }
+            { to: "/admin/chat", icon: ChatBubbleLeftRightIcon, label: "Chat" }
         ]
     };
 
