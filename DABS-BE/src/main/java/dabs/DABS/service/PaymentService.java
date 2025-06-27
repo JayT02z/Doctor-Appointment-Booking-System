@@ -77,6 +77,10 @@ public class PaymentService {
         payment.setPaymentMethod(paymentForm.getPaymentMethod());
         payment.setStatus(PaymentStatus.PENDING);
         payment.setAmount(paymentForm.getAmount());
+        // Nếu thanh toán bằng tiền mặt thì set payment_date luôn
+        if (paymentForm.getPaymentMethod() != null && paymentForm.getPaymentMethod().name().equals("CASH")) {
+            payment.setPaymentDate(java.time.LocalDateTime.now());
+        }
         paymentRepository.save(payment);
 
         PaymentDTO paymentDTO = new PaymentDTO(null, payment, payment.getStatus());

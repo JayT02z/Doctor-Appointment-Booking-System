@@ -28,6 +28,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static dabs.DABS.doctorappointment.security.config.VnPayConfig.vnp_Command;
@@ -179,10 +181,10 @@ public class PaymentController {
             if ("00".equals(responseCode)) {
                 payment.setStatus(PaymentStatus.PAID);
                 try {
-                    SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-                    Date paymentDate = formatter.parse(payDate);
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+                    LocalDateTime paymentDate = LocalDateTime.parse(payDate, formatter);
                     payment.setPaymentDate(paymentDate);
-                } catch (ParseException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
                 paymentRepository.save(payment);
