@@ -34,7 +34,6 @@ public class Users {
     @Column(nullable = true)
     private String password;
 
-    @Pattern(regexp = "^(0[0-9]{9})$", message = "Số điện thoại không hợp lệ (phải gồm 10 chữ số bắt đầu bằng 0)")
     @Column(unique = true, nullable = true)
     private String phone;
 

@@ -14,15 +14,19 @@ const HeroBanner = () => {
         <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
             {/* Background with overlay */}
             <div className="absolute inset-0">
+                {/* Lớp ảnh nền có blur và opacity */}
                 <div
-                    className="absolute inset-0 bg-gradient-to-br from-blue-900/90 to-indigo-900/90"
+                    className="w-full h-full absolute inset-0"
                     style={{
-                        backgroundImage: "url('https://images3.alphacoders.com/101/1010294.jpg')",
+                        backgroundImage: "url('/banner-doctor.png')",
                         backgroundSize: "cover",
                         backgroundPosition: "center",
-                        backgroundBlendMode: "overlay",
+                        // filter: "blur(4px)",
+                        opacity: 0.7,
+                        zIndex: 0
                     }}
                 />
+                <div className="absolute inset-0 bg-gray-100/2"></div>
 
                 {/* Animated background effects */}
                 <div className="absolute inset-0">
@@ -44,7 +48,7 @@ const HeroBanner = () => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
-                            className="inline-flex items-center px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm mb-6"
+                            className="inline-flex items-center px-4 py-2 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-sm mb-6 font-semibold"
                         >
                             ✨ Nền tảng đặt lịch khám hàng đầu Việt Nam
                         </motion.div>
@@ -53,19 +57,19 @@ const HeroBanner = () => {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.5 }}
-                            className="text-5xl lg:text-6xl font-bold text-white leading-tight mb-6"
+                            className="text-5xl lg:text-6xl font-extrabold leading-tight mb-6"
                         >
-                            Sức khỏe của bạn
-                            <span className="block bg-clip-text text-transparent bg-gradient-to-r from-blue-200 to-indigo-300">
-                                là ưu tiên hàng đầu
-                            </span>
+                            <span className="text-blue-900">Sức khỏe của bạn</span>
+                            <span className="block bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-cyan-500 to-indigo-400">
+          là ưu tiên hàng đầu
+        </span>
                         </motion.h1>
 
                         <motion.p
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.7 }}
-                            className="text-lg text-gray-300 mb-8 max-w-lg"
+                            className="text-lg text-gray-700 mb-8 max-w-lg"
                         >
                             Đặt lịch hẹn với bác sĩ chuyên khoa hàng đầu chỉ trong vài giây.
                             Trải nghiệm chăm sóc sức khỏe hiện đại và tiện lợi.
@@ -79,17 +83,21 @@ const HeroBanner = () => {
                         >
                             <Link
                                 to="/patient/book-appointment"
-                                className="group inline-flex items-center px-6 py-3 text-base font-medium bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transform hover:scale-105 transition-all duration-300"
+                                className="group inline-flex items-center px-6 py-3 text-base font-semibold bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl shadow-lg hover:scale-105 transition-all duration-300"
                             >
                                 Đặt lịch ngay
                                 <ArrowRightIcon className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                             </Link>
 
                             <button
-                                className="inline-flex items-center px-6 py-3 text-base font-medium bg-white/10 backdrop-blur-md text-white rounded-xl border border-white/20 hover:bg-white/20 transition-all duration-300"
+                                className="inline-flex items-center px-6 py-3 text-base font-semibold bg-white text-blue-700 border border-blue-200 rounded-xl hover:bg-blue-50 transition-all duration-300"
+                                onClick={() => {
+                                    document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+                                }}
                             >
                                 Tìm hiểu thêm
                             </button>
+
                         </motion.div>
 
                         <motion.div
@@ -100,28 +108,15 @@ const HeroBanner = () => {
                         >
                             {features.map((feature, index) => (
                                 <div key={index} className="flex items-center gap-2">
-                                    <feature.icon className="h-5 w-5 text-blue-400" />
-                                    <span className="text-gray-300">{feature.text}</span>
+                                    <feature.icon className="h-5 w-5 text-blue-500" />
+                                    <span className="text-blue-700 font-medium">{feature.text}</span>
                                 </div>
                             ))}
                         </motion.div>
                     </motion.div>
-
-                    {/* Right content - Doctor image */}
-                    <motion.div
-                        initial={{ opacity: 0, x: 50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.8, delay: 0.5 }}
-                        className="hidden lg:block"
-                    >
-                        <img
-                            src="/doctor.png"
-                            alt="Doctor"
-                            className="w-full max-w-lg mx-auto drop-shadow-2xl"
-                        />
-                    </motion.div>
                 </div>
             </div>
+
 
             {/* Scroll indicator */}
             <motion.div

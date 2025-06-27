@@ -299,7 +299,12 @@ public class UsersService {
     /**
      * Handle Google OAuth2 login: if user exists, return it; else create new PATIENT user with OAuth2 info.
      */
-    public Users processOAuthPostLogin(String email, String name, String googleId, String avatarUrl) {
+    public Users processOAuthPostLogin(String email,
+                                       String name,
+                                       String googleId,
+                                       String avatarUrl,
+                                       String phone) {
+
         Optional<Users> optionalUser = usersRepository.findByEmail(email);
 
         if (optionalUser.isPresent()) {
@@ -308,7 +313,7 @@ public class UsersService {
 
         Users newUser = new Users();
         newUser.setEmail(email);
-        newUser.setUsername(email); // Or generate another username if needed
+        newUser.setUsername(email);
         newUser.setGoogleId(googleId);
         newUser.setAvatarUrl(avatarUrl);
         newUser.setIsOauth2(true);
@@ -316,10 +321,15 @@ public class UsersService {
         newUser.setStatus(Status.ACTIVE);
         newUser.setRoles(Collections.singleton(Role.PATIENT));
         newUser.setPassword(passwordEncoder.encode("default_password"));
-        newUser.setPhone("0000000000");
+
+        newUser.setPhone((phone != null && !phone.isBlank()) ? phone : null);
+
+        System.out.println("Google phone received: " + phone);
+        System.out.println("Final phone saved: " + newUser.getPhone());
 
         return usersRepository.save(newUser);
     }
+
 
     public Long getDoctorIdByUserId(Long userId) {
         return doctorRepository.findByUserId(userId).map(Doctor::getId).orElse(null);

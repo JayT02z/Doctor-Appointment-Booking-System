@@ -1,5 +1,6 @@
 package dabs.DABS.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import dabs.DABS.Enum.Role;
 import dabs.DABS.model.DTO.UserDTO;
 import dabs.DABS.model.Entity.Doctor;
@@ -9,7 +10,10 @@ import dabs.DABS.model.Response.AuthResponse;
 import dabs.DABS.model.Response.OAuth2LoginResponse;
 import dabs.DABS.repository.DoctorRepository;
 import dabs.DABS.repository.PatientRepository;
+import dabs.DABS.service.GooglePeopleService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 
@@ -48,6 +52,12 @@ public class AuthController {
         this.usersService = usersService;
         this.tokenBlackListService = tokenBlacklistService;
     }
+
+    @Autowired
+    private OAuth2AuthorizedClientService clientService;
+
+    @Autowired
+    private GooglePeopleService googlePeopleService;
 
     @Autowired
     private MailSenderService mailSenderService;
@@ -89,20 +99,28 @@ public class AuthController {
     }
 
     @GetMapping("/oauth2/success")
-    public ResponseEntity<?> handleGoogleOAuth2Success(OAuth2AuthenticationToken authentication) {
+    public ResponseEntity<?> handleGoogleOAuth2Success(OAuth2AuthenticationToken authentication) throws JsonProcessingException {
         OAuth2User oauthUser = authentication.getPrincipal();
         String email = oauthUser.getAttribute("email");
         String name = oauthUser.getAttribute("name");
         String googleId = oauthUser.getAttribute("sub");
         String avatarUrl = oauthUser.getAttribute("picture");
 
-        Users user = usersService.processOAuthPostLogin(email, name, googleId, avatarUrl);
+
+        OAuth2AuthorizedClient client = clientService.loadAuthorizedClient(
+                authentication.getAuthorizedClientRegistrationId(),
+                authentication.getName());
+        String accessToken = client.getAccessToken().getTokenValue();
+        String phone = googlePeopleService.fetchPrimaryPhone(accessToken);
+        Users user = usersService.processOAuthPostLogin(email, name, googleId, avatarUrl, phone);
+
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUsername());
         String token = jwtUtil.generateToken(userDetails);
         Long userId = user.getId();
         Long doctorId = usersService.getDoctorIdByUserId(userId);
         Long patientId = usersService.getPatientIdByUserId(userId);
 
+        // Tự động tạo Doctor/Patient nếu thiếu
         if (patientId == null && user.getRoles().contains(Role.PATIENT)) {
             Patient newPatient = new Patient();
             newPatient.setUser(user);
@@ -116,6 +134,7 @@ public class AuthController {
             doctorRepository.save(newDoctor);
             doctorId = newDoctor.getId();
         }
+
         Map<String, Object> body = new HashMap<>();
         body.put("message", "Login with Google thành công");
         body.put("user", UserDTO.fromEntity(user));
@@ -125,6 +144,7 @@ public class AuthController {
 
         return ResponseEntity.ok(body);
     }
+
 
 
 }
