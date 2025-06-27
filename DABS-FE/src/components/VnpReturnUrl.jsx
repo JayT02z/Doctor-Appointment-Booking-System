@@ -70,12 +70,16 @@ const VnpReturnUrl = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full bg-white shadow-xl rounded-lg p-8">
         <div className="text-center">
-          {getStatusIcon()}
-          <h2 className={`mt-6 text-3xl font-extrabold ${getStatusColor()}`}>
-            {paymentStatus?.status === 'Ok' ? 'Thanh toán thành công' : 'Thanh toán thất bại'}
-          </h2>
+          <div className="flex justify-center mb-4">
+            <img src="/vnpay.png" alt="VNPay Logo" className="h-16 w-auto" />
+          </div>
+          <div className="flex flex-col items-center justify-center">
+            <div className="flex items-center gap-2">
+              <h2 className={`text-3xl font-extrabold ${getStatusColor()}`}>{paymentStatus?.status === 'Ok' ? 'Thanh toán thành công' : 'Thanh toán thất bại'}</h2>
+              <span className="align-middle flex items-center">{paymentStatus?.status === 'Ok' ? <CheckCircleIcon className="h-8 w-8 text-green-500" /> : getStatusIcon()}</span>
+            </div>
+          </div>
           <p className="mt-2 text-sm text-gray-600">{paymentStatus?.message}</p>
-
           {/* Hiển thị thêm thông tin giao dịch nếu có */}
           {paymentStatus?.status === 'Ok' && (
             <div className="mt-4 text-left bg-gray-50 rounded-lg p-4">
