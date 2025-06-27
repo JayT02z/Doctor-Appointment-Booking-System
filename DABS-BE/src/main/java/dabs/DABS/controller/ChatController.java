@@ -1,10 +1,13 @@
 package dabs.DABS.controller;
 
+import dabs.DABS.Enum.StatusApplication;
 import dabs.DABS.model.Entity.ChatMessage;
 import dabs.DABS.model.Entity.Conversation;
+import dabs.DABS.model.Response.ResponseData;
 import dabs.DABS.service.ChatMessageService;
 import dabs.DABS.service.ConversationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,13 +27,17 @@ public class ChatController {
     ChatMessageService chatMessageService;
 
     @PostMapping("/conversations")
-    public ResponseEntity<Long> createConversation(@RequestBody CreateConversationRequest request) {
+    public ResponseEntity<ResponseData<Long>> createConversation(@RequestBody CreateConversationRequest request) {
         Conversation conversation = conversationService.getOrCreateConversation(request.getUserIds(), request.getRoles(), request.getType());
-        return ResponseEntity.ok(conversation.getId());
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                conversation.getId()
+        ));
     }
 
     @GetMapping("/conversations")
-    public ResponseEntity<List<ConversationDTO>> getUserConversations(@RequestParam Long userId) {
+    public ResponseEntity<ResponseData<List<ConversationDTO>>> getUserConversations(@RequestParam Long userId) {
         List<Conversation> conversations = conversationService.getConversationsOfUser(userId);
         List<ConversationDTO> dtos = conversations.stream().map(conversation -> {
             ConversationDTO dto = new ConversationDTO();
@@ -49,11 +56,15 @@ public class ChatController {
             }
             return dto;
         }).collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                dtos
+        ));
     }
 
     @PostMapping("/messages")
-    public ResponseEntity<ChatMessageDTO> sendMessage(@RequestBody SendMessageRequest request) {
+    public ResponseEntity<ResponseData<ChatMessageDTO>> sendMessage(@RequestBody SendMessageRequest request) {
         ChatMessage message = chatMessageService.sendMessage(request.getConversationId(), request.getSenderId(), request.getMessage());
         ChatMessageDTO dto = new ChatMessageDTO();
         dto.setId(message.getId());
@@ -62,11 +73,15 @@ public class ChatController {
         dto.setSenderName(message.getSender().getUsername());
         dto.setMessage(message.getMessage());
         dto.setCreatedDate(message.getCreatedDate());
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                dto
+        ));
     }
 
     @GetMapping("/messages")
-    public ResponseEntity<List<ChatMessageDTO>> getMessages(@RequestParam Long conversationId) {
+    public ResponseEntity<ResponseData<List<ChatMessageDTO>>> getMessages(@RequestParam Long conversationId) {
         List<ChatMessage> messages = chatMessageService.getMessages(conversationId);
         List<ChatMessageDTO> dtos = messages.stream().map(message -> {
             ChatMessageDTO dto = new ChatMessageDTO();
@@ -78,6 +93,10 @@ public class ChatController {
             dto.setCreatedDate(message.getCreatedDate());
             return dto;
         }).collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(
+                StatusApplication.SUCCESS.getCode(),
+                StatusApplication.SUCCESS.getMessage(),
+                dtos
+        ));
     }
 }
