@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Users, ChevronDown, Search, Trash2, Edit, User2 } from 'lucide-react';
 import Pagination from "./doctor_dashboard/Pagination.jsx";
+import { formatDate} from "../utils/format.js";
 
 const PatientTable = ({ data, onDelete, pageState }) => {
     const navigate = useNavigate();
@@ -33,7 +34,7 @@ const PatientTable = ({ data, onDelete, pageState }) => {
                                         <span className="font-medium text-gray-900">{patient.username}</span>
                                     </div>
                                 </td>
-                                <td className="px-6 py-4 text-gray-600">{patient.dob?.join("-") || "-"}</td>
+                                <td className="px-6 py-4 text-gray-600">{formatDate(patient.dob)}</td>
                                 <td className="px-6 py-4 text-gray-600">{patient.gender || "-"}</td>
                                 <td className="px-6 py-4 text-gray-600">{patient.address || "-"}</td>
                                 <td className="px-6 py-4 text-gray-600">

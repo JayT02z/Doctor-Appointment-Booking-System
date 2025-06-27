@@ -1,6 +1,6 @@
 // components/admin/AppointmentDetailModal.jsx
 import React from "react";
-import { formatTimeSlot } from "../utils/format.js";
+import { formatTimeSlot, formatDate } from "../utils/format.js";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, Clock, User2, Stethoscope, FileText, CheckCircle, ClipboardList, X } from 'lucide-react';
 
@@ -110,7 +110,7 @@ const AppointmentDetailModal = ({ isOpen, onClose, appointment }) => {
                                             <Calendar className="h-5 w-5 text-[#00B5F1]" />
                                             <div>
                                                 <p className="text-sm text-gray-500">Date</p>
-                                                <p className="font-medium text-gray-900">{date?.join("-")}</p>
+                                                <p className="font-medium text-gray-900">{formatDate(date)}</p>
                                             </div>
                                         </div>
 

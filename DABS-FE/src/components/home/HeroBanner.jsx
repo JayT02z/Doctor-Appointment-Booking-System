@@ -10,6 +10,13 @@ const HeroBanner = () => {
         { icon: ClockIcon, text: "Đặt lịch 24/7" }
     ];
 
+    const scrollToStats = () => {
+        const statsSection = document.getElementById('stats-section');
+        if (statsSection) {
+            statsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
     return (
         <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
             {/* Background with overlay */}
@@ -18,10 +25,9 @@ const HeroBanner = () => {
                 <div
                     className="w-full h-full absolute inset-0"
                     style={{
-                        backgroundImage: "url('/banner-doctor.png')",
+                        backgroundImage: "url(/thumnails.jpg)",
                         backgroundSize: "cover",
                         backgroundPosition: "center",
-                        // filter: "blur(4px)",
                         opacity: 0.7,
                         zIndex: 0
                     }}
@@ -61,8 +67,8 @@ const HeroBanner = () => {
                         >
                             <span className="text-blue-900">Sức khỏe của bạn</span>
                             <span className="block bg-clip-text text-transparent bg-gradient-to-r from-blue-500 via-cyan-500 to-indigo-400">
-          là ưu tiên hàng đầu
-        </span>
+                                là ưu tiên hàng đầu
+                            </span>
                         </motion.h1>
 
                         <motion.p
@@ -90,14 +96,11 @@ const HeroBanner = () => {
                             </Link>
 
                             <button
+                                onClick={scrollToStats}
                                 className="inline-flex items-center px-6 py-3 text-base font-semibold bg-white text-blue-700 border border-blue-200 rounded-xl hover:bg-blue-50 transition-all duration-300"
-                                onClick={() => {
-                                    document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
-                                }}
                             >
                                 Tìm hiểu thêm
                             </button>
-
                         </motion.div>
 
                         <motion.div

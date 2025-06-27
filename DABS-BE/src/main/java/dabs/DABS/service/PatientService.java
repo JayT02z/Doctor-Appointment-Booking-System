@@ -93,7 +93,6 @@ public class PatientService {
 
         users.setEmail(patientForm.getEmail());
         users.setPhone(patientForm.getPhone());
-        users.setUsername(patientForm.getFullName());
 
         usersRepository.save(users);
         patientRepository.save(patients);

@@ -1,8 +1,68 @@
 // DoctorCard.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Star, MapPin, Clock, Award } from 'lucide-react';
+import axios from 'axios';
 
 const DoctorCard = ({ doctor, imageUrl, onBook }) => {
+    const [rating, setRating] = useState(0);
+
+    useEffect(() => {
+        const fetchRating = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8080/api/feedback/rating/${doctor.id}`);
+                if (response.data.statusCode === 200) {
+                    setRating(response.data.data);
+                }
+            } catch (error) {
+                console.error('Error fetching doctor rating:', error);
+                setRating(0);
+            }
+        };
+
+        fetchRating();
+    }, [doctor.id]);
+
+    const renderStars = (rating) => {
+        const stars = [];
+        const fullStars = Math.floor(rating);
+        const hasHalfStar = rating % 1 >= 0.5;
+
+        // Add full stars
+        for (let i = 0; i < fullStars; i++) {
+            stars.push(
+                <Star
+                    key={`full-${i}`}
+                    className="w-4 h-4 text-yellow-400 fill-current"
+                />
+            );
+        }
+
+        // Add half star if needed
+        if (hasHalfStar) {
+            stars.push(
+                <div key="half" className="relative w-4 h-4">
+                    <Star className="absolute w-4 h-4 text-gray-300 fill-current" />
+                    <div className="absolute overflow-hidden w-[50%]">
+                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                    </div>
+                </div>
+            );
+        }
+
+        // Add remaining empty stars
+        const emptyStars = 5 - Math.ceil(rating);
+        for (let i = 0; i < emptyStars; i++) {
+            stars.push(
+                <Star
+                    key={`empty-${i}`}
+                    className="w-4 h-4 text-gray-300"
+                />
+            );
+        }
+
+        return stars;
+    };
+
     return (
         <div className="group relative bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-100 hover:border-[#00B5F1]/30 hover:-translate-y-2">
             {/* Gradient Overlay */}
@@ -49,13 +109,8 @@ const DoctorCard = ({ doctor, imageUrl, onBook }) => {
 
                     {/* Rating */}
                     <div className="flex items-center justify-center gap-1 mb-4">
-                        {[...Array(5)].map((_, i) => (
-                            <Star
-                                key={i}
-                                className={`w-4 h-4 ${i < 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
-                            />
-                        ))}
-                        <span className="text-sm text-gray-600 ml-1">(4.0)</span>
+                        {renderStars(rating)}
+                        <span className="text-sm text-gray-600 ml-1">({rating.toFixed(1)})</span>
                     </div>
                 </div>
 

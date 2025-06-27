@@ -47,7 +47,7 @@ const StatsSection = () => {
     });
 
     return (
-        <section className="relative py-24 overflow-hidden">
+        <section id="stats-section" className="relative py-24 overflow-hidden">
             {/* Background Elements */}
             <div className="absolute inset-0 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
                 <div className="absolute top-1/2 left-0 w-72 h-72 bg-blue-400/10 rounded-full blur-3xl"></div>

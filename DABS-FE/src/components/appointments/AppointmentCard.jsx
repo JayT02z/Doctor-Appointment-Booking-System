@@ -12,6 +12,7 @@ import {
   StarIcon,
   XCircleIcon
 } from '@heroicons/react/24/outline';
+import { Stethoscope } from "lucide-react";
 
 const formatTimeSlot = (slot) => {
     if (!slot) return "";
@@ -58,6 +59,13 @@ const AppointmentCard = ({
                             <ClockIcon className="h-5 w-5" />
                             <p className="text-sm">
                                 {formatTimeSlot(appointment.timeSlot)}
+                            </p>
+                        </div>
+
+                        <div className="flex items-center space-x-2 text-gray-600">
+                            <Stethoscope className="h-5 w-5" />
+                            <p className="text-sm">
+                                {appointment.serviceName}
                             </p>
                         </div>
 

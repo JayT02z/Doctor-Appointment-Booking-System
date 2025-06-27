@@ -4,6 +4,7 @@ import Pagination from "./doctor_dashboard/Pagination.jsx";
 import PatientDetailModal from "./doctor_dashboard/PatientDetailModal.jsx";
 import AppointmentDetailModal from "./AppointmentDetailModal.jsx";
 import { DollarSign, Search, Filter, Loader2, Calendar, CreditCard, User, FileText, QrCodeIcon } from 'lucide-react';
+import { formatDate } from "../utils/format.js";
 
 const PaymentTable = ({ payments = [], loading = false, onUpdatePaymentStatus }) => {
     const [search, setSearch] = useState("");
@@ -116,7 +117,7 @@ const PaymentTable = ({ payments = [], loading = false, onUpdatePaymentStatus })
                                             {p.appointment?.patientName?.fullName || "-"}
                                         </button>
                                     </td>
-                                    <td className="px-6 py-4 text-gray-600">{p.appointment?.date?.join("-") || "-"}</td>
+                                    <td className="px-6 py-4 text-gray-600">{formatDate(p.appointment?.date)}</td>
                                     <td className="px-6 py-4 font-medium text-gray-900">{p.amount.toLocaleString()} ₫</td>
                                     <td className="px-6 py-4 text-gray-600">{p.paymentMethod}</td>
                                     <td className="px-6 py-4">

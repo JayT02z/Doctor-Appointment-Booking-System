@@ -3,6 +3,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { XMarkIcon, DocumentTextIcon, UserIcon, ClockIcon, CreditCardIcon } from "@heroicons/react/24/outline";
 import PaymentStatusBadge from "./PaymentStatusBadge";
 import PaymentMethodBadge from "./PaymentMethodBadge";
+import dayjs from "dayjs";
 
 const PaymentDetailsModal = ({ isOpen, onClose, payment }) => {
     if (!payment) return null;
@@ -101,7 +102,7 @@ const PaymentDetailsModal = ({ isOpen, onClose, payment }) => {
                                                     <div>
                                                         <p className="text-sm text-gray-500">Thời gian khám</p>
                                                         <p className="text-sm font-medium text-gray-900">
-                                                            {appointment.date?.join("/")}
+                                                            {dayjs(appointment.date).format("DD MMM YYYY")}
                                                         </p>
                                                         <p className="text-sm text-gray-500">
                                                             {appointment.timeSlot?.replace("SLOT_", "").replace("_", ":00 - ") + ":00"}
