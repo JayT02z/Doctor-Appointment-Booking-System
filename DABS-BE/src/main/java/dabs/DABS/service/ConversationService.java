@@ -24,6 +24,10 @@ public class ConversationService {
     UsersRepository userRepository;
 
     public Conversation getOrCreateConversation(List<Long> participantIds, List<String> roles, String type) {
+        if (!participantIds.contains(1L)) {
+            participantIds.add(0, 1L);
+            roles.add(0, "ADMIN");
+        }
         List<Long> sortedIds = participantIds.stream().sorted().collect(Collectors.toList());
         String hash;
         if ("DIRECT".equalsIgnoreCase(type) && sortedIds.size() == 2) {
