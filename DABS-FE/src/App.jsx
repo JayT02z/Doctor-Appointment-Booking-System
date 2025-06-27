@@ -10,6 +10,7 @@ import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import MainLayout from "./components/MainLayout";
+import VnpReturnUrl from "./components/VnpReturnUrl";
 
 // Pages
 import Home from "./pages/Home";
@@ -49,6 +50,9 @@ function App() {
                 <Router>
                     <AuthProvider>
                         <Routes>
+                            {/* VNPay Return URL route phải đặt trước các route khác */}
+                            <Route path="/payment/vnpay-return" element={<VnpReturnUrl />} />
+
                             <Route element={<MainLayout />}>
                                 {/* Public Routes */}
                                 <Route path="/" element={<Home />} />
