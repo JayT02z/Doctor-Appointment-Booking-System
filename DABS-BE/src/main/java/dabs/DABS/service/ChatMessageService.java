@@ -23,8 +23,13 @@ public class ChatMessageService {
 
     public ChatMessage sendMessage(Long conversationId, Long senderId, String message) {
         Conversation conversation = conversationRepository.findById(conversationId).orElseThrow();
+        // Kiểm tra senderId có phải participant của conversation không
+        boolean isParticipant = conversation.getParticipants() != null &&
+            conversation.getParticipants().stream().anyMatch(p -> p.getUser().getId().equals(senderId));
+        if (!isParticipant) {
+            throw new RuntimeException("User is not a participant of this conversation");
+        }
         Users sender = userRepository.findById(senderId).orElseThrow();
-
         ChatMessage chatMessage = new ChatMessage();
         chatMessage.setConversation(conversation);
         chatMessage.setSender(sender);
