@@ -275,28 +275,6 @@ const DoctorSchedule = () => {
                     </span>
                 </button>
 
-                <button
-                    onClick={() => {
-                        const copied = {};
-                        for (const [day, slots] of Object.entries(scheduleData)) {
-                            copied[day] = [...slots];
-                        }
-                        setWeekOffset((prev) => {
-                            const next = prev + 1;
-                            setTimeout(() => setScheduleData(copied), 0);
-                            return next;
-                        });
-                        toast.success("Schedule copied to next week!");
-                    }}
-                    className="group w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3
-                             bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200
-                             text-gray-700 rounded-xl font-medium text-sm transition-all duration-200
-                             border border-gray-200 hover:border-gray-300 hover:shadow-sm"
-                >
-                    <Copy className="w-4 h-4 text-gray-500 group-hover:text-gray-700 transition-colors duration-200" />
-                    Copy to Next Week
-                </button>
-
                 <div className="fixed bottom-6 right-6 flex flex-col gap-2">
                     <button
                         onClick={() => {
