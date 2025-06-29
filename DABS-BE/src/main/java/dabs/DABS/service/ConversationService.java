@@ -27,12 +27,10 @@ public class ConversationService {
         if (roles == null) {
             roles = new java.util.ArrayList<>();
         }
-        // Đảm bảo admin (id=1) luôn là participant đầu tiên với role ADMIN
         if (!participantIds.contains(1L)) {
             participantIds.add(0, 1L);
             roles.add(0, "ADMIN");
         }
-        // Tự động lấy role từ Users nếu roles thiếu
         while (roles.size() < participantIds.size()) {
             Long userId = participantIds.get(roles.size());
             String role = "USER";
@@ -52,7 +50,6 @@ public class ConversationService {
             }
             roles.add(role);
         }
-        // Chốt lại roles và participantIds để dùng trong lambda (phải final hoặc effectively final)
         final List<Long> finalSortedIds = new java.util.ArrayList<>(participantIds.stream().sorted().collect(Collectors.toList()));
         final List<String> finalRoles = new java.util.ArrayList<>(roles);
         String hash;

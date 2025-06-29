@@ -10,7 +10,7 @@ export default function ChatWithAdmin() {
     const { activeChatWindow, openChat, closeChat } = useChat();
     const isOpen = activeChatWindow === 'admin';
 
-    if (!user || user.role !== "PATIENT") return null;
+    if (!user || (user.role !== "PATIENT" && user.role !== "DOCTOR")) return null;
 
     return (
         <div className="fixed bottom-6 right-6 z-50">

@@ -6,6 +6,7 @@ import dabs.DABS.model.Entity.Conversation;
 import dabs.DABS.model.Response.ResponseData;
 import dabs.DABS.service.ChatMessageService;
 import dabs.DABS.service.ConversationService;
+import dabs.DABS.repository.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,8 @@ public class ChatController {
     ConversationService conversationService;
     @Autowired
     ChatMessageService chatMessageService;
+    @Autowired
+    PatientRepository patientRepository;
 
     @PostMapping("/conversations")
     public ResponseEntity<ResponseData<Long>> createConversation(@RequestBody CreateConversationRequest request) {
@@ -50,7 +53,23 @@ public class ChatController {
                     ConversationDTO.ParticipantDto pDto = new ConversationDTO.ParticipantDto();
                     pDto.setUserId(participant.getUser().getId());
                     pDto.setRole(participant.getRole());
-                    pDto.setUserName(participant.getUser().getUsername());
+                    if (!participant.getUser().getId().equals(userId)) {
+                        if ("PATIENT".equalsIgnoreCase(participant.getRole())) {
+                            var patientOpt = patientRepository.findByUserId(participant.getUser().getId());
+                            pDto.setUserName(patientOpt.map(p -> p.getFullName()).orElse(participant.getUser().getUsername()));
+                        } else if ("DOCTOR".equalsIgnoreCase(participant.getRole())) {
+                            var doctorOpt = participant.getUser().getDoctor();
+                            if (doctorOpt != null && doctorOpt.getFullName() != null) {
+                                pDto.setUserName(doctorOpt.getFullName());
+                            } else {
+                                pDto.setUserName(participant.getUser().getUsername());
+                            }
+                        } else {
+                            pDto.setUserName(participant.getUser().getUsername());
+                        }
+                    } else {
+                        pDto.setUserName(participant.getUser().getUsername());
+                    }
                     return pDto;
                 }).collect(Collectors.toList()));
             }
@@ -70,7 +89,12 @@ public class ChatController {
         dto.setId(message.getId());
         dto.setConversationId(message.getConversation().getId());
         dto.setSenderId(message.getSender().getId());
-        dto.setSenderName(message.getSender().getUsername());
+        var patientOpt = patientRepository.findByUserId(message.getSender().getId());
+        if (patientOpt.isPresent()) {
+            dto.setSenderName(patientOpt.get().getFullName());
+        } else {
+            dto.setSenderName(message.getSender().getUsername());
+        }
         dto.setMessage(message.getMessage());
         dto.setCreatedDate(message.getCreatedDate());
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(new ResponseData<>(

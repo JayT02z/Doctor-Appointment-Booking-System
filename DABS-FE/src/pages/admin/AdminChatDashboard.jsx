@@ -3,6 +3,7 @@ import useAdminConversations from "../../hooks/useAdminConversations";
 import ChatWindowAdmin from "../../components/ChatWindowAdmin.jsx";
 import { Users } from "lucide-react";
 import { FunnelIcon } from "@heroicons/react/24/outline";
+import { useAuth } from "../../context/AuthContext";
 
 export default function AdminChatDashboard() {
     const {
@@ -13,6 +14,9 @@ export default function AdminChatDashboard() {
         loading,
         sendMessage,
     } = useAdminConversations();
+
+    const { user } = useAuth();
+    const myUserId = user?.id;
 
     const [filterRecent, setFilterRecent] = useState(false);
 
@@ -73,8 +77,17 @@ export default function AdminChatDashboard() {
                         </div>
                         <ul className="overflow-y-auto max-h-[70vh] divide-y divide-gray-100">
                             {filteredConversations.map((conv) => {
-                                const patient = conv.participants.find(p => p.role.toLowerCase() === "patient");
+                                // Tìm participant khác mình (admin)
+                                const other = conv.participants.find(p => p.userId !== myUserId);
+
+                                // Xác định tên hiển thị
+                                let displayName = other?.userName || "Ẩn danh";
+                                if (other?.role?.toLowerCase() === "doctor") {
+                                    displayName = `DR_${displayName}`;
+                                }
+
                                 const isUnread = conv.status !== "READ"; // placeholder status
+
                                 return (
                                     <li
                                         key={conv.id}
@@ -90,7 +103,7 @@ export default function AdminChatDashboard() {
                                                 <div className="flex items-center justify-between gap-3">
                                                     <div>
                                                         <p className="font-medium text-gray-900 truncate">
-                                                            {patient?.userName || "Bệnh nhân ẩn danh"}
+                                                            {displayName}
                                                         </p>
                                                         <p className="text-xs text-gray-400 mt-0.5">ID: {conv.id}</p>
                                                     </div>
