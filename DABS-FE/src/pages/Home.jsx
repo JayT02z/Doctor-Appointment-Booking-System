@@ -34,7 +34,7 @@ const Home = () => {
             <FeaturedDoctors />
             <PatientTestimonials />
             <LatestArticles />
-            <SupportSection/>
+            {/*<SupportSection/>*/}
             <ChatWithAdmin/>
             <ChatWidget />
         </div>

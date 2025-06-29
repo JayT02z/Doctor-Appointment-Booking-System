@@ -24,7 +24,7 @@ export default function AdminSidebar() {
     const location = useLocation();
 
     return (
-        <div className="w-64 bg-white fixed left-0 top-16 h-[calc(100vh-4rem)] border-r border-gray-200 shadow-lg">
+        <div className="w-64 bg-white fixed left-0 top-16 h-[calc(100vh-4rem)] border-r border-gray-200 shadow-lg z-40">
             <div className="px-3 py-4 h-full overflow-y-auto">
                 <div className="space-y-1">
                     {menuItems.map((item) => {
@@ -35,14 +35,12 @@ export default function AdminSidebar() {
                             <Link
                                 key={item.to}
                                 to={item.to}
-                                className={`
-                                    flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl
-                                    transition-all duration-200
-                                    ${isActive 
-                                        ? 'bg-[#00B5F1] text-white' 
-                                        : 'text-gray-600 hover:bg-gray-50'
-                                    }
-                                `}
+                                className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl
+                  transition-all duration-200
+                  ${isActive
+                                    ? 'bg-[#00B5F1] text-white'
+                                    : 'text-gray-600 hover:bg-gray-50'}
+                `}
                             >
                                 <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-500'}`} />
                                 {item.label}
