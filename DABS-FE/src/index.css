@@ -77,3 +77,12 @@
     @apply bg-background text-foreground;
   }
 }
+html, body, #root {
+  overflow-x: hidden !important;
+  width: 100vw !important;
+  max-width: 100vw !important;
+  position: relative;
+}
+* {
+  box-sizing: border-box;
+}
