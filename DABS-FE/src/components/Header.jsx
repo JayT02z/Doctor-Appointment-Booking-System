@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import AvatarDropdown from "./AvatarDropdown";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Home, Search, Info, PhoneCall } from 'lucide-react';
+import { Home, Search, Info, PhoneCall, BarChart2 } from 'lucide-react';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -29,6 +29,13 @@ const Header = () => {
         to: "/patient/book-appointment",
         label: "Find Doctors",
         icon: Search
+      });
+    }
+    if (user && user.role === 'ADMIN') {
+      baseNavigation.push({
+        to: "/admin/dashboard",
+        icon: BarChart2,
+        label: "Admin Dashboard"
       });
     }
     return baseNavigation;
